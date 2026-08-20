@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Duty Packet</title>
+  <style>
+    :root {
+      --navy: #1b365d;
+      --gold: #b8952c;
+      --cream: #f4efe4;
+      --paper: #fbf7ee;
+      --ink: #1a1a1a;
+      --warn: #7a1f1f;
+      --rule: #c4b8a0;
+      --ok: #1f4d3a;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: #d9d1c3 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cpath d='M0 80L80 0H60L0 60zM80 80V60L60 80zM0 20V0h20z' fill='%23cfc6b6' fill-opacity='0.35'/%3E%3C/svg%3E");
+      color: var(--ink);
+      font-family: Georgia, "Times New Roman", Times, serif;
+    }
+    header.mast {
+      background: var(--navy);
+      color: #fff;
+      border-bottom: 5px solid var(--gold);
+      padding: 1.1rem 1.5rem 1rem;
+    }
+    header.mast .row { display: flex; gap: 1rem; align-items: center; max-width: 1100px; margin: 0 auto; }
+    .seal {
+      width: 58px; height: 58px; border-radius: 50%;
+      border: 2px solid var(--gold);
+      display: grid; place-items: center;
+      font-size: 11px; letter-spacing: 0.06em;
+      background: #142844;
+    }
+    h1 { margin: 0; font-size: 1.7rem; font-weight: 700; }
+    .tag { margin: 0.2rem 0 0; font-style: italic; opacity: 0.9; font-size: 0.95rem; }
+    .wrap { max-width: 1100px; margin: 1.2rem auto 3rem; display: grid; grid-template-columns: 1fr 300px; gap: 1.1rem; padding: 0 1rem; }
+    @media (max-width: 880px) { .wrap { grid-template-columns: 1fr; } }
+    section.card, aside.card {
+      background: var(--paper);
+      border: 1px solid #cfc3ad;
+      box-shadow: 0 1px 0 #fff inset, 0 8px 18px rgba(40,30,10,0.08);
+      padding: 1rem 1.15rem 1.15rem;
+    }
+    section.card h2, aside.card h2 {
+      margin: 0 0 0.65rem;
+      color: var(--navy);
+      font-size: 1.15rem;
+      border-bottom: 1px solid var(--gold);
+      padding-bottom: 0.3rem;
+    }
+    p.note { font-size: 0.92rem; color: #333; margin-top: 0; }
+    label { display: block; font-size: 0.78rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--navy); margin: 0.7rem 0 0.2rem; }
+    input, select, textarea {
+      width: 100%; padding: 0.45rem 0.5rem;
+      border: 1px solid #b7ad99; background: #fffdf8;
+      font-family: Georgia, serif; font-size: 1rem;
+    }
+    textarea { min-height: 88px; resize: vertical; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+    @media (max-width: 640px) { .grid2 { grid-template-columns: 1fr; } }
+    button {
+      font-family: Georgia, serif;
+      background: var(--navy); color: #fff;
+      border: 1px solid #142844;
+      border-bottom: 2px solid #0d1f38;
+      padding: 0.45rem 0.8rem;
+      cursor: pointer;
+      margin-top: 0.7rem;
+      margin-right: 0.4rem;
+    }
+    button.secondary { background: #fffdf8; color: var(--navy); border-color: var(--navy); }
+    button:disabled { opacity: 0.55; cursor: not-allowed; }
+    .citation, .warn, .ok {
+      font-size: 0.9rem; margin: 0.5rem 0 0; padding: 0.45rem 0.55rem;
+      border-left: 3px solid var(--gold); background: #fff;
+    }
+    .warn { border-left-color: var(--warn); color: var(--warn); }
+    .ok { border-left-color: var(--ok); color: var(--ok); }
+    aside .banner { font-weight: 700; color: var(--warn); margin-bottom: 0.5rem; }
+    aside .banner.ready { color: var(--ok); }
+    aside ul { padding-left: 1.1rem; margin: 0.3rem 0 0.8rem; }
+    aside li { margin: 0.25rem 0; font-size: 0.92rem; }
+    .keys { font-size: 0.85rem; }
+    footer {
+      max-width: 1100px; margin: 0 auto 2rem; padding: 0 1rem;
+      font-size: 0.85rem; color: #444;
+    }
+  </style>
+</head>
+<body>
+  <header class="mast">
+    <div class="row">
+      <div class="seal">DUTY<br>PACKET</div>
+      <div>
+        <h1>Duty Packet</h1>
+        <p class="tag">A municipal grant packet for a small-town police department. Packet and checklist only. Nothing is filed.</p>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div>
+      <section class="card">
+        <h2>1. Agency</h2>
+        <p class="note">Guided fields only. Do not paste a finished sample town. Every number later in the packet must already sit in a sourced field.</p>
+        <label for="agency_name">Agency name</label>
+        <input id="agency_name" autocomplete="organization" placeholder="[agency]">
+        <div class="grid2">
+          <div>
+            <label for="ori">9-character ORI</label>
+            <input id="ori" maxlength="9" placeholder="XX0000000" style="text-transform:uppercase">
+          </div>
+          <div>
+            <label for="sworn_count">Sworn count</label>
+            <input id="sworn_count" inputmode="numeric" placeholder="[sworn count]">
+          </div>
+        </div>
+        <div class="grid2">
+          <div>
+            <label for="town">Town (this place only)</label>
+            <input id="town" placeholder="Town name, not the county">
+          </div>
+          <div>
+            <label for="state">State</label>
+            <select id="state"><option value="">Select the state</option></select>
+          </div>
+        </div>
+        <p class="note" id="saa_line">Name the state to route a state JAG pass-through. Direct federal JAG dies under about $10,000. This app will not invent a universal JAG PDF.</p>
+      </section>
+
+      <section class="card">
+        <h2>2. Sourced population — Census ACS 5-year</h2>
+        <p class="note">This town only. Never ACS 1-year. Never a county number on the town. If the lookup fails, the field stays blank. CrimeGrade, City-Data, Wikipedia, and nearby cities are not used.</p>
+        <button type="button" id="btn_pop">Look up ACS 5-year for this town</button>
+        <p id="pop_out" class="warn">Population is blank until ACS 5-year returns a row.</p>
+      </section>
+
+      <section class="card">
+        <h2>3. Sourced crime — FBI CDE, this ORI only</h2>
+        <p class="note">If CDE has no row, leave blank. Do not fill from another agency.</p>
+        <button type="button" id="btn_crime">Look up FBI CDE for this ORI</button>
+        <p id="crime_out" class="warn">Crime is blank until CDE returns a row for this ORI.</p>
+      </section>
+
+      <section class="card">
+        <h2>4. People who must sign</h2>
+        <p class="note">COPS needs two Authorized Representatives: the chief and the mayor. A clerk is not enough.</p>
+        <div class="grid2">
+          <div>
+            <label for="chief_name">Chief</label>
+            <input id="chief_name" placeholder="Top law-enforcement executive">
+          </div>
+          <div>
+            <label for="mayor_name">Mayor</label>
+            <input id="mayor_name" placeholder="Top government executive">
+          </div>
+        </div>
+        <label for="uei">SAM.gov Unique Entity ID</label>
+        <input id="uei" maxlength="12" placeholder="UEI">
+        <label><input type="checkbox" id="sam_current"> SAM.gov is current, including the annual notarized Entity Administrator letter</label>
+        <label><input type="checkbox" id="grants_gov_ready"> Grants.gov path is ready for SF-424 (this app does not submit it)</label>
+        <label><input type="checkbox" id="justgrants_ready"> JustGrants entity is ready after SF-424 (this app does not submit it)</label>
+        <label><input type="checkbox" id="two_aors"> Chief and mayor are the two Authorized Representatives — not a clerk</label>
+        <label><input type="checkbox" id="saa_solicitation_confirmed"> I have opened the current local JAG solicitation on the SAA site. Live windows are owned outside this app.</label>
+      </section>
+
+      <section class="card">
+        <h2>5. State JAG narrative frames</h2>
+        <p class="note">Plain civic language. Brackets stay until the sourced field exists. Edit only after the numbers are on the packet.</p>
+        <label for="community_need">Community need</label>
+        <textarea id="community_need"></textarea>
+        <label for="problem_statement">Problem statement</label>
+        <textarea id="problem_statement"></textarea>
+        <label for="project_description">Project description</label>
+        <textarea id="project_description"></textarea>
+        <label for="use_of_funds">Use of funds (chief must list the items)</label>
+        <textarea id="use_of_funds" placeholder="Leave blank until the items are listed"></textarea>
+        <label for="sustainability">Sustainability / retention</label>
+        <textarea id="sustainability"></textarea>
+        <label for="why_this_town">Why this town, not a city with a grant writer</label>
+        <textarea id="why_this_town"></textarea>
+        <button type="button" class="secondary" id="btn_frames">Refresh frames from sourced fields</button>
+      </section>
+
+      <section class="card">
+        <h2>6. FY27 COPS Hiring readiness — not an FY26 application</h2>
+        <p class="note">The FY26 window is closed. This sheet is readiness only. No deadline is printed. COPS is not scraped.</p>
+        <label for="chp_positions">Entry-level positions contemplated</label>
+        <input id="chp_positions" placeholder="Leave blank until the chief answers">
+        <label for="chp_match">25% cash match, or a waiver (stays blank until the chief answers)</label>
+        <select id="chp_match">
+          <option value="">— blank until the chief answers —</option>
+          <option value="The town can meet the 25 percent local cash match from municipal funds.">Town can meet the 25% cash match</option>
+          <option value="The chief intends to request a waiver of the 25 percent match for fiscal distress.">Intend to request a match waiver</option>
+        </select>
+        <label for="chp_retention">12-month post-grant retention (stays blank until the chief answers)</label>
+        <select id="chp_retention">
+          <option value="">— blank until the chief answers —</option>
+          <option value="The town will retain each CHP-funded position for at least 12 months after federal funding ends, added to the local budget, not by attrition.">Town will retain 12 months after the grant</option>
+          <option value="The chief cannot yet commit to 12-month post-grant retention.">Cannot yet commit</option>
+        </select>
+      </section>
+
+      <section class="card">
+        <h2>7. Print</h2>
+        <p class="note">Filenames use agency, grant, and date so last year’s packet is not overwritten. Incomplete packets print with an incomplete banner and do not look finished.</p>
+        <button type="button" id="btn_jag">Download state JAG pass-through packet</button>
+        <button type="button" id="btn_chp">Download FY27 CHP readiness sheet</button>
+        <button type="button" class="secondary" id="btn_zip">Download both (dated zip)</button>
+      </section>
+    </div>
+
+    <aside class="card">
+      <h2>Completeness</h2>
+      <p class="banner" id="banner">INCOMPLETE — not ready to file.</p>
+      <div class="keys" id="keys"></div>
+      <p><strong>Still owed</strong></p>
+      <ul id="owed"><li>Fill the agency fields.</li></ul>
+      <p><strong>Notes</strong></p>
+      <ul id="notes"><li>Census ACS and FBI CDE fail closed without keys.</li></ul>
+    </aside>
+  </div>
+  <footer>
+    Duty Packet prepares a fileable municipal packet. It does not submit to Grants.gov or JustGrants,
+    does not scrape COPS, and does not invent a statistic. Stay on legitimate grant-writing only.
+  </footer>
+
+<script>
+const stateEl = document.getElementById("state");
+const popOut = document.getElementById("pop_out");
+const crimeOut = document.getElementById("crime_out");
+let population = { ok: false, blank_reason: "Population is blank until ACS 5-year returns a row." };
+let crime = { ok: false, blank_reason: "Crime is blank until CDE returns a row for this ORI." };
+let framesLoaded = false;
+
+function val(id) { return document.getElementById(id).value.trim(); }
+function checked(id) { return document.getElementById(id).checked; }
+
+function profile() {
+  return {
+    agency_name: val("agency_name"),
+    ori: val("ori").toUpperCase(),
+    sworn_count: val("sworn_count"),
+    town: val("town"),
+    state: val("state"),
+    chief_name: val("chief_name"),
+    mayor_name: val("mayor_name"),
+    uei: val("uei"),
+    sam_current: checked("sam_current"),
+    grants_gov_ready: checked("grants_gov_ready"),
+    justgrants_ready: checked("justgrants_ready"),
+    two_aors: checked("two_aors"),
+    saa_solicitation_confirmed: checked("saa_solicitation_confirmed"),
+    community_need: val("community_need"),
+    problem_statement: val("problem_statement"),
+    project_description: val("project_description"),
+    use_of_funds: val("use_of_funds"),
+    sustainability: val("sustainability"),
+    why_this_town: val("why_this_town"),
+    chp_positions: val("chp_positions"),
+    chp_match: val("chp_match"),
+    chp_retention: val("chp_retention"),
+    population,
+    crime,
+  };
+}
+
+async function refreshReview() {
+  const res = await fetch("/api/review", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(profile()),
+  });
+  const data = await res.json();
+  const banner = document.getElementById("banner");
+  banner.textContent = data.banner;
+  banner.className = "banner" + (data.ready ? " ready" : "");
+  const owed = document.getElementById("owed");
+  owed.innerHTML = "";
+  (data.owed.length ? data.owed : [{ who: "", item: "None." }]).forEach((row) => {
+    const li = document.createElement("li");
+    li.textContent = row.who ? (row.who + " — " + row.item) : row.item;
+    owed.appendChild(li);
+  });
+  const notes = document.getElementById("notes");
+  notes.innerHTML = "";
+  (data.notes.length ? data.notes : ["No source notes."]).forEach((line) => {
+    const li = document.createElement("li");
+    li.textContent = line;
+    notes.appendChild(li);
+  });
+  if (data.saa && data.saa.ok) {
+    document.getElementById("saa_line").textContent =
+      data.saa.program + " — " + data.saa.saa + ". " + data.saa.form_warning;
+  }
+  if (!framesLoaded && data.slots) {
+    applyFrames(data.slots, false);
+    framesLoaded = true;
+  }
+  return data;
+}
+
+function applyFrames(slots, overwrite) {
+  ["community_need", "problem_statement", "project_description", "sustainability", "why_this_town"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (overwrite || !el.value.trim()) el.value = slots[id] || "";
+  });
+}
+
+async function download(url, fallback) {
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(profile()),
+  });
+  if (!res.ok) { alert("The packet could not be built."); return; }
+  const blob = await res.blob();
+  const disp = res.headers.get("Content-Disposition") || "";
+  const match = /filename="?([^"]+)"?/.exec(disp);
+  const name = match ? match[1] : fallback;
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+document.getElementById("btn_frames").onclick = async () => {
+  const data = await refreshReview();
+  applyFrames(data.slots, true);
+};
+
+document.getElementById("btn_pop").onclick = async () => {
+  popOut.className = "citation";
+  popOut.textContent = "Asking Census ACS 5-year for this town…";
+  const res = await fetch("/api/population", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ town: val("town"), state: val("state") }),
+  });
+  population = await res.json();
+  if (population.ok) {
+    popOut.className = "ok";
+    popOut.textContent = population.citation;
+  } else {
+    popOut.className = "warn";
+    let extra = population.blank_reason || "Population left blank.";
+    if (population.candidates && population.candidates.length) {
+      extra += " Matches: " + population.candidates.map((c) => c.name).join("; ");
+    }
+    popOut.textContent = extra;
+  }
+  refreshReview();
+};
+
+document.getElementById("btn_crime").onclick = async () => {
+  crimeOut.className = "citation";
+  crimeOut.textContent = "Asking FBI CDE for this ORI…";
+  const res = await fetch("/api/crime", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ori: val("ori") }),
+  });
+  crime = await res.json();
+  if (crime.ok) {
+    crimeOut.className = "ok";
+    crimeOut.textContent = crime.citation;
+  } else {
+    crimeOut.className = "warn";
+    crimeOut.textContent = crime.blank_reason || "Crime left blank.";
+  }
+  refreshReview();
+};
+
+document.getElementById("btn_jag").onclick = () => download("/api/packet/jag", "DutyPacket-JAG.pdf");
+document.getElementById("btn_chp").onclick = () => download("/api/packet/chp", "DutyPacket-CHP.pdf");
+document.getElementById("btn_zip").onclick = () => download("/api/packet/zip", "DutyPacket.zip");
+
+["input", "change"].forEach((evt) => {
+  document.body.addEventListener(evt, () => refreshReview());
+});
+
+fetch("/api/status").then((r) => r.json()).then((data) => {
+  data.states.forEach((st) => {
+    const opt = document.createElement("option");
+    opt.value = st.abbr;
+    opt.textContent = st.name;
+    stateEl.appendChild(opt);
+  });
+  const keys = document.getElementById("keys");
+  keys.innerHTML =
+    "Census ACS key: " + (data.keys.census_acs ? "present" : "missing — population stays blank") +
+    "<br>FBI CDE key: " + (data.keys.fbi_cde ? "present" : "missing — crime stays blank");
+  refreshReview();
+});
+</script>
+</body>
+</html>
