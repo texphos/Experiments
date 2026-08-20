@@ -20,10 +20,10 @@ FRAMES = {
         "must not be replaced with a number from another town or a website."
     ),
     "project_description": (
-        "If the [state program] awards a local pass-through, the [agency] will "
-        "use the funds for the items listed in the use-of-funds line below. "
+        "The city is the applicant in Texas eGrants. The [agency] would carry "
+        "out the work if the Criminal Justice Grant Program awards funds. "
         "We are [sworn count] sworn. The request should stay inside what this "
-        "town can buy, field, and account for."
+        "town can buy, field, and account for. eGrants is the form; this page is desk prep."
     ),
     "sustainability": (
         "When the pass-through ends, the [agency] will keep the funded work "
@@ -86,11 +86,6 @@ def fill_frame(template: str, profile: dict[str, Any]) -> str:
     crime = display_crime(profile)
     if crime != "[sourced crime]":
         text = text.replace("[sourced crime]", crime)
-    program = _text((profile.get("saa") or {}).get("program"))
-    if program:
-        text = text.replace("[state program]", program)
-    else:
-        text = text.replace("[state program]", "[state JAG pass-through]")
     return text
 
 

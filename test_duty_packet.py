@@ -197,11 +197,14 @@ def test_chp_match_and_retention_blank_until_chief():
             },
             "crime": {"ok": True, "citation": "4 violent offenses in 2024; FBI CDE ORI TX1234500"},
             "use_of_funds": "One patrol vehicle radio.",
-            "saa_solicitation_confirmed": True,
+            "city_name": "City of Hico",
+            "applicant_type": "city",
+            "cog": "HOTCOG",
+            "cog_first": True,
+            "ceo_le_certifications": True,
+            "egrants_is_the_form": True,
             "sam_current": True,
             "uei": "ABCDEFGHIJKL",
-            "grants_gov_ready": True,
-            "justgrants_ready": True,
             "two_aors": True,
             "chp_positions": "1",
         }
@@ -215,35 +218,40 @@ def test_chp_match_and_retention_blank_until_chief():
 def test_incomplete_packet_does_not_look_finished():
     review = packet.completeness({})
     assert review["ready"] is False
-    assert "INCOMPLETE" in review["banner"]
+    assert "DRAFT" in review["banner"]
+    assert review["draft"] is True
     assert any(row["who"] == "chief" for row in review["owed"])
     assert any(row["who"] == "mayor" for row in review["owed"])
     pdf = packet.render_jag_pdf({}, review)
     assert pdf.startswith(b"%PDF")
-    assert b"INCOMPLETE PACKET" in pdf
+    assert b"DRAFT" in pdf
 
 
 def test_state_jag_is_not_universal():
     tx = saa.saa_for("TX")
     assert tx["ok"] is True
-    assert "Texas" in tx["program"]
+    assert tx["program"] == "Criminal Justice Grant Program"
     assert "Public Safety Office" in tx["saa"]
-    assert "not a federal jag" in tx["form_warning"].lower()
-    empty = saa.saa_for("")
-    assert empty["ok"] is False
-    assert "universal" in empty["form_warning"].lower()
+    assert "egrants is the form" in tx["form_warning"].lower()
+    assert "not a texas jag pdf" in tx["form_warning"].lower()
+    named = saa.saa_for("")
+    assert named["state_abbr"] == "TX"
     title = saa.state_packet_title("TX")
-    assert title.startswith("Texas JAG")
-    assert "universal" not in title.lower()
+    assert "desk prep" in title.lower()
+    assert "not a Texas JAG PDF" in title
 
 
 def test_filename_uses_agency_grant_and_date():
     names = packet.packet_filenames(
-        {"agency_name": "Hico Police Department", "state": "TX"},
+        {
+            "agency_name": "Hico Police Department",
+            "city_name": "City of Hico",
+            "state": "TX",
+        },
         when=date(2026, 8, 20),
     )
-    assert names["jag"] == "Hico-Police-Department_TX-JAG-Passthrough_2026-08-20.pdf"
-    assert names["chp"] == "Hico-Police-Department_FY27-CHP-Readiness_2026-08-20.pdf"
+    assert names["jag"] == "City-of-Hico_TX-CJGP-DeskPrep_2026-08-20.pdf"
+    assert names["chp"] == "City-of-Hico_FY27-CHP-Readiness_2026-08-20.pdf"
     assert "2026-08-20" in names["zip"]
 
 
@@ -258,13 +266,17 @@ def test_chp_sheet_is_readiness_not_fy26_application():
 
 def test_zip_contains_both_dated_pdfs():
     name, data = packet.render_zip(
-        {"agency_name": "Hico Police Department", "state": "TX"},
+        {
+            "agency_name": "Hico Police Department",
+            "city_name": "City of Hico",
+            "state": "TX",
+        },
         when=date(2026, 8, 20),
     )
     assert name.endswith("_2026-08-20.zip")
     with zipfile.ZipFile(io.BytesIO(data)) as zf:
         names = zf.namelist()
-    assert any("JAG-Passthrough" in n for n in names)
+    assert any("TX-CJGP-DeskPrep" in n for n in names)
     assert any("FY27-CHP-Readiness" in n for n in names)
 
 
@@ -277,19 +289,98 @@ def test_server_does_not_submit_and_keys_report(monkeypatch):
     status = client.get("/api/status").get_json()
     assert status["submits_grants_gov"] is False
     assert status["submits_justgrants"] is False
+    assert status["submits_egrants"] is False
+    assert status["egrants_is_the_form"] is True
+    assert status["named_state"] == "TX"
     assert status["scrapes_cops"] is False
     assert status["hardcoded_deadlines"] is False
     assert status["keys"]["census_acs"] is False
     assert status["keys"]["fbi_cde"] is False
     html = client.get("/").data.decode()
     assert "Duty Packet" in html
-    assert "Nothing is filed" in html
+    assert "eGrants is the form" in html
+    assert "does not submit" in html.lower()
 
 
-def test_no_deadline_constants_in_app_modules():
+def test_no_live_window_hardcoding():
     root = os.path.dirname(os.path.abspath(__file__))
     banned = ("due date", "closes on", "deadline:", "nofo close")
     for name in ("server.py", "duty_packet.py", "duty_saa.py", "index.html"):
         text = open(os.path.join(root, name), encoding="utf-8").read().lower()
         for token in banned:
             assert token not in text, f"{name} contains {token}"
+
+
+def test_texas_city_applicant_and_cog_required():
+    import duty_texas as texas
+
+    assert len(texas.TEXAS_COGS) == 24
+    pd = texas.texas_kills({"applicant_type": "pd", "cog": "HOTCOG", "cog_first": True})
+    assert any(row["rule"] == "city_applicant" for row in pd)
+    city_only = texas.texas_kills(
+        {"applicant_type": "city", "city_name": "City of Hico"}
+    )
+    assert any(row["rule"] == "cog_required" for row in city_only)
+    ready_rules = {
+        "applicant_type": "city",
+        "city_name": "City of Hico",
+        "cog": "HOTCOG",
+        "cog_first": True,
+        "ceo_le_certifications": True,
+        "egrants_is_the_form": True,
+    }
+    assert texas.texas_kills(ready_rules) == []
+    review = packet.completeness(
+        {
+            **ready_rules,
+            "agency_name": "Hico Police Department",
+            "state": "TX",
+        }
+    )
+    assert any(row.get("rule") == "city_applicant" or "CITY" in row["item"] for row in packet.completeness({"applicant_type": "pd", "state": "TX"})["owed"])
+    assert review["routing"]["killed"] is False
+
+
+def test_texas_egrants_is_not_a_fake_pdf():
+    profile = {
+        "agency_name": "Hico Police Department",
+        "city_name": "City of Hico",
+        "applicant_type": "pd",
+        "state": "TX",
+        "ori": "TX1234500",
+    }
+    review = packet.completeness(profile)
+    assert review["draft"] is True
+    pdf = packet.render_jag_pdf(profile, review)
+    low = pdf.lower()
+    assert b"egrants is the form" in low
+    assert b"not a texas jag pdf" in low
+    assert b"https://egrants.gov.texas.gov/" in pdf
+    assert b"criminal justice grant program" in low
+    assert b"public safety office" in low
+    assert b"desk prep" in low
+    assert b"official texas jag application" not in low
+    assert b"apply as the city" in low
+    assert b"council of governments" in low
+    assert b"ignore it" in low
+    assert b"DRAFT" in pdf
+    assert b"Chief of police" in pdf
+    assert b"Mayor" in pdf
+    assert b"page 1" in pdf
+
+
+def test_texas_print_spec_and_footer():
+    pdf = packet.render_jag_pdf(
+        {
+            "agency_name": "Hico Police Department",
+            "city_name": "City of Hico",
+            "state": "TX",
+        }
+    )
+    from reportlab.lib.colors import HexColor
+
+    assert packet.CREAM == HexColor("#F7F1E6")
+    assert packet.INK == HexColor("#1B2430")
+    assert b"Hico Police Department" in pdf
+    assert b"Texas Criminal Justice Grant Program desk prep" in pdf
+    assert b"page " in pdf

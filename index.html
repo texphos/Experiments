@@ -3,175 +3,183 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Duty Packet</title>
+  <title>Duty Packet — Texas</title>
   <style>
+    @font-face { font-family: "EB Garamond"; src: url("/fonts/EBGaramond-Regular.ttf") format("truetype"); font-weight: 400; font-style: normal; }
+    @font-face { font-family: "EB Garamond"; src: url("/fonts/EBGaramond-Bold.ttf") format("truetype"); font-weight: 700; font-style: normal; }
+    @font-face { font-family: "EB Garamond"; src: url("/fonts/EBGaramond-Italic.ttf") format("truetype"); font-weight: 400; font-style: italic; }
     :root {
-      --navy: #1b365d;
-      --gold: #b8952c;
-      --cream: #f4efe4;
-      --paper: #fbf7ee;
-      --ink: #1a1a1a;
-      --warn: #7a1f1f;
-      --rule: #c4b8a0;
+      --cream: #f7f1e6;
+      --ink: #1b2430;
+      --rule: #8a8174;
+      --warn: #6b1d1d;
       --ok: #1f4d3a;
     }
     * { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; }
     body {
-      background: #d9d1c3 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cpath d='M0 80L80 0H60L0 60zM80 80V60L60 80zM0 20V0h20z' fill='%23cfc6b6' fill-opacity='0.35'/%3E%3C/svg%3E");
+      background: #ebe4d6;
       color: var(--ink);
-      font-family: Georgia, "Times New Roman", Times, serif;
+      font-family: Georgia, "EB Garamond", "Times New Roman", Times, serif;
     }
     header.mast {
-      background: var(--navy);
-      color: #fff;
-      border-bottom: 5px solid var(--gold);
-      padding: 1.1rem 1.5rem 1rem;
+      background: var(--cream);
+      color: var(--ink);
+      border-bottom: 1px solid var(--ink);
+      padding: 1.1rem 1.25rem 1rem;
     }
-    header.mast .row { display: flex; gap: 1rem; align-items: center; max-width: 1100px; margin: 0 auto; }
+    header.mast .row { display: flex; gap: 1rem; align-items: center; max-width: 980px; margin: 0 auto; }
     .seal {
-      width: 58px; height: 58px; border-radius: 50%;
-      border: 2px solid var(--gold);
-      display: grid; place-items: center;
-      font-size: 11px; letter-spacing: 0.06em;
-      background: #142844;
+      width: 0.7in; height: 0.7in; border-radius: 50%;
+      border: 1.4px solid var(--ink);
+      box-shadow: inset 0 0 0 3px var(--cream), inset 0 0 0 4px var(--ink);
+      background: transparent;
     }
-    h1 { margin: 0; font-size: 1.7rem; font-weight: 700; }
-    .tag { margin: 0.2rem 0 0; font-style: italic; opacity: 0.9; font-size: 0.95rem; }
-    .wrap { max-width: 1100px; margin: 1.2rem auto 3rem; display: grid; grid-template-columns: 1fr 300px; gap: 1.1rem; padding: 0 1rem; }
-    @media (max-width: 880px) { .wrap { grid-template-columns: 1fr; } }
-    section.card, aside.card {
-      background: var(--paper);
-      border: 1px solid #cfc3ad;
-      box-shadow: 0 1px 0 #fff inset, 0 8px 18px rgba(40,30,10,0.08);
-      padding: 1rem 1.15rem 1.15rem;
+    h1 { margin: 0; font-size: 1.65rem; font-weight: 700; }
+    .tag { margin: 0.25rem 0 0; font-style: italic; font-size: 0.98rem; }
+    .wrap { max-width: 980px; margin: 0 auto 2.5rem; padding: 0 1rem; }
+    .paper {
+      background: var(--cream);
+      border-left: 1px solid #d7cfc0;
+      border-right: 1px solid #d7cfc0;
+      padding: 1.15rem 1.25rem 2rem;
     }
-    section.card h2, aside.card h2 {
-      margin: 0 0 0.65rem;
-      color: var(--navy);
-      font-size: 1.15rem;
-      border-bottom: 1px solid var(--gold);
-      padding-bottom: 0.3rem;
+    section { margin: 0 0 1.4rem; padding: 0 0 1rem; border-bottom: 1px solid var(--rule); }
+    section:last-of-type { border-bottom: 0; }
+    h2 { margin: 0 0 0.5rem; color: var(--ink); font-size: 1.15rem; font-weight: 700; }
+    p.note { font-size: 0.95rem; margin: 0 0 0.6rem; }
+    .url { font-style: italic; }
+    label { display: block; font-size: 0.78rem; letter-spacing: 0.04em; text-transform: uppercase; margin: 0.7rem 0 0.2rem; }
+    label.tick { text-transform: none; letter-spacing: 0; font-size: 0.95rem; margin: 0.45rem 0; }
+    input[type="text"], input[type="number"], select, textarea {
+      width: 100%; padding: 0.4rem 0.45rem;
+      border: 0; border-bottom: 1px solid var(--ink);
+      background: transparent;
+      color: var(--ink);
+      font-family: Georgia, "EB Garamond", serif; font-size: 1rem;
+      border-radius: 0;
     }
-    p.note { font-size: 0.92rem; color: #333; margin-top: 0; }
-    label { display: block; font-size: 0.78rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--navy); margin: 0.7rem 0 0.2rem; }
-    input, select, textarea {
-      width: 100%; padding: 0.45rem 0.5rem;
-      border: 1px solid #b7ad99; background: #fffdf8;
-      font-family: Georgia, serif; font-size: 1rem;
-    }
-    textarea { min-height: 88px; resize: vertical; }
+    textarea { min-height: 88px; resize: vertical; border: 1px solid var(--rule); padding: 0.45rem; }
     .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
     @media (max-width: 640px) { .grid2 { grid-template-columns: 1fr; } }
     button {
-      font-family: Georgia, serif;
-      background: var(--navy); color: #fff;
-      border: 1px solid #142844;
-      border-bottom: 2px solid #0d1f38;
-      padding: 0.45rem 0.8rem;
+      font-family: Georgia, "EB Garamond", serif;
+      background: var(--cream); color: var(--ink);
+      border: 1px solid var(--ink);
+      padding: 0.4rem 0.75rem;
       cursor: pointer;
       margin-top: 0.7rem;
-      margin-right: 0.4rem;
+      margin-right: 0.35rem;
     }
-    button.secondary { background: #fffdf8; color: var(--navy); border-color: var(--navy); }
     button:disabled { opacity: 0.55; cursor: not-allowed; }
-    .citation, .warn, .ok {
-      font-size: 0.9rem; margin: 0.5rem 0 0; padding: 0.45rem 0.55rem;
-      border-left: 3px solid var(--gold); background: #fff;
+    .citation, .warn, .ok { font-size: 0.92rem; margin: 0.5rem 0 0; }
+    .warn { color: var(--warn); }
+    .ok { color: var(--ok); }
+    aside {
+      border: 1px solid var(--ink);
+      padding: 0.8rem 1rem;
+      margin: 1rem 0 1.4rem;
     }
-    .warn { border-left-color: var(--warn); color: var(--warn); }
-    .ok { border-left-color: var(--ok); color: var(--ok); }
-    aside .banner { font-weight: 700; color: var(--warn); margin-bottom: 0.5rem; }
+    aside .banner { font-weight: 700; color: var(--warn); margin: 0 0 0.4rem; }
     aside .banner.ready { color: var(--ok); }
-    aside ul { padding-left: 1.1rem; margin: 0.3rem 0 0.8rem; }
-    aside li { margin: 0.25rem 0; font-size: 0.92rem; }
-    .keys { font-size: 0.85rem; }
-    footer {
-      max-width: 1100px; margin: 0 auto 2rem; padding: 0 1rem;
-      font-size: 0.85rem; color: #444;
+    aside ul { padding-left: 1.1rem; margin: 0.25rem 0 0.7rem; }
+    aside li { margin: 0.22rem 0; font-size: 0.94rem; }
+    .keys { font-size: 0.88rem; }
+    footer.colophon {
+      max-width: 980px; margin: 0 auto 2rem; padding: 0 1rem;
+      font-size: 0.88rem; color: var(--ink);
     }
+    a { color: inherit; text-decoration: none; }
   </style>
 </head>
 <body>
   <header class="mast">
     <div class="row">
-      <div class="seal">DUTY<br>PACKET</div>
+      <div class="seal" aria-hidden="true"></div>
       <div>
         <h1>Duty Packet</h1>
-        <p class="tag">A municipal grant packet for a small-town police department. Packet and checklist only. Nothing is filed.</p>
+        <p class="tag">Texas desk. The city applies. eGrants is the form. Packet and checklist only.</p>
       </div>
     </div>
   </header>
 
   <div class="wrap">
-    <div>
-      <section class="card">
-        <h2>1. Agency</h2>
-        <p class="note">Guided fields only. Do not paste a finished sample town. Every number later in the packet must already sit in a sourced field.</p>
-        <label for="agency_name">Agency name</label>
-        <input id="agency_name" autocomplete="organization" placeholder="[agency]">
+    <div class="paper">
+      <aside>
+        <h2>Completeness</h2>
+        <p class="banner" id="banner">DRAFT — required fields are empty.</p>
+        <div class="keys" id="keys"></div>
+        <p><strong>Who still owes</strong></p>
+        <ul id="owed"><li>Fill the city and agency fields.</li></ul>
+        <p><strong>Notes</strong></p>
+        <ul id="notes"><li>Census ACS and FBI CDE fail closed without keys.</li></ul>
+      </aside>
+
+      <section>
+        <h2>1. Texas applicant — the city, not the PD</h2>
+        <p class="note">Named state is Texas. State Administering Agency: Governor’s Public Safety Office. Vehicle: Criminal Justice Grant Program. File in eGrants <span class="url">https://egrants.gov.texas.gov/</span>. This desk does not invent a Texas JAG PDF and does not submit anything.</p>
+        <label for="city_name">City (legal applicant)</label>
+        <input id="city_name" type="text" placeholder="City of —">
+        <input type="hidden" id="applicant_type" value="city">
+        <input type="hidden" id="state" value="TX">
+        <label for="agency_name">Police department (implements; does not apply)</label>
+        <input id="agency_name" type="text" autocomplete="organization" placeholder="[agency]">
         <div class="grid2">
           <div>
             <label for="ori">9-character ORI</label>
-            <input id="ori" maxlength="9" placeholder="XX0000000" style="text-transform:uppercase">
+            <input id="ori" type="text" maxlength="9" placeholder="TX0000000" style="text-transform:uppercase">
           </div>
           <div>
             <label for="sworn_count">Sworn count</label>
-            <input id="sworn_count" inputmode="numeric" placeholder="[sworn count]">
+            <input id="sworn_count" type="text" inputmode="numeric" placeholder="[sworn count]">
           </div>
         </div>
-        <div class="grid2">
-          <div>
-            <label for="town">Town (this place only)</label>
-            <input id="town" placeholder="Town name, not the county">
-          </div>
-          <div>
-            <label for="state">State</label>
-            <select id="state"><option value="">Select the state</option></select>
-          </div>
-        </div>
-        <p class="note" id="saa_line">Name the state to route a state JAG pass-through. Direct federal JAG dies under about $10,000. This app will not invent a universal JAG PDF.</p>
+        <label for="town">Town for ACS 5-year place lookup</label>
+        <input id="town" type="text" placeholder="Town name, not the county">
+        <label for="cog">Regional Council of Governments (required)</label>
+        <select id="cog"><option value="">Select the COG — all 24 run their own workshop</option></select>
+        <label class="tick"><input type="checkbox" id="cog_first"> We hit the COG workshop / priority list first. PSO will bounce a skip.</label>
+        <label class="tick"><input type="checkbox" id="ceo_le_certifications"> We will upload the CEO/Law Enforcement Certifications form in eGrants.</label>
+        <label class="tick"><input type="checkbox" id="egrants_is_the_form"> eGrants is the form. This file is desk prep only.</label>
+        <p class="note">County filings need 90%+ CCH disposition completeness at DPS. A municipal PD does not file as the county. County Essential Services is invitation-only to counties — ignore it.</p>
       </section>
 
-      <section class="card">
+      <section>
         <h2>2. Sourced population — Census ACS 5-year</h2>
-        <p class="note">This town only. Never ACS 1-year. Never a county number on the town. If the lookup fails, the field stays blank. CrimeGrade, City-Data, Wikipedia, and nearby cities are not used.</p>
+        <p class="note">This Texas town only. Never ACS 1-year. Never a county number on the town. If the lookup fails, the field stays blank.</p>
         <button type="button" id="btn_pop">Look up ACS 5-year for this town</button>
         <p id="pop_out" class="warn">Population is blank until ACS 5-year returns a row.</p>
       </section>
 
-      <section class="card">
+      <section>
         <h2>3. Sourced crime — FBI CDE, this ORI only</h2>
         <p class="note">If CDE has no row, leave blank. Do not fill from another agency.</p>
         <button type="button" id="btn_crime">Look up FBI CDE for this ORI</button>
         <p id="crime_out" class="warn">Crime is blank until CDE returns a row for this ORI.</p>
       </section>
 
-      <section class="card">
+      <section>
         <h2>4. People who must sign</h2>
-        <p class="note">COPS needs two Authorized Representatives: the chief and the mayor. A clerk is not enough.</p>
+        <p class="note">Mayor for the city. Chief for the department. A clerk is not enough. COPS, if later filed, needs both as Authorized Representatives.</p>
         <div class="grid2">
           <div>
             <label for="chief_name">Chief</label>
-            <input id="chief_name" placeholder="Top law-enforcement executive">
+            <input id="chief_name" type="text" placeholder="Top law-enforcement executive">
           </div>
           <div>
             <label for="mayor_name">Mayor</label>
-            <input id="mayor_name" placeholder="Top government executive">
+            <input id="mayor_name" type="text" placeholder="Top government executive">
           </div>
         </div>
         <label for="uei">SAM.gov Unique Entity ID</label>
-        <input id="uei" maxlength="12" placeholder="UEI">
-        <label><input type="checkbox" id="sam_current"> SAM.gov is current, including the annual notarized Entity Administrator letter</label>
-        <label><input type="checkbox" id="grants_gov_ready"> Grants.gov path is ready for SF-424 (this app does not submit it)</label>
-        <label><input type="checkbox" id="justgrants_ready"> JustGrants entity is ready after SF-424 (this app does not submit it)</label>
-        <label><input type="checkbox" id="two_aors"> Chief and mayor are the two Authorized Representatives — not a clerk</label>
-        <label><input type="checkbox" id="saa_solicitation_confirmed"> I have opened the current local JAG solicitation on the SAA site. Live windows are owned outside this app.</label>
+        <input id="uei" type="text" maxlength="12" placeholder="UEI">
+        <label class="tick"><input type="checkbox" id="sam_current"> SAM.gov is current, including the annual notarized Entity Administrator letter</label>
+        <label class="tick"><input type="checkbox" id="two_aors"> Chief and mayor are the two Authorized Representatives — not a clerk</label>
       </section>
 
-      <section class="card">
-        <h2>5. State JAG narrative frames</h2>
-        <p class="note">Plain civic language. Brackets stay until the sourced field exists. Edit only after the numbers are on the packet.</p>
+      <section>
+        <h2>5. Narrative frames</h2>
+        <p class="note">Plain civic language. Brackets stay until the sourced field exists. No sample town.</p>
         <label for="community_need">Community need</label>
         <textarea id="community_need"></textarea>
         <label for="problem_statement">Problem statement</label>
@@ -184,14 +192,14 @@
         <textarea id="sustainability"></textarea>
         <label for="why_this_town">Why this town, not a city with a grant writer</label>
         <textarea id="why_this_town"></textarea>
-        <button type="button" class="secondary" id="btn_frames">Refresh frames from sourced fields</button>
+        <button type="button" id="btn_frames">Refresh frames from sourced fields</button>
       </section>
 
-      <section class="card">
+      <section>
         <h2>6. FY27 COPS Hiring readiness — not an FY26 application</h2>
-        <p class="note">The FY26 window is closed. This sheet is readiness only. No deadline is printed. COPS is not scraped.</p>
+        <p class="note">The FY26 window is closed. Readiness only. No COPS date is printed. COPS is not scraped.</p>
         <label for="chp_positions">Entry-level positions contemplated</label>
-        <input id="chp_positions" placeholder="Leave blank until the chief answers">
+        <input id="chp_positions" type="text" placeholder="Leave blank until the chief answers">
         <label for="chp_match">25% cash match, or a waiver (stays blank until the chief answers)</label>
         <select id="chp_match">
           <option value="">— blank until the chief answers —</option>
@@ -206,32 +214,22 @@
         </select>
       </section>
 
-      <section class="card">
+      <section>
         <h2>7. Print</h2>
-        <p class="note">Filenames use agency, grant, and date so last year’s packet is not overwritten. Incomplete packets print with an incomplete banner and do not look finished.</p>
-        <button type="button" id="btn_jag">Download state JAG pass-through packet</button>
+        <p class="note">Filenames use city, grant, and date so last year’s packet is not overwritten. Empty required fields stamp DRAFT and list who owes the blank.</p>
+        <button type="button" id="btn_jag">Download Texas CJGP desk packet</button>
         <button type="button" id="btn_chp">Download FY27 CHP readiness sheet</button>
-        <button type="button" class="secondary" id="btn_zip">Download both (dated zip)</button>
+        <button type="button" id="btn_zip">Download both (dated zip)</button>
       </section>
     </div>
-
-    <aside class="card">
-      <h2>Completeness</h2>
-      <p class="banner" id="banner">INCOMPLETE — not ready to file.</p>
-      <div class="keys" id="keys"></div>
-      <p><strong>Still owed</strong></p>
-      <ul id="owed"><li>Fill the agency fields.</li></ul>
-      <p><strong>Notes</strong></p>
-      <ul id="notes"><li>Census ACS and FBI CDE fail closed without keys.</li></ul>
-    </aside>
   </div>
-  <footer>
-    Duty Packet prepares a fileable municipal packet. It does not submit to Grants.gov or JustGrants,
-    does not scrape COPS, and does not invent a statistic. Stay on legitimate grant-writing only.
+  <footer class="colophon">
+    Duty Packet does not submit to eGrants, Grants.gov, or JustGrants. It does not scrape COPS.
+    The FY2027 Texas cycle is dead. Watch eGrants for the next notice.
   </footer>
 
 <script>
-const stateEl = document.getElementById("state");
+const cogEl = document.getElementById("cog");
 const popOut = document.getElementById("pop_out");
 const crimeOut = document.getElementById("crime_out");
 let population = { ok: false, blank_reason: "Population is blank until ACS 5-year returns a row." };
@@ -244,18 +242,21 @@ function checked(id) { return document.getElementById(id).checked; }
 function profile() {
   return {
     agency_name: val("agency_name"),
+    city_name: val("city_name"),
+    applicant_type: val("applicant_type") || "city",
     ori: val("ori").toUpperCase(),
     sworn_count: val("sworn_count"),
     town: val("town"),
-    state: val("state"),
+    state: "TX",
+    cog: val("cog"),
+    cog_first: checked("cog_first"),
+    ceo_le_certifications: checked("ceo_le_certifications"),
+    egrants_is_the_form: checked("egrants_is_the_form"),
     chief_name: val("chief_name"),
     mayor_name: val("mayor_name"),
     uei: val("uei"),
     sam_current: checked("sam_current"),
-    grants_gov_ready: checked("grants_gov_ready"),
-    justgrants_ready: checked("justgrants_ready"),
     two_aors: checked("two_aors"),
-    saa_solicitation_confirmed: checked("saa_solicitation_confirmed"),
     community_need: val("community_need"),
     problem_statement: val("problem_statement"),
     project_description: val("project_description"),
@@ -294,10 +295,6 @@ async function refreshReview() {
     li.textContent = line;
     notes.appendChild(li);
   });
-  if (data.saa && data.saa.ok) {
-    document.getElementById("saa_line").textContent =
-      data.saa.program + " — " + data.saa.saa + ". " + data.saa.form_warning;
-  }
   if (!framesLoaded && data.slots) {
     applyFrames(data.slots, false);
     framesLoaded = true;
@@ -318,7 +315,7 @@ async function download(url, fallback) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(profile()),
   });
-  if (!res.ok) { alert("The packet could not be built."); return; }
+  if (!res.ok) { window.alert("The packet could not be built."); return; }
   const blob = await res.blob();
   const disp = res.headers.get("Content-Disposition") || "";
   const match = /filename="?([^"]+)"?/.exec(disp);
@@ -341,7 +338,7 @@ document.getElementById("btn_pop").onclick = async () => {
   const res = await fetch("/api/population", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ town: val("town"), state: val("state") }),
+    body: JSON.stringify({ town: val("town"), state: "TX" }),
   });
   population = await res.json();
   if (population.ok) {
@@ -377,7 +374,7 @@ document.getElementById("btn_crime").onclick = async () => {
   refreshReview();
 };
 
-document.getElementById("btn_jag").onclick = () => download("/api/packet/jag", "DutyPacket-JAG.pdf");
+document.getElementById("btn_jag").onclick = () => download("/api/packet/jag", "DutyPacket-TX-CJGP.pdf");
 document.getElementById("btn_chp").onclick = () => download("/api/packet/chp", "DutyPacket-CHP.pdf");
 document.getElementById("btn_zip").onclick = () => download("/api/packet/zip", "DutyPacket.zip");
 
@@ -386,11 +383,11 @@ document.getElementById("btn_zip").onclick = () => download("/api/packet/zip", "
 });
 
 fetch("/api/status").then((r) => r.json()).then((data) => {
-  data.states.forEach((st) => {
+  (data.cogs || []).forEach((cog) => {
     const opt = document.createElement("option");
-    opt.value = st.abbr;
-    opt.textContent = st.name;
-    stateEl.appendChild(opt);
+    opt.value = cog.id;
+    opt.textContent = cog.name + " (" + cog.id + ")";
+    cogEl.appendChild(opt);
   });
   const keys = document.getElementById("keys");
   keys.innerHTML =

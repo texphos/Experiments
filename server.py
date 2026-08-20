@@ -9,8 +9,9 @@ from dotenv import load_dotenv
 from flask import Flask, jsonify, request, send_file, send_from_directory
 
 from duty_packet import completeness, packet_filenames, render_chp_pdf, render_jag_pdf, render_zip
-from duty_saa import list_states, saa_for
+from duty_saa import saa_for
 from duty_sources import keys_status, lookup_acs5_population, lookup_cde_crime
+from duty_texas import NAMED_STATE, TEXAS_COGS, texas_routing
 
 ROOT = Path(__file__).resolve().parent
 load_dotenv(ROOT / ".env")
@@ -38,23 +39,45 @@ def status():
             "files_only": True,
             "submits_grants_gov": False,
             "submits_justgrants": False,
+            "submits_egrants": False,
+            "egrants_is_the_form": True,
             "scrapes_cops": False,
             "hardcoded_deadlines": False,
+            "named_state": NAMED_STATE,
             "keys": keys_status(),
-            "states": list_states(),
+            "cogs": TEXAS_COGS,
         }
     )
 
 
+@app.get("/fonts/<path:name>")
+def fonts(name):
+    allowed = {
+        "EBGaramond-Regular.ttf",
+        "EBGaramond-Bold.ttf",
+        "EBGaramond-Italic.ttf",
+    }
+    if name not in allowed:
+        return ("Not found", 404)
+    return send_from_directory(ROOT / "fonts", name)
+
+
 @app.get("/api/saa")
 def saa():
-    return jsonify(saa_for(request.args.get("state") or ""))
+    return jsonify(saa_for(request.args.get("state") or NAMED_STATE))
+
+
+@app.get("/api/texas")
+def texas():
+    return jsonify(texas_routing())
 
 
 @app.post("/api/population")
 def population():
     body = _json()
-    result = lookup_acs5_population(str(body.get("town") or ""), str(body.get("state") or ""))
+    result = lookup_acs5_population(
+        str(body.get("town") or ""), str(body.get("state") or NAMED_STATE)
+    )
     return jsonify(result)
 
 

@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from duty_texas import NAMED_STATE, texas_saa_block
+
 # Direct federal JAG Local formula awards are not available when the
 # calculated allocation is under $10,000. Those dollars are added to the
 # state award; the town applies to its State Administering Agency.
@@ -280,7 +282,7 @@ SAA: dict[str, dict[str, str]] = {
         "state": "Texas",
         "saa": "Office of the Governor, Public Safety Office",
         "url": "https://gov.texas.gov/organization/public-safety",
-        "portal": "Texas eGrants (confirm on the SAA site)",
+        "portal": "eGrants — https://egrants.gov.texas.gov/",
     },
     "UT": {
         "state": "Utah",
@@ -338,29 +340,20 @@ def normalize_state(value: str | None) -> str:
 
 
 def state_packet_title(state_abbr: str) -> str:
-    abbr = normalize_state(state_abbr)
-    if not abbr:
-        return "State JAG pass-through packet (name the state first)"
+    abbr = normalize_state(state_abbr) or NAMED_STATE
+    if abbr == NAMED_STATE:
+        return (
+            "Texas Criminal Justice Grant Program — desk prep "
+            "(eGrants is the form; this is not a Texas JAG PDF)"
+        )
     name = SAA[abbr]["state"]
     return f"{name} JAG local pass-through application packet"
 
 
 def saa_for(state_abbr: str) -> dict[str, Any]:
-    abbr = normalize_state(state_abbr)
-    if not abbr:
-        return {
-            "ok": False,
-            "state_abbr": "",
-            "state": "",
-            "saa": "",
-            "url": "",
-            "portal": "",
-            "program": "",
-            "direct_floor_note": JAG_DIRECT_FLOOR_NOTE,
-            "form_warning": (
-                "Name the state. Duty Packet will not invent a universal JAG form."
-            ),
-        }
+    abbr = normalize_state(state_abbr) or NAMED_STATE
+    if abbr == NAMED_STATE:
+        return texas_saa_block()
     row = SAA[abbr]
     return {
         "ok": True,
