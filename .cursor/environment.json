@@ -1,0 +1,11 @@
+{
+  "name": "Experiments",
+  "install": "npm ci",
+  "terminals": [
+    {
+      "name": "server",
+      "command": "npm run dev"
+    }
+  ],
+  "ports": [3000]
+}

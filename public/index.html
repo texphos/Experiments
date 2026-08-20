@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Experiments</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <h1>Experiments</h1>
+        <p class="subtitle">Track ideas, hypotheses, and their status.</p>
+      </header>
+
+      <form id="new-experiment" class="card">
+        <h2>New experiment</h2>
+        <label>
+          Title
+          <input id="title" name="title" type="text" placeholder="e.g. Cache warmup on boot" required />
+        </label>
+        <label>
+          Hypothesis
+          <textarea id="hypothesis" name="hypothesis" rows="2" placeholder="What do you expect to happen?"></textarea>
+        </label>
+        <button type="submit">Add experiment</button>
+        <p id="form-error" class="error" hidden></p>
+      </form>
+
+      <section>
+        <h2>Backlog <span id="count" class="count">0</span></h2>
+        <ul id="list" class="list"></ul>
+        <p id="empty" class="empty">No experiments yet. Add your first one above.</p>
+      </section>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>
