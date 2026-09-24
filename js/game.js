@@ -378,8 +378,9 @@
   }
 
   function spawnPipe() {
-    const gap = spawnCount === 0 ? Math.max(gapFor(score), 228) : gapFor(score);
-    const margin = 78;
+    const opening = spawnCount < 2;
+    const gap = opening ? 336 : gapFor(score);
+    const margin = opening ? 40 : 78;
     const min = margin + gap / 2;
     const max = GROUND_Y - margin - gap / 2;
     const mid = (min + max) / 2;
