@@ -14,7 +14,7 @@ Then visit `http://localhost:8765`.
 
 ## Controls
 
-- **Space**, **click**, or **tap** to flap
+- **Play**, then **Space**, **click**, or **tap** to flap. The gumdrop hovers until that first flap.
 - **P** or **Esc** to pause
 - **M** to mute
 

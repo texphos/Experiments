@@ -150,6 +150,7 @@ canvas {
   justify-content: center;
   padding: 24px;
   background: rgba(90, 20, 50, 0.18);
+  pointer-events: auto;
 }
 
 .card {

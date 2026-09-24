@@ -8,9 +8,7 @@
   const CAP_H = 34;
   const BIRD_X = 128;
   const BIRD_R = 19;
-  const GRAVITY = 1880;
-  const FLAP_V = -520;
-  const MAX_FALL = 760;
+  const MAX_FALL = 700;
 
   const SPRINKLE = ["#ff4d6d", "#ffd166", "#7ae0ff", "#c9b6ff", "#7dffa0", "#fff"];
   const VARIANTS = [
@@ -216,13 +214,19 @@
   }
 
   function speedFor(points) {
-    return 148 + Math.min(points, 36) * 3.1;
+    return 126 + Math.min(points, 40) * 3.4;
   }
   function gapFor(points) {
-    return Math.max(158, 204 - points * 1.35);
+    return Math.max(156, 214 - points * 1.4);
   }
   function spacingFor(points) {
-    return Math.max(214, 268 - points * 1.1);
+    return Math.max(210, 280 - points * 1.2);
+  }
+  function gravityFor(points) {
+    return 860 + Math.min(points, 28) * 26;
+  }
+  function flapFor(points) {
+    return -455 - Math.min(points, 28) * 3;
   }
 
   function resetRun() {
@@ -232,7 +236,7 @@
     particles = [];
     floaters = [];
     traveled = 0;
-    nextSpawn = 150;
+    nextSpawn = 70;
     spawnCount = 0;
     flash = 0;
     shake = 0;
@@ -273,18 +277,24 @@
     return null;
   }
 
-  function startGame() {
+  function enterReady() {
     resetRun();
-    mode = "play";
+    mode = "ready";
     hide(menuEl);
     hide(overEl);
     hide(pauseEl);
+  }
+
+  function beginRun() {
+    if (mode !== "ready") return;
+    mode = "play";
+    bird.vy = 0;
     flap();
   }
 
   function flap() {
     if (mode !== "play") return;
-    bird.vy = FLAP_V;
+    bird.vy = flapFor(score);
     bird.flap = 1;
     audio.flap();
     burst(bird.x - 8, bird.y + 4, 7);
@@ -368,11 +378,12 @@
   }
 
   function spawnPipe() {
-    const gap = gapFor(score);
+    const gap = spawnCount === 0 ? Math.max(gapFor(score), 228) : gapFor(score);
     const margin = 78;
     const min = margin + gap / 2;
     const max = GROUND_Y - margin - gap / 2;
-    const gapY = min + Math.random() * Math.max(1, max - min);
+    const mid = (min + max) / 2;
+    const gapY = spawnCount === 0 ? mid : min + Math.random() * Math.max(1, max - min);
     pipes.push({
       x: W + 24,
       gapY,
@@ -412,17 +423,19 @@
 
   function update(dt) {
     time += dt;
-    const scenery = mode === "play" ? 1 : mode === "menu" ? 0.35 : 0;
-    scroll += speedFor(mode === "play" ? score : 0) * dt * (mode === "play" ? 1 : scenery);
+    const coasting = mode === "menu" || mode === "ready";
+    const scenery = mode === "play" ? 1 : coasting ? 0.35 : 0;
+    scroll += speedFor(mode === "play" ? score : 0) * dt * scenery;
 
     for (const cloud of clouds) {
-      cloud.x -= cloud.v * dt * (mode === "menu" ? 0.45 : mode === "play" ? 1 : 0);
+      cloud.x -= cloud.v * dt * (coasting ? 0.45 : mode === "play" ? 1 : 0);
       if (cloud.x < -160) cloud.x = W + 50;
     }
 
-    if (mode === "menu") {
+    if (coasting) {
       bird.y = H * 0.46 + Math.sin(time * 2.3) * 14;
       bird.rot = Math.sin(time * 2.3) * 0.12;
+      bird.vy = 0;
       bird.flap = Math.max(0, bird.flap - dt * 3);
       return;
     }
@@ -449,7 +462,7 @@
       if (floaters[i].life <= 0) floaters.splice(i, 1);
     }
 
-    bird.vy = Math.min(MAX_FALL, bird.vy + GRAVITY * dt);
+    bird.vy = Math.min(MAX_FALL, bird.vy + gravityFor(score) * dt);
     bird.y += bird.vy * dt;
     const targetRot = Math.max(-0.85, Math.min(1.15, bird.vy / 680));
     bird.rot += (targetRot - bird.rot) * Math.min(1, dt * 9);
@@ -896,8 +909,27 @@
     ctx.restore();
   }
 
+  function drawReady() {
+    if (mode !== "ready") return;
+    ctx.save();
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.lineJoin = "round";
+    ctx.font = "700 46px Fredoka, Trebuchet MS, sans-serif";
+    ctx.lineWidth = 8;
+    ctx.strokeStyle = "#c2185b";
+    ctx.fillStyle = "#fff";
+    ctx.strokeText("Get ready", W / 2, 188);
+    ctx.fillText("Get ready", W / 2, 188);
+    ctx.font = "500 22px Fredoka, Trebuchet MS, sans-serif";
+    ctx.lineWidth = 5;
+    ctx.strokeText("tap to flap", W / 2, 232);
+    ctx.fillText("tap to flap", W / 2, 232);
+    ctx.restore();
+  }
+
   function drawScore() {
-    if (mode === "menu" || (mode === "dead" && overReady)) return;
+    if (mode === "menu" || mode === "ready" || (mode === "dead" && overReady)) return;
     ctx.save();
     ctx.translate(W / 2, 96);
     ctx.scale(scorePop, scorePop);
@@ -941,21 +973,31 @@
       ctx.fillRect(-20, -20, W + 40, H + 40);
     }
     drawScore();
+    drawReady();
   }
 
   function act() {
-    if (mode === "menu" || (mode === "dead" && overReady)) startGame();
+    if (mode === "menu" || (mode === "dead" && overReady)) enterReady();
+    else if (mode === "ready") beginRun();
     else if (mode === "play") flap();
     else if (mode === "pause") togglePause();
   }
 
   playBtn.addEventListener("click", (e) => {
     e.stopPropagation();
-    startGame();
+    enterReady();
   });
   againBtn.addEventListener("click", (e) => {
     e.stopPropagation();
-    startGame();
+    enterReady();
+  });
+  overEl.addEventListener("pointerdown", (e) => {
+    if (e.target.closest("button")) return;
+    if (mode === "dead" && overReady) enterReady();
+  });
+  pauseEl.addEventListener("pointerdown", (e) => {
+    if (e.target.closest("button")) return;
+    if (mode === "pause") togglePause();
   });
   resumeBtn.addEventListener("click", (e) => {
     e.stopPropagation();
