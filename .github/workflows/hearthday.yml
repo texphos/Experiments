@@ -12,6 +12,10 @@ on:
       - ".github/workflows/hearthday.yml"
   workflow_dispatch:
 
+concurrency:
+  group: hearthday-${{ github.ref }}
+  cancel-in-progress: true
+
 defaults:
   run:
     working-directory: hearthday-ios
