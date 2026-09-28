@@ -63,12 +63,12 @@ CI is in [`.github/workflows/hearthday.yml`](../.github/workflows/hearthday.yml)
 
 | Check | Result | Where |
 |---|---|---|
-| Xcode build and `xcodebuild test`, Xcode 16.4, iPhone 17 Pro simulator (iOS 26.2) | **100/100 pass**: 80 core, 9 app-model, 8 StoreKit (`SKTestSession`), and 3 UI tests (full loop in light, full loop in dark, terminate and relaunch mid-bake) | macOS job; screenshots and `.xcresult` uploaded as artifacts |
+| Xcode build and `xcodebuild test`, Xcode 16.4, iPhone 17 Pro simulator (iOS 26.2) | **116/116 pass, none skipped**: 95 core, 10 app-model, 8 StoreKit (`SKTestSession`), and 3 UI tests (full loop in light, full loop in dark, terminate and relaunch mid-bake) | macOS job; screenshots and `.xcresult` uploaded as artifacts |
 | Unsigned Release build, generic iOS device | **Pass** | macOS job |
 | Committed `Hearthday.xcodeproj` equals XcodeGen output | **Pass** | macOS job |
-| `swift test` on Linux (Swift 6.1) and fixtures up to date | **Pass**, 80 tests | Linux job, and locally |
-| JS parity with Swift (plans, invalid input, check-in options and wording, reminders after re-plan, DST windows) | **21/21 pass** | Prototype job, and locally |
-| Prototype end-to-end in headless Chrome over `file://` | **39/39 pass**, no script errors | Prototype job, and locally |
+| `swift test` on Linux (Swift 6.1) and fixtures up to date | **Pass**, 95 tests | Linux job, and locally |
+| JS parity with Swift (plans, invalid input, check-in options and wording, reminders after re-plan, scripted bakes with late/early steps, fridge transfer and repeated check-ins, DST windows) | **28/28 pass** | Prototype job, and locally |
+| Prototype end-to-end in headless Chrome over `file://` | **48/48 pass**, no script errors | Prototype job, and locally |
 
 The latest run and its artifacts are listed on the pull request's Checks tab. Sensitivity checks:
 - The DST tests fail under the old fixed-duration logic: 15 failures in Swift, and the JS DST checks fail too.

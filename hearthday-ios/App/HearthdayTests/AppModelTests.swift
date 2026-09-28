@@ -129,8 +129,11 @@ final class AppModelTests: XCTestCase {
 
     func testShapingLateMovesTheBakeAndItsReminderAndSaysWhy() async throws {
         let model = onboardedModel()
-        let plan = try await startBake(model)
-        try XCTSkipUnless(plan.proofMode == .fridge, "This scenario needs a cold proof")
+        let sunday10 = utc.date(from: DateComponents(year: 2026, month: 10, day: 11, hour: 10))!
+        let result = await model.plan(readyBy: sunday10, formula: .countryLoaf, tempC: 21, starterNeedsFeed: true)
+        let plan = try XCTUnwrap(result.primary, "\(result)")
+        XCTAssertEqual(plan.proofMode, .fridge, "Friday morning to Sunday 10:00 plans an overnight cold proof")
+        model.start(plan)
         while model.state.activeSession?.nextAttendedStep?.kind != .shape { _ = try completeNext(model) }
         let bakeBefore = try XCTUnwrap(model.state.activeSession?.plan.step("bake")?.start)
         let shape = try XCTUnwrap(model.state.activeSession?.nextAttendedStep)
