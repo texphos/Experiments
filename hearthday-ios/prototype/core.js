@@ -39,6 +39,70 @@
     return b.endMinute > b.startMinute ? b.endMinute - b.startMinute : 1440 - b.startMinute + b.endMinute;
   }
 
+  // ---------- Validation (mirrors Validation.swift) ----------
+  const LIMITS = {
+    tempC: [14, 32], risePercent: [0, 200], flourGrams: [200, 2000], hydrationPercent: [55, 95],
+    starterPercent: [5, 40], saltPercent: [0, 3], maxDaysAhead: 7,
+  };
+  const within = (v, [lo, hi]) => typeof v === "number" && Number.isFinite(v) && v >= lo && v <= hi;
+  const minuteOk = (m) => Number.isInteger(m) && m >= 0 && m < 1440;
+
+  function blockIsValid(b) {
+    return minuteOk(b.startMinute) && minuteOk(b.endMinute) && b.startMinute !== b.endMinute
+      && Array.isArray(b.weekdays) && b.weekdays.length > 0 && b.weekdays.every((d) => d >= 1 && d <= 7);
+  }
+
+  function blockProblems(b) {
+    const out = [];
+    if (!String(b.label || "").trim()) out.push("busyLabelEmpty");
+    if (!Array.isArray(b.weekdays) || !b.weekdays.length || !b.weekdays.every((d) => d >= 1 && d <= 7)) out.push("busyNoDays");
+    if (!minuteOk(b.startMinute) || !minuteOk(b.endMinute)) out.push("busyTimeInvalid");
+    else if (b.startMinute === b.endMinute) out.push("busyZeroLength");
+    return out;
+  }
+
+  function formulaProblems(f) {
+    const out = [];
+    if (!String(f.name || "").trim()) out.push("formulaNameEmpty");
+    if (!within(f.flourGrams, LIMITS.flourGrams)) out.push("flourOutOfRange");
+    if (!within(f.hydrationPercent, LIMITS.hydrationPercent)) out.push("hydrationOutOfRange");
+    if (!within(f.starterPercent, LIMITS.starterPercent)) out.push("starterOutOfRange");
+    if (!within(f.saltPercent, LIMITS.saltPercent)) out.push("saltOutOfRange");
+    return out;
+  }
+
+  function requestProblems(r) {
+    const out = [];
+    if (!within(r.kitchenTempC, LIMITS.tempC)) out.push("temperatureOutOfRange");
+    if (!(r.readyBy > r.now)) out.push("readyTimeInPast");
+    else if (r.readyBy - r.now > LIMITS.maxDaysAhead * DAY + HOUR) out.push("readyTimeTooFar");
+    return out.concat(formulaProblems(r.formula));
+  }
+
+  function checkInProblems(risePercent, tempC) {
+    const out = [];
+    if (!within(risePercent, LIMITS.risePercent)) out.push("riseOutOfRange");
+    if (!within(tempC, LIMITS.tempC)) out.push("temperatureOutOfRange");
+    return out;
+  }
+
+  const PROBLEM_TEXT = {
+    temperatureOutOfRange: `Enter a dough temperature between ${LIMITS.tempC[0]} and ${LIMITS.tempC[1]} °C. Outside that range Hearthday’s timing model isn’t reliable enough to plan with.`,
+    riseOutOfRange: `Enter a rise between 0% and ${LIMITS.risePercent[1]}%.`,
+    readyTimeInPast: "Pick a time in the future.",
+    readyTimeTooFar: `Pick a time within the next ${LIMITS.maxDaysAhead} days.`,
+    formulaNameEmpty: "Give the formula a name.",
+    flourOutOfRange: `Flour should be between ${LIMITS.flourGrams[0]} and ${LIMITS.flourGrams[1]} g.`,
+    hydrationOutOfRange: `Water should be between ${LIMITS.hydrationPercent[0]}% and ${LIMITS.hydrationPercent[1]}% of the flour.`,
+    starterOutOfRange: `Starter should be between ${LIMITS.starterPercent[0]}% and ${LIMITS.starterPercent[1]}% of the flour.`,
+    saltOutOfRange: `Salt should be between 0% and ${LIMITS.saltPercent[1]}% of the flour.`,
+    busyLabelEmpty: "Give this busy time a name.",
+    busyNoDays: "Choose at least one day.",
+    busyTimeInvalid: "Choose a valid start and end time.",
+    busyZeroLength: "Start and end can’t be the same time.",
+  };
+  const problemMessage = (code) => PROBLEM_TEXT[code] || "Something in that entry isn’t valid.";
+
   const typicalWeekdayWorker = () => [
     { label: "Sleep", kind: "sleep", weekdays: EVERY_DAY.slice(), startMinute: 23 * 60, endMinute: 7 * 60 },
     { label: "Work", kind: "work", weekdays: WEEKDAYS.slice(), startMinute: 8 * 60 + 30, endMinute: 17 * 60 + 30 },
@@ -52,9 +116,11 @@
     while (day <= lastDay) {
       const wd = cal.weekday(day);
       for (const b of blocks) {
-        if (!b.weekdays.includes(wd)) continue;
+        if (!b.weekdays.includes(wd) || !blockIsValid(b)) continue;
+        // Wall-clock end on the correct local day, so a night spanning a DST change is 7 or 9 real hours.
         const s = cal.atMinute(day, b.startMinute);
-        const e = s + blockDuration(b) * MIN;
+        const e = cal.atMinute(b.endMinute > b.startMinute ? day : cal.addDays(day, 1), b.endMinute);
+        if (!(e > s)) continue;
         if (s < end && start < e) result.push({ label: b.label, kind: b.kind, start: s, end: e });
       }
       day = cal.addDays(day, 1);
@@ -376,6 +442,8 @@
 
   function plan(request, cal) {
     const r = normalize(request);
+    const problems = requestProblems(r);
+    if (problems.length) return { feasible: false, invalid: problems };
     const diag = new Diagnostics();
     const candidates = search(r, cal, diag);
     if (candidates.length) {
@@ -530,6 +598,10 @@
   function checkIn(s, now, risePercent, tempC, blocks, cal, modelOverrides, process) {
     const p = process || PROCESS;
     const model = makeModel(modelOverrides);
+    const problems = checkInProblems(risePercent, tempC);
+    if (problems.length) {
+      return { progress: 0, targetRisePercent: 0, estimatedReadyAt: now, summary: problems.map(problemMessage).join(" "), options: [], problems };
+    }
     const target = targetRisePercent(tempC);
     const elapsed = Math.max(now - session.bulkClockStart(s), 10 * MIN);
     const progress = Math.min(Math.max(risePercent / target, 0.02), 2);
@@ -552,7 +624,7 @@
         options.push({
           kind: isNow ? "shapeNow" : "shapeWhenReady",
           title: isNow ? "Shape now" : "Shape when it’s ready",
-          detail: isNow ? "The dough has reached its target rise and you’re free." : "You’re free when the dough is likely ready. Reminders move to match.",
+          detail: isNow ? "Your reading is at the target rise and you’re free. Confirm with a domed top and bubbles at the edges." : "You’re free when the dough is likely ready. Reminders move to match.",
           bulkEndsAt: freeShape, steps, conflictLabel: null, recommended: true,
         });
       }
@@ -582,7 +654,7 @@
       if (stay) {
         options.push({
           kind: "stayUp", title: label ? `Shape during ${label}` : "Shape on time",
-          detail: "Keeps the dough on its ideal timing, but you’d need to be around.",
+          detail: "Shapes at the likely-ready time, but you’d need to be around.",
           bulkEndsAt: readyAt, steps: stay, conflictLabel: label, recommended: !options.some((o) => o.recommended),
         });
       }
@@ -598,15 +670,16 @@
       }
     }
     const summary = remaining === 0
-      ? `At ${Math.round(risePercent)}% rise the dough has reached its target of about ${Math.round(target)}%.`
-      : `About ${Math.round(progress * 100)}% of the way to a ${Math.round(target)}% rise. Likely ready in ${halfHours(remaining / HOUR)} h.`;
+      ? `At ${Math.round(risePercent)}% rise your reading meets the target of about ${Math.round(target)}%. Go by the dough: a domed top and bubbles at the edges.`
+      : `About ${Math.round(progress * 100)}% of the way to a ${Math.round(target)}% rise. Likely ready in about ${halfHours(remaining / HOUR)} h. That’s a straight-line estimate from one reading, so check again if you can.`;
     for (const o of options) { o.readyAt = o.steps.length ? o.steps[o.steps.length - 1].end : o.bulkEndsAt; const sh = o.steps.find((x) => x.kind === "shape"); o.shapeAt = sh ? sh.start : null; }
-    return { progress, targetRisePercent: target, estimatedReadyAt: readyAt, summary, options };
+    return { progress, targetRisePercent: target, estimatedReadyAt: readyAt, summary, options, problems: [] };
   }
 
   return {
     MIN, HOUR, DAY, EVERY_DAY, WEEKDAYS, FEED_RATIOS, PROCESS, CAL,
     makeCalendar, typicalWeekdayWorker, intervals, timeline, blockDuration,
+    LIMITS, blockIsValid, blockProblems, formulaProblems, requestProblems, checkInProblems, problemMessage,
     makeModel, bulkHours, roomProofHours, starterPeakHours, targetRisePercent, calibration,
     halfHours, hoursRange, compact,
     plan, infeasibilityMessage, leverSummary, planStep,

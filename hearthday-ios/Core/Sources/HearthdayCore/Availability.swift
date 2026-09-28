@@ -74,14 +74,14 @@ public struct Availability: Codable, Hashable, Sendable {
         let lastDay = calendar.startOfDay(for: end)
         while day <= lastDay {
             let weekday = calendar.component(.weekday, from: day)
-            for block in blocks where block.weekdays.contains(weekday) {
-                guard let blockStart = calendar.date(
-                    bySettingHour: block.startMinute / 60,
-                    minute: block.startMinute % 60,
-                    second: 0,
-                    of: day
-                ) else { continue }
-                let blockEnd = blockStart.addingTimeInterval(TimeInterval(block.durationMinutes * 60))
+            for block in blocks where block.weekdays.contains(weekday) && block.isValid {
+                guard let blockStart = Self.wallClock(block.startMinute, on: day, calendar: calendar),
+                      let endDay = block.endMinute > block.startMinute
+                        ? day
+                        : calendar.date(byAdding: .day, value: 1, to: day),
+                      let blockEnd = Self.wallClock(block.endMinute, on: endDay, calendar: calendar),
+                      blockEnd > blockStart
+                else { continue }
                 let interval = BusyInterval(label: block.label, kind: block.kind, start: blockStart, end: blockEnd)
                 if interval.overlaps(start, end) {
                     result.append(interval)
@@ -91,6 +91,27 @@ public struct Availability: Codable, Hashable, Sendable {
             day = next
         }
         return result.sorted { ($0.start, $0.label) < ($1.start, $1.label) }
+    }
+
+    /// A local wall-clock time on `day`. Busy blocks are wall-clock commitments, so across a DST change a
+    /// 23:00–07:00 night is 7 or 9 real hours, never "start + 8 h". A time skipped by spring-forward
+    /// moves forward by the gap (02:30 → 03:30), which is also what JavaScript's `Date` does.
+    /// A time repeated by fall-back resolves to its first occurrence. Implemented explicitly because
+    /// Foundation's matching policies behave differently on Apple platforms and Linux.
+    static func wallClock(_ minute: Int, on day: Date, calendar: Calendar) -> Date? {
+        let ymd = calendar.dateComponents([.year, .month, .day], from: day)
+        var utc = Calendar(identifier: .gregorian)
+        utc.timeZone = TimeZone(identifier: "UTC")!
+        guard let naive = utc.date(from: DateComponents(
+            year: ymd.year, month: ymd.month, day: ymd.day, hour: minute / 60, minute: minute % 60
+        )) else { return nil }
+        let zone = calendar.timeZone
+        let offsetBefore = TimeInterval(zone.secondsFromGMT(for: naive.addingTimeInterval(-86_400)))
+        let offsetAfter = TimeInterval(zone.secondsFromGMT(for: naive.addingTimeInterval(86_400)))
+        let candidates = [offsetBefore, offsetAfter]
+            .map { naive.addingTimeInterval(-$0) }
+            .filter { zone.secondsFromGMT(for: $0) == Int(naive.timeIntervalSince($0)) }
+        return candidates.min() ?? naive.addingTimeInterval(-offsetBefore)
     }
 
     public func timeline(from start: Date, to end: Date, calendar: Calendar) -> BusyTimeline {

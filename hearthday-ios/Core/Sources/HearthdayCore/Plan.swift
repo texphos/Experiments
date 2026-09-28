@@ -197,6 +197,7 @@ public struct Infeasibility: Codable, Hashable, Sendable {
 public enum PlanResult: Hashable, Sendable {
     case feasible(primary: BakePlan, alternatives: [BakePlan])
     case infeasible(Infeasibility)
+    case invalid([InputProblem])
 
     public var primary: BakePlan? {
         if case let .feasible(p, _) = self { return p }

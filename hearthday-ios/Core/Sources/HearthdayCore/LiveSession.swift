@@ -59,6 +59,31 @@ public struct BakeSession: Codable, Hashable, Identifiable, Sendable {
 
     public func isDone(_ step: BakeStep) -> Bool { completed[step.id] != nil }
 
+    /// Where the bake stands when the baker opens the app, including after it was closed for hours.
+    public enum Status: Hashable, Sendable {
+        case upcoming(BakeStep)
+        case due(BakeStep)
+        /// The next hands-on step started more than `graceMinutes` ago and hasn't been marked done.
+        case overdue(BakeStep, minutesLate: Int)
+        case baked
+        /// The loaf should have been out long ago; ask the baker to log or abandon it rather than guess.
+        case stale
+    }
+
+    public static let graceMinutes = 15
+    public static let staleAfterHours = 12.0
+
+    public func status(now: Date) -> Status {
+        if isBaked { return .baked }
+        if now.timeIntervalSince(plan.readyAt) > Self.staleAfterHours * 3600 { return .stale }
+        guard let next = nextAttendedStep else { return .baked }
+        let late = now.timeIntervalSince(next.start)
+        if late > TimeInterval(Self.graceMinutes * 60) {
+            return .overdue(next, minutesLate: Int(late / 60))
+        }
+        return late >= -5 * 60 ? .due(next) : .upcoming(next)
+    }
+
     public var isBaked: Bool { completed["bake"] != nil }
 
     /// Bulk fermentation is timed from when mixing started.
@@ -206,6 +231,7 @@ public struct CheckInResult: Hashable, Sendable {
     public var estimatedReadyAt: Date
     public var summary: String
     public var options: [ReplanOption]
+    public var problems: [InputProblem] = []
 }
 
 /// Re-plans the rest of a bake from a mid-bulk observation (volume rise in a straight-sided container
@@ -223,6 +249,17 @@ public enum LiveReplanner {
         model: FermentationModel,
         process: ProcessSettings = ProcessSettings()
     ) -> CheckInResult {
+        let problems = CheckInValidation.problems(risePercent: risePercent, tempC: tempC)
+        guard problems.isEmpty else {
+            return CheckInResult(
+                progress: 0,
+                targetRisePercent: 0,
+                estimatedReadyAt: now,
+                summary: problems.map(\.message).joined(separator: " "),
+                options: [],
+                problems: problems
+            )
+        }
         let target = FermentationModel.targetRisePercent(tempC: tempC)
         let elapsed = max(now.timeIntervalSince(session.bulkClockStart), 600)
         let progress = min(max(risePercent / target, 0.02), 2)
@@ -259,7 +296,7 @@ public enum LiveReplanner {
                     kind: isNow ? .shapeNow : .shapeWhenReady,
                     title: isNow ? "Shape now" : "Shape when it’s ready",
                     detail: isNow
-                        ? "The dough has reached its target rise and you’re free."
+                        ? "Your reading is at the target rise and you’re free. Confirm with a domed top and bubbles at the edges."
                         : "You’re free when the dough is likely ready. Reminders move to match.",
                     bulkEndsAt: free,
                     steps: steps,
@@ -301,7 +338,7 @@ public enum LiveReplanner {
                 options.append(ReplanOption(
                     kind: .stayUp,
                     title: label.map { "Shape during \($0)" } ?? "Shape on time",
-                    detail: "Keeps the dough on its ideal timing, but you’d need to be around.",
+                    detail: "Shapes at the likely-ready time, but you’d need to be around.",
                     bulkEndsAt: readyAt,
                     steps: steps,
                     conflictLabel: label,
@@ -328,9 +365,9 @@ public enum LiveReplanner {
         let pct = Int((progress * 100).rounded())
         let summary: String
         if remaining == 0 {
-            summary = "At \(Int(risePercent.rounded()))% rise the dough has reached its target of about \(Int(target.rounded()))%."
+            summary = "At \(Int(risePercent.rounded()))% rise your reading meets the target of about \(Int(target.rounded()))%. Go by the dough: a domed top and bubbles at the edges."
         } else {
-            summary = "About \(pct)% of the way to a \(Int(target.rounded()))% rise. Likely ready in \(DurationText.halfHours(remaining / 3600)) h."
+            summary = "About \(pct)% of the way to a \(Int(target.rounded()))% rise. Likely ready in about \(DurationText.halfHours(remaining / 3600)) h. That’s a straight-line estimate from one reading, so check again if you can."
         }
 
         return CheckInResult(

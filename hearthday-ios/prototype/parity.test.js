@@ -48,7 +48,9 @@ for (const s of fixtures.planScenarios) {
   check(s.name, () => {
     const r = H.plan(requestFrom(s.input), cal);
     assert.strictEqual(r.feasible, s.expected.feasible, "feasibility");
-    if (r.feasible) {
+    if (s.expected.invalid) {
+      assert.deepStrictEqual(r.invalid, s.expected.invalid, "input problems");
+    } else if (r.feasible) {
       assert.deepStrictEqual(planView(r.primary), s.expected.primary);
       assert.deepStrictEqual(r.alternatives.map(planView), s.expected.alternatives);
     } else {
@@ -101,6 +103,42 @@ check("a fridge-paused bulk is not used for calibration (same rule as Swift)", (
   s.plan.steps.push({ id: "cold-bulk", kind: "coldBulk", start: 0, end: 0, attended: false });
   assert.strictEqual(H.session.calibrationSample(s), null);
 });
+
+console.log("Validation");
+check("invalid check-in readings give no options and say why", () => {
+  const ps = planByName["Friday morning → Saturday 10:00"];
+  const plan = H.plan(requestFrom(ps.input), cal).primary;
+  const s = H.newSession(plan, plan.firstStepAt);
+  H.session.complete(s, "mix", H.planStep(plan, "mix").end);
+  for (const [rise, temp, code] of [[-5, 21, "riseOutOfRange"], [500, 21, "riseOutOfRange"], [NaN, 21, "riseOutOfRange"], [40, 60, "temperatureOutOfRange"]]) {
+    const r = H.checkIn(s, plan.mixAt + 4 * H.HOUR, rise, temp, ps.input.blocks, cal, {});
+    assert.deepStrictEqual(r.options, []);
+    assert.deepStrictEqual(r.problems, [code]);
+    assert.ok(r.summary.length > 0);
+  }
+});
+check("busy-block problems match Swift and invalid blocks are ignored", () => {
+  const zero = { label: "Nap", kind: "other", weekdays: [7], startMinute: 600, endMinute: 600 };
+  const noDays = { label: "Gym", kind: "other", weekdays: [], startMinute: 600, endMinute: 660 };
+  const bad = { label: "", kind: "other", weekdays: [1, 9], startMinute: 1500, endMinute: 60 };
+  assert.deepStrictEqual(H.blockProblems(zero), ["busyZeroLength"]);
+  assert.deepStrictEqual(H.blockProblems(noDays), ["busyNoDays"]);
+  assert.deepStrictEqual(H.blockProblems(bad).sort(), ["busyLabelEmpty", "busyNoDays", "busyTimeInvalid"]);
+  assert.deepStrictEqual(H.intervals([zero, noDays, bad], t("2026-10-05T00:00:00Z"), t("2026-10-12T00:00:00Z"), cal), []);
+});
+
+console.log(`Daylight saving (${fixtures.dst.timeZone}, browser-local calendar)`);
+process.env.TZ = fixtures.dst.timeZone;
+const tzApplied = new Date(Date.UTC(2026, 2, 9, 12)).getTimezoneOffset() === 240 && new Date(Date.UTC(2026, 2, 7, 12)).getTimezoneOffset() === 300;
+for (const w of fixtures.dst.windows) {
+  check(w.name, () => {
+    assert.ok(tzApplied, "this Node build ignored process.env.TZ; run with TZ=America/New_York set in the environment");
+    const local = H.makeCalendar(false);
+    const got = H.intervals(fixtures.dst.blocks, t(w.from), t(w.to), local).map((i) => ({ label: i.label, start: iso(i.start), end: iso(i.end) }));
+    const key = (x) => `${x.start}|${x.label}`;
+    assert.deepStrictEqual(got.sort((a, b) => (key(a) < key(b) ? -1 : 1)), w.intervals.slice().sort((a, b) => (key(a) < key(b) ? -1 : 1)));
+  });
+}
 
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);

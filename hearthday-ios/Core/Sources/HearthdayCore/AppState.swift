@@ -11,6 +11,25 @@ public struct UserSettings: Codable, Hashable, Sendable {
     public var hasCompletedOnboarding = false
 
     public init() {}
+
+    enum CodingKeys: String, CodingKey {
+        case availability, kitchenTempC, usesFahrenheit, starterUsuallyNeedsFeed, preferredFeedRatio
+        case allowInoculationAdjustment, allowFeedRatioAdjustment, hasCompletedOnboarding
+    }
+
+    /// Missing keys fall back to defaults so a file written by an older build still opens.
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        let d = UserSettings()
+        availability = try c.decodeIfPresent(Availability.self, forKey: .availability) ?? d.availability
+        kitchenTempC = try c.decodeIfPresent(Double.self, forKey: .kitchenTempC) ?? d.kitchenTempC
+        usesFahrenheit = try c.decodeIfPresent(Bool.self, forKey: .usesFahrenheit) ?? d.usesFahrenheit
+        starterUsuallyNeedsFeed = try c.decodeIfPresent(Bool.self, forKey: .starterUsuallyNeedsFeed) ?? d.starterUsuallyNeedsFeed
+        preferredFeedRatio = try c.decodeIfPresent(FeedRatio.self, forKey: .preferredFeedRatio) ?? d.preferredFeedRatio
+        allowInoculationAdjustment = try c.decodeIfPresent(Bool.self, forKey: .allowInoculationAdjustment) ?? d.allowInoculationAdjustment
+        allowFeedRatioAdjustment = try c.decodeIfPresent(Bool.self, forKey: .allowFeedRatioAdjustment) ?? d.allowFeedRatioAdjustment
+        hasCompletedOnboarding = try c.decodeIfPresent(Bool.self, forKey: .hasCompletedOnboarding) ?? d.hasCompletedOnboarding
+    }
 }
 
 /// What we keep about a finished bake. Everything stays on device.
@@ -49,8 +68,58 @@ public struct AppState: Codable, Hashable, Sendable {
     public var calibration = Calibration()
     /// Cached entitlement for offline launches; StoreKit remains the source of truth.
     public var isPro = false
+    public var schemaVersion = AppState.currentSchemaVersion
+
+    public static let currentSchemaVersion = 1
 
     public init() {}
+
+    enum CodingKeys: String, CodingKey {
+        case settings, formulas, activeSession, history, calibration, isPro, schemaVersion
+    }
+
+    public struct NewerFileError: Error, Equatable {
+        public var version: Int
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        let version = try c.decodeIfPresent(Int.self, forKey: .schemaVersion) ?? 1
+        guard version <= AppState.currentSchemaVersion else { throw NewerFileError(version: version) }
+        let d = AppState()
+        settings = try c.decodeIfPresent(UserSettings.self, forKey: .settings) ?? d.settings
+        formulas = try c.decodeIfPresent([Formula].self, forKey: .formulas) ?? d.formulas
+        activeSession = try c.decodeIfPresent(BakeSession.self, forKey: .activeSession)
+        history = try c.decodeIfPresent([BakeRecord].self, forKey: .history) ?? d.history
+        calibration = try c.decodeIfPresent(Calibration.self, forKey: .calibration) ?? d.calibration
+        isPro = try c.decodeIfPresent(Bool.self, forKey: .isPro) ?? d.isPro
+        schemaVersion = AppState.currentSchemaVersion
+    }
+
+    /// Brings values a hand-edited or damaged file could contain back inside what the planner accepts.
+    /// Returns true when anything changed. Invalid busy blocks are kept (so the baker can fix them) but
+    /// ignored by planning.
+    @discardableResult
+    public mutating func repair() -> Bool {
+        let before = self
+        settings.kitchenTempC = Self.clamp(settings.kitchenTempC, Limits.tempC, fallback: 21)
+        for i in formulas.indices {
+            var f = formulas[i]
+            if f.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { f.name = "My loaf" }
+            f.flourGrams = Self.clamp(f.flourGrams, Limits.flourGrams, fallback: 500)
+            f.hydrationPercent = Self.clamp(f.hydrationPercent, Limits.hydrationPercent, fallback: 72)
+            f.starterPercent = Self.clamp(f.starterPercent, Limits.starterPercent, fallback: 20)
+            f.saltPercent = Self.clamp(f.saltPercent, Limits.saltPercent, fallback: 2)
+            formulas[i] = f
+        }
+        if formulas.isEmpty { formulas = [.countryLoaf] }
+        return before != self
+    }
+
+    static func clamp(_ value: Double, _ range: ClosedRange<Double>, fallback: Double) -> Double {
+        guard value.isFinite else { return fallback }
+        return min(max(value, range.lowerBound), range.upperBound)
+    }
 
     /// Personal calibration is applied to plans for Pro; everyone sees what it has learned.
     public var planningModel: FermentationModel {
@@ -182,12 +251,18 @@ public struct JSONFileStore: Sendable {
     public func load() throws -> AppState {
         guard FileManager.default.fileExists(atPath: url.path) else { return AppState() }
         let data = try Data(contentsOf: url)
-        return try Self.decoder.decode(AppState.self, from: data)
+        var state = try Self.decoder.decode(AppState.self, from: data)
+        state.repair()
+        return state
     }
 
     public func save(_ state: AppState) throws {
         let data = try Self.encoder.encode(state)
+        #if os(iOS)
+        try data.write(to: url, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
+        #else
         try data.write(to: url, options: .atomic)
+        #endif
     }
 
     /// Moves an unreadable file aside so a fresh start never destroys the only copy.
@@ -198,16 +273,49 @@ public struct JSONFileStore: Sendable {
         return backup
     }
 
+    /// Dates are written as seconds since 2001 at full precision, so a bake reloaded after the app is closed
+    /// has bit-identical times (computed likely-ready windows carry sub-millisecond fractions that an
+    /// ISO 8601 string would round). ISO 8601 strings are still accepted when reading.
     static let encoder: JSONEncoder = {
         let e = JSONEncoder()
-        e.dateEncodingStrategy = .iso8601
+        e.dateEncodingStrategy = .custom { date, encoder in
+            var c = encoder.singleValueContainer()
+            try c.encode(date.timeIntervalSinceReferenceDate)
+        }
         e.outputFormatting = [.sortedKeys]
         return e
     }()
 
     static let decoder: JSONDecoder = {
         let d = JSONDecoder()
-        d.dateDecodingStrategy = .iso8601
+        d.dateDecodingStrategy = .custom { decoder in
+            let c = try decoder.singleValueContainer()
+            if let seconds = try? c.decode(Double.self), seconds.isFinite {
+                return Date(timeIntervalSinceReferenceDate: seconds)
+            }
+            let text = try c.decode(String.self)
+            guard let date = parseISO(text) else {
+                throw DecodingError.dataCorruptedError(in: c, debugDescription: "Unreadable date \(text)")
+            }
+            return date
+        }
         return d
     }()
+
+    static func parseISO(_ text: String) -> Date? {
+        guard text.hasSuffix("Z") else { return isoFormatter().date(from: text) }
+        let body = text.dropLast()
+        let parts = body.split(separator: ".", maxSplits: 1)
+        guard let whole = isoFormatter().date(from: parts[0] + "Z") else { return nil }
+        guard parts.count == 2 else { return whole }
+        let digits = String(parts[1].prefix(3)).padding(toLength: 3, withPad: "0", startingAt: 0)
+        guard let ms = Int(digits) else { return nil }
+        return Date(timeIntervalSince1970: whole.timeIntervalSince1970 + Double(ms) / 1000)
+    }
+
+    private static func isoFormatter() -> ISO8601DateFormatter {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime]
+        return f
+    }
 }

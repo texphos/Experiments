@@ -47,6 +47,8 @@ final class PlannerTests: XCTestCase {
                     if !slotFree {
                         XCTAssertEqual(info.reason, .bakeConflict, "A busy oven slot should be named as the blocker")
                     }
+                case let .invalid(problems):
+                    XCTFail("Valid request reported as invalid: \(problems)")
                 }
             }
         }

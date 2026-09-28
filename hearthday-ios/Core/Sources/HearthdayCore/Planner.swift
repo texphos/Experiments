@@ -10,6 +10,8 @@ public enum Planner {
     static let earliestSearchHours = 72
 
     public static func plan(_ request: PlanRequest, calendar: Calendar) -> PlanResult {
+        let problems = request.problems
+        guard problems.isEmpty else { return .invalid(problems) }
         var diagnostics = Diagnostics()
         let candidates = search(request, calendar: calendar, diagnostics: &diagnostics)
         if let primary = candidates.first {
