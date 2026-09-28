@@ -12,6 +12,10 @@ on:
       - ".github/workflows/hearthday.yml"
   workflow_dispatch:
 
+# Read-only token, no secrets, no deployment. Standard GitHub-hosted runners only (free for public repos).
+permissions:
+  contents: read
+
 concurrency:
   group: hearthday-${{ github.ref }}
   cancel-in-progress: true
@@ -24,6 +28,7 @@ jobs:
   core-linux:
     name: Core tests (Linux, swift test)
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     container: swift:6.1
     steps:
       - uses: actions/checkout@v4
@@ -41,14 +46,16 @@ jobs:
           swift run -q hearthday-fixtures > /tmp/fixtures.json
           diff -u ../prototype/fixtures.json /tmp/fixtures.json
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: failure()
         with:
           name: core-linux-log
           path: hearthday-ios/core-tests.log
+          retention-days: 5
 
   prototype:
     name: Prototype (parity, standalone build, headless browser)
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -70,10 +77,12 @@ jobs:
         with:
           name: prototype-screenshots
           path: hearthday-ios/prototype/e2e-screenshots/
+          retention-days: 5
 
   ios:
     name: iOS app (Xcode build, unit, StoreKit and UI tests)
     runs-on: macos-15
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - name: Show toolchain
@@ -128,8 +137,10 @@ jobs:
         with:
           name: ios-test-results
           path: ${{ runner.temp }}/export/
+          retention-days: 5
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: failure()
         with:
           name: ios-xcresult
           path: ${{ runner.temp }}/Hearthday.xcresult
+          retention-days: 5
