@@ -16,6 +16,10 @@ public enum InputProblem: Hashable, Sendable {
     case busyNoDays
     case busyTimeInvalid
     case busyZeroLength
+    /// The dough is chilling; a room-temperature rise target says nothing about it.
+    case doughIsChilled
+    /// Check-ins only make sense between mixing and shaping.
+    case notInBulk
 
     public var code: String {
         switch self {
@@ -32,6 +36,8 @@ public enum InputProblem: Hashable, Sendable {
         case .busyNoDays: return "busyNoDays"
         case .busyTimeInvalid: return "busyTimeInvalid"
         case .busyZeroLength: return "busyZeroLength"
+        case .doughIsChilled: return "doughIsChilled"
+        case .notInBulk: return "notInBulk"
         }
     }
 
@@ -63,6 +69,10 @@ public enum InputProblem: Hashable, Sendable {
             return "Choose a valid start and end time."
         case .busyZeroLength:
             return "Start and end can’t be the same time."
+        case .doughIsChilled:
+            return "The dough is in the fridge, so its rise can’t be compared with room-temperature targets. Shape it cold at the planned time, going by how it looks and feels."
+        case .notInBulk:
+            return "Check-ins are for the time between mixing and shaping."
         }
     }
 }

@@ -6,6 +6,8 @@ public enum ProofMode: String, Codable, CaseIterable, Sendable {
 
 public enum StepKind: String, Codable, Sendable {
     case feedStarter, starterRise, mix, fold, bulk, shape, coldRetard, roomProof, preheat, bake, coldBulk
+    /// Hands-on: moving the dough into the fridge mid-bulk. Completing it marks the bake as chilled.
+    case fridgeDough
 }
 
 public struct BakeStep: Codable, Hashable, Identifiable, Sendable {

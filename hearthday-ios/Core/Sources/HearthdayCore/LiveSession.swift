@@ -34,6 +34,8 @@ public struct BakeSession: Codable, Hashable, Identifiable, Sendable {
     public var notes: String
     public var finishedAt: Date?
     public var replanCount: Int
+    /// Set when a late or early mix/shape forced Hearthday to move the bake; shown until the next re-plan.
+    public var adjustmentNote: String?
 
     public init(id: UUID = UUID(), plan: BakePlan, startedAt: Date) {
         self.id = id
@@ -99,8 +101,26 @@ public struct BakeSession: Codable, Hashable, Identifiable, Sendable {
         completed["mix"] != nil && completed["shape"] == nil
     }
 
-    /// Mark a hands-on step done. Finishing the mix late or early slides the dough-driven steps with it.
-    public mutating func complete(_ stepID: String, at now: Date) {
+    /// True once the dough has gone into the fridge mid-bulk. It stays true even if the plan is replaced later,
+    /// because `completed` is never pruned. Bakes saved before the transfer step existed count as chilled as
+    /// soon as their plan has a cold bulk.
+    public var isChilled: Bool {
+        if completed["fridge"] != nil { return true }
+        return plan.step("fridge") == nil && plan.steps.contains { $0.kind == .coldBulk }
+    }
+
+    /// Rise check-ins compare against room-temperature targets, so they stop once the dough is chilled.
+    public var canCheckIn: Bool { isInBulk && !isChilled }
+
+    /// Mark a hands-on step done. Finishing the mix late or early slides the dough-driven steps with it; if that
+    /// squeezes or stretches a cold proof beyond what's workable, the bake moves (see `keepColdProofWorkable`).
+    public mutating func complete(
+        _ stepID: String,
+        at now: Date,
+        availability: Availability? = nil,
+        calendar: Calendar = .current,
+        process: ProcessSettings = ProcessSettings()
+    ) {
         guard let step = plan.step(stepID), completed[stepID] == nil else { return }
         completed[stepID] = now
         if stepID == "mix" {
@@ -111,7 +131,71 @@ public struct BakeSession: Codable, Hashable, Identifiable, Sendable {
             let delta = now.timeIntervalSince(step.end)
             if abs(delta) >= 60 { shiftAfterShape(by: delta) }
         }
+        if stepID == "mix" || stepID == "shape" {
+            keepColdProofWorkable(reason: stepID == "mix" ? "Mixing" : "Shaping", availability: availability, calendar: calendar, process: process)
+        }
         if stepID == "bake" { finishedAt = now }
+    }
+
+    /// Keeps a pending cold proof within the workable range. When it falls outside, the bake moves to the nearest
+    /// grid time inside the range, preferring one where preheat and bake are free, and `adjustmentNote` says why.
+    mutating func keepColdProofWorkable(reason: String, availability: Availability?, calendar: Calendar, process: ProcessSettings) {
+        guard let retard = plan.step("cold-proof"), let bake = plan.step("bake"), let preheat = plan.step("preheat"),
+              completed[retard.id] == nil, completed[bake.id] == nil, completed[preheat.id] == nil else { return }
+        let low = retard.start.addingTimeInterval(process.retardMinHours * 3600)
+        let high = retard.start.addingTimeInterval(process.retardMaxHours * 3600)
+        let current = bake.start
+        guard current < low || current > high else { return }
+
+        let grid = TimeInterval(process.gridMinutes * 60)
+        var candidates: [Date] = []
+        var t = ceilToGrid(low, grid)
+        while t <= high {
+            candidates.append(t)
+            t = t.addingTimeInterval(grid)
+        }
+        if candidates.isEmpty { candidates = [low] }
+        candidates.sort {
+            let a = abs($0.timeIntervalSince(current)), b = abs($1.timeIntervalSince(current))
+            return a != b ? a < b : $0 < $1
+        }
+        let preheatDuration = preheat.duration
+        let bakeDuration = bake.duration
+        var chosen = candidates[0]
+        if let availability {
+            let timeline = availability.timeline(
+                from: low.addingTimeInterval(-preheatDuration - 3600),
+                to: high.addingTimeInterval(bakeDuration + 3600),
+                calendar: calendar
+            )
+            if let free = candidates.first(where: {
+                timeline.isFree(start: $0.addingTimeInterval(-preheatDuration), duration: preheatDuration + bakeDuration)
+            }) {
+                chosen = free
+            }
+        }
+
+        plan.steps = sortSteps(plan.steps.map { step in
+            switch step.id {
+            case retard.id:
+                return StepFactory.coldRetard(start: retard.start, end: chosen, process: process)
+            case preheat.id:
+                var s = step
+                s.start = chosen.addingTimeInterval(-preheatDuration)
+                s.end = chosen
+                return s
+            case bake.id:
+                var s = step
+                s.start = chosen
+                s.end = chosen.addingTimeInterval(bakeDuration)
+                return s
+            default:
+                return step
+            }
+        })
+        adjustmentNote = current < low
+            ? "\(reason) ran late, so the bake moved later to give the cold proof at least \(Int(process.retardMinHours)) h."
+            : "\(reason) was early, so the bake moved earlier to keep the cold proof under \(Int(process.retardMaxHours)) h."
     }
 
     mutating func shiftDoughSteps(by delta: TimeInterval) {
@@ -161,10 +245,16 @@ public struct BakeSession: Codable, Hashable, Identifiable, Sendable {
         }
     }
 
+    /// Hours of bulk at room temperature: from mixing until shaping, or until the dough went into the fridge.
     public var actualBulkHours: Double? {
         guard let shapeDone = completed["shape"], let shape = plan.step("shape") else { return nil }
-        let shapeStart = shapeDone.addingTimeInterval(-shape.duration)
-        return shapeStart.timeIntervalSince(bulkClockStart) / 3600
+        var end = shapeDone.addingTimeInterval(-shape.duration)
+        if let fridged = completed["fridge"] {
+            end = fridged.addingTimeInterval(-TimeInterval(LiveReplanner.fridgeTransferMinutes * 60))
+        } else if isChilled, let cold = plan.steps.first(where: { $0.kind == .coldBulk }) {
+            end = cold.start
+        }
+        return max(0, end.timeIntervalSince(bulkClockStart) / 3600)
     }
 
     public var averageTempC: Double {
@@ -174,10 +264,13 @@ public struct BakeSession: Codable, Hashable, Identifiable, Sendable {
     }
 
     /// A calibration sample, only when the baker judged the dough "just right" at shaping and bulk ran
-    /// entirely at room temperature; a fridge pause mid-bulk would make the dough look slow.
+    /// entirely at room temperature. Chilled bulks are excluded outright: the model has no term for time in the
+    /// fridge, and counting it as room time would teach Hearthday that the baker's dough is slow.
     public func calibrationSample(baseModel: FermentationModel = FermentationModel()) -> Calibration.Sample? {
         guard shapeReadiness == .justRight,
-              !plan.steps.contains(where: { $0.kind == .coldBulk }),
+              !isChilled,
+              completed["fridge"] == nil,
+              !plan.steps.contains(where: { $0.kind == .coldBulk || $0.kind == .fridgeDough }),
               let actual = actualBulkHours,
               let date = completed["shape"] else { return nil }
         var model = baseModel
@@ -192,18 +285,27 @@ public struct BakeSession: Codable, Hashable, Identifiable, Sendable {
         )
     }
 
-    /// Accept a check-in option: keep what already happened, replace everything from shaping on.
+    /// Accept a check-in option: keep what already happened, replace everything from the end of bulk on.
+    /// Pending folds that would fall after the new end of bulk are dropped, and any earlier fridge option that
+    /// hadn't been carried out is replaced. Ignored once the dough is chilled, when check-ins no longer apply.
     public mutating func apply(_ option: ReplanOption) {
-        let keptKinds: Set<StepKind> = [.feedStarter, .starterRise, .mix, .fold]
-        var kept = plan.steps.filter { keptKinds.contains($0.kind) }
+        guard !isChilled else { return }
+        var kept = plan.steps.filter { step in
+            switch step.kind {
+            case .feedStarter, .starterRise, .mix: return true
+            case .fold: return completed[step.id] != nil || step.end <= option.bulkEndsAt
+            default: return false
+            }
+        }
         if var bulk = plan.step("bulk") {
-            bulk.end = option.bulkEndsAt
+            bulk.end = max(bulk.start, option.bulkEndsAt)
             kept.append(bulk)
         }
         plan.steps = sortSteps(kept + option.steps)
         if option.steps.contains(where: { $0.kind == .coldRetard }) { plan.proofMode = .fridge }
         if option.steps.contains(where: { $0.kind == .roomProof }) { plan.proofMode = .room }
         replanCount += 1
+        adjustmentNote = nil
     }
 }
 
@@ -241,6 +343,7 @@ public struct CheckInResult: Hashable, Sendable {
 public enum LiveReplanner {
     /// Before this, one reading says little about the dough's speed, so the summary says the estimate is rough.
     public static let earlyReadingMinutes = 45
+    public static let fridgeTransferMinutes = 5
 
     public static func checkIn(
         session: BakeSession,
@@ -252,7 +355,12 @@ public enum LiveReplanner {
         model: FermentationModel,
         process: ProcessSettings = ProcessSettings()
     ) -> CheckInResult {
-        let problems = CheckInValidation.problems(risePercent: risePercent, tempC: tempC)
+        var problems = CheckInValidation.problems(risePercent: risePercent, tempC: tempC)
+        if session.isChilled {
+            problems = [.doughIsChilled]
+        } else if !session.isInBulk {
+            problems = [.notInBulk]
+        }
         guard problems.isEmpty else {
             return CheckInResult(
                 progress: 0,
@@ -311,14 +419,20 @@ public enum LiveReplanner {
             let conflict = timeline.conflict(start: readyAt, duration: shapeDuration)
             let label = conflict?.label
 
+            // The transfer is hands-on, so it has to happen while the baker is free: 10 minutes before the busy
+            // block when that slot is free, otherwise right now (the baker is holding the phone).
+            let transfer = TimeInterval(fridgeTransferMinutes * 60)
             let fridgeAt: Date = {
                 guard let c = conflict, c.start > now else { return now }
-                return max(now, c.start.addingTimeInterval(-600))
+                let before = max(now, c.start.addingTimeInterval(-600))
+                if before.timeIntervalSince(now) < 300 || timeline.isFree(start: before, duration: transfer) { return before }
+                return now
             }()
             let progressAtFridge = min(1, (elapsed + fridgeAt.timeIntervalSince(now)) / totalBulk)
-            if let free = freeShape, progressAtFridge >= minimumColdBulkProgress, free > fridgeAt {
+            if let free = freeShape, progressAtFridge >= minimumColdBulkProgress, free > fridgeAt.addingTimeInterval(transfer) {
                 if let rest = tail(shapeAt: free, ctx: tailContext) {
-                    let coldBulk = StepFactory.coldBulk(start: fridgeAt, end: free)
+                    let moveToFridge = StepFactory.fridgeDough(start: fridgeAt, minutes: fridgeTransferMinutes)
+                    let coldBulk = StepFactory.coldBulk(start: moveToFridge.end, end: free)
                     let comfortable = progressAtFridge >= comfortableColdBulkProgress
                     let pctIn = Int((progressAtFridge * 100).rounded())
                     options.append(ReplanOption(
@@ -330,7 +444,7 @@ public enum LiveReplanner {
                             ? "It goes in about \(pctIn)% of the way through bulk and keeps fermenting slowly as it chills. Shape it cold when you’re free."
                             : "It would go in only about \(pctIn)% of the way through bulk. If it hasn’t risen much by morning, give it time at room temperature before shaping.",
                         bulkEndsAt: fridgeAt,
-                        steps: [coldBulk] + rest,
+                        steps: [moveToFridge, coldBulk] + rest,
                         conflictLabel: nil,
                         recommended: comfortable
                     ))

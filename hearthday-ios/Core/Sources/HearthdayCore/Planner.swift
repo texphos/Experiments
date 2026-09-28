@@ -391,7 +391,7 @@ func distanceOutside(_ value: Double, _ low: Double, _ high: Double) -> Double {
 }
 
 private let stepOrder: [StepKind] = [
-    .feedStarter, .starterRise, .mix, .fold, .bulk, .coldBulk, .shape, .coldRetard, .roomProof, .preheat, .bake,
+    .feedStarter, .starterRise, .mix, .fold, .bulk, .fridgeDough, .coldBulk, .shape, .coldRetard, .roomProof, .preheat, .bake,
 ]
 
 func sortSteps(_ steps: [BakeStep]) -> [BakeStep] {

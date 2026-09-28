@@ -134,6 +134,18 @@ enum StepFactory {
         )
     }
 
+    static func fridgeDough(start: Date, minutes: Int) -> BakeStep {
+        BakeStep(
+            id: "fridge",
+            kind: .fridgeDough,
+            start: start,
+            end: start.addingTimeInterval(TimeInterval(minutes * 60)),
+            attended: true,
+            title: "Put the dough in the fridge",
+            detail: "Cover it and move it to the fridge. Chilling slows bulk right down; you’ll shape it cold."
+        )
+    }
+
     static func coldBulk(start: Date, end: Date) -> BakeStep {
         BakeStep(
             id: "cold-bulk",

@@ -160,8 +160,9 @@ public struct AppState: Codable, Hashable, Sendable {
         activeSession = BakeSession(plan: plan, startedAt: now)
     }
 
-    public mutating func completeStep(_ id: String, at now: Date) {
-        activeSession?.complete(id, at: now)
+    /// Completing a step late can move the bake; it's kept out of the baker's busy times where possible.
+    public mutating func completeStep(_ id: String, at now: Date, calendar: Calendar = .current) {
+        activeSession?.complete(id, at: now, availability: settings.availability, calendar: calendar)
     }
 
     public mutating func setShapeReadiness(_ readiness: ShapeReadiness) {

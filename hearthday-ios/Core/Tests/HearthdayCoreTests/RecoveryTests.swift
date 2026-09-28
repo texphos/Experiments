@@ -58,7 +58,11 @@ final class RecoveryTests: XCTestCase {
 
     func testStatusAfterReopeningDistinguishesDueOverdueAndStale() throws {
         let (state, _) = try midBakeState()
-        let session = try XCTUnwrap(state.activeSession)
+        var session = try XCTUnwrap(state.activeSession)
+        let transfer = try XCTUnwrap(session.nextAttendedStep)
+        XCTAssertEqual(transfer.kind, .fridgeDough, "Moving the dough to the fridge is the next hands-on step")
+        XCTAssertEqual(session.status(now: transfer.start.addingTimeInterval(40 * 60)), .overdue(transfer, minutesLate: 40))
+        session.complete(transfer.id, at: transfer.end)
         let shape = try XCTUnwrap(session.nextAttendedStep)
         XCTAssertEqual(shape.kind, .shape)
 
