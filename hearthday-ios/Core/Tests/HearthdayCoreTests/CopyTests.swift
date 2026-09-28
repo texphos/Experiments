@@ -82,6 +82,9 @@ final class CopyTests: XCTestCase {
             XCTAssertFalse(r.summary.contains("about 0 "), r.summary)
             XCTAssertFalse(r.summary.contains("about 0."), r.summary)
         }
+        let early = LiveReplanner.checkIn(session: s, now: plan.step("mix")!.end.addingTimeInterval(5 * 60), risePercent: 40, tempC: 21,
+                                          availability: .typicalWeekdayWorker, calendar: TestClock.calendar, model: FermentationModel())
+        XCTAssertTrue(early.summary.contains("very rough guess"), "A reading minutes after mixing is flagged as rough: \(early.summary)")
         XCTAssertEqual(DurationText.approximate(hours: 0.01), "5 min")
         XCTAssertEqual(DurationText.approximate(hours: 0.3), "20 min")
         XCTAssertEqual(DurationText.approximate(hours: 0.8), "1 h")

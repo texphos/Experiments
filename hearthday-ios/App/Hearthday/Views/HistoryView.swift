@@ -95,7 +95,7 @@ private struct BakeRow: View {
                         .accessibilityLabel("\(rating) stars")
                 }
             }
-            Text("\(record.proofMode == .fridge ? "Fridge proof" : "Room proof") · \(Int(record.inoculationPercent))% starter · \(Fmt.temperature(record.tempC, fahrenheit: fahrenheit))\(record.actualBulkHours.map { " · bulk \(DurationText.halfHours($0)) h" } ?? "")")
+            Text("\(record.proofMode == .fridge ? "Fridge proof" : "Room proof") · \(Int(record.inoculationPercent))% starter · \(Fmt.temperature(record.tempC, fahrenheit: fahrenheit))\(record.actualBulkHours.map { " · bulk \(DurationText.approximate(hours: $0))" } ?? "")")
                 .font(.footnote).foregroundStyle(Palette.ash)
             if !record.notes.isEmpty {
                 Text(record.notes).font(.callout).foregroundStyle(Palette.rye)

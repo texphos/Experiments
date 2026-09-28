@@ -239,6 +239,9 @@ public struct CheckInResult: Hashable, Sendable {
 /// fermentation usually accelerates, so this tends to overestimate the time remaining — the safer error
 /// when the alternative is over-proofing while the baker is asleep.
 public enum LiveReplanner {
+    /// Before this, one reading says little about the dough's speed, so the summary says the estimate is rough.
+    public static let earlyReadingMinutes = 45
+
     public static func checkIn(
         session: BakeSession,
         now: Date,
@@ -363,9 +366,12 @@ public enum LiveReplanner {
         }
 
         let pct = Int((progress * 100).rounded())
+        let sinceMix = max(0, Int((now.timeIntervalSince(session.bulkClockStart) / 60).rounded()))
         let summary: String
         if remaining == 0 {
             summary = "At \(Int(risePercent.rounded()))% rise your reading meets the target of about \(Int(target.rounded()))%. Go by the dough: a domed top and bubbles at the edges."
+        } else if sinceMix < earlyReadingMinutes {
+            summary = "Only \(DurationText.compact(minutes: sinceMix)) since mixing, so this is a very rough guess: a straight line says about \(DurationText.approximate(hours: remaining / 3600)). A reading after the first hour is much more reliable."
         } else {
             summary = "About \(pct)% of the way to a \(Int(target.rounded()))% rise. Likely ready in about \(DurationText.approximate(hours: remaining / 3600)). That’s a straight-line estimate from one reading, so check again if you can."
         }

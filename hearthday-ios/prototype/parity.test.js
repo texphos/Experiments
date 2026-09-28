@@ -77,6 +77,7 @@ for (const c of fixtures.checkInScenarios) {
     assert.strictEqual(iso(now), c.expected.now, "now");
     assert.strictEqual(iso(Math.round(r.estimatedReadyAt / 1000) * 1000), c.expected.estimatedReadyAt, "estimatedReadyAt");
     assert.ok(Math.abs(r.targetRisePercent - c.expected.targetRisePercent) < 1e-9, "target rise");
+    assert.strictEqual(r.summary, c.expected.summary, "summary");
     assert.deepStrictEqual(
       r.options.map((o) => ({ kind: o.kind, recommended: o.recommended, bulkEndsAt: iso(Math.round(o.bulkEndsAt / 1000) * 1000), conflictLabel: o.conflictLabel, steps: stepsView(o.steps.map((x) => Object.assign({}, x, { start: Math.round(x.start / 1000) * 1000, end: Math.round(x.end / 1000) * 1000 }))) })),
       c.expected.options

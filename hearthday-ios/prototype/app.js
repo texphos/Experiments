@@ -292,7 +292,7 @@
         r.shapeReadiness ? `<span class="tag ${r.shapeReadiness === "justRight" ? "sage" : "warn"}">${{ under: "Under at shaping", justRight: "Just right", over: "Over at shaping" }[r.shapeReadiness]}</span>` : "",
         r.rating ? `<span class="tag" aria-label="${r.rating} stars">${"★".repeat(r.rating)}</span>` : ""].join("");
       return `<div class="card"><div class="row between"><h3>${esc(r.formulaName)}</h3><span class="small muted">${new Date(r.finishedAt).toLocaleDateString([], { month: "short", day: "numeric" })}</span></div>
-        <div>${tags}</div><p class="small muted">${r.proofMode === "fridge" ? "Fridge proof" : "Room proof"} · ${Math.round(r.inoculationPercent)}% starter · ${temp(r.tempC)}${r.actualBulkHours ? ` · bulk ${H.halfHours(r.actualBulkHours)} h` : ""}</p>${r.notes ? `<p>${esc(r.notes)}</p>` : ""}</div>`;
+        <div>${tags}</div><p class="small muted">${r.proofMode === "fridge" ? "Fridge proof" : "Room proof"} · ${Math.round(r.inoculationPercent)}% starter · ${temp(r.tempC)}${r.actualBulkHours ? ` · bulk ${H.approximate(r.actualBulkHours)}` : ""}</p>${r.notes ? `<p>${esc(r.notes)}</p>` : ""}</div>`;
     }).join("");
     return `<div class="stack"><h1>Journal</h1>
       <div class="card"><h3>Your kitchen’s speed</h3><div class="row" role="img" aria-label="${Math.min(n, 3)} of 3 calibration bakes" style="margin:8px 0">${bars}</div>

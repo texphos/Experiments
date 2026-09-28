@@ -488,6 +488,7 @@
   function clonePlan(p) { return makePlan(Object.assign({}, p, { steps: p.steps.map((s) => Object.assign({}, s)) })); }
 
   const GRACE_MINUTES = 15;
+  const EARLY_READING_MINUTES = 45;
   const STALE_AFTER_HOURS = 12;
   const session = {
     nextAttendedStep: (s) => s.plan.steps.find((x) => x.attended && s.completed[x.id] == null) || null,
@@ -696,8 +697,11 @@
         }
       }
     }
+    const sinceMix = Math.max(0, Math.round((now - session.bulkClockStart(s)) / MIN));
     const summary = remaining === 0
       ? `At ${Math.round(risePercent)}% rise your reading meets the target of about ${Math.round(target)}%. Go by the dough: a domed top and bubbles at the edges.`
+      : sinceMix < EARLY_READING_MINUTES
+      ? `Only ${compact(sinceMix)} since mixing, so this is a very rough guess: a straight line says about ${approximate(remaining / HOUR)}. A reading after the first hour is much more reliable.`
       : `About ${Math.round(progress * 100)}% of the way to a ${Math.round(target)}% rise. Likely ready in about ${approximate(remaining / HOUR)}. That’s a straight-line estimate from one reading, so check again if you can.`;
     for (const o of options) { o.readyAt = o.steps.length ? o.steps[o.steps.length - 1].end : o.bulkEndsAt; const sh = o.steps.find((x) => x.kind === "shape"); o.shapeAt = sh ? sh.start : null; }
     return { progress, targetRisePercent: target, estimatedReadyAt: readyAt, summary, options, problems: [] };
@@ -708,7 +712,7 @@
     makeCalendar, typicalWeekdayWorker, intervals, timeline, blockDuration,
     LIMITS, blockIsValid, blockProblems, formulaProblems, requestProblems, checkInProblems, problemMessage,
     makeModel, bulkHours, roomProofHours, starterPeakHours, targetRisePercent, calibration,
-    halfHours, hoursRange, compact,
+    halfHours, hoursRange, compact, approximate,
     plan, infeasibilityMessage, leverSummary, planStep,
     newSession, session, checkIn,
   };

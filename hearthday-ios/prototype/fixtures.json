@@ -56,6 +56,7 @@
             "step" : "bake"
           }
         ],
+        "summary" : "About 57% of the way to a 37% rise. Likely ready in about 2 h. That’s a straight-line estimate from one reading, so check again if you can.",
         "targetRisePercent" : 36.666666666666664
       },
       "hoursAfterMix" : 2.5,
@@ -155,6 +156,7 @@
             "step" : "bake"
           }
         ],
+        "summary" : "About 46% of the way to a 65% rise. Likely ready in about 2½ h. That’s a straight-line estimate from one reading, so check again if you can.",
         "targetRisePercent" : 65
       },
       "hoursAfterMix" : 2,
@@ -220,6 +222,7 @@
             "step" : "bake"
           }
         ],
+        "summary" : "About 21% of the way to a 85% rise. Likely ready in about 15 h. That’s a straight-line estimate from one reading, so check again if you can.",
         "targetRisePercent" : 85
       },
       "hoursAfterMix" : 4,
@@ -277,6 +280,7 @@
             "step" : "bake"
           }
         ],
+        "summary" : "At 30% rise your reading meets the target of about 30%. Go by the dough: a domed top and bubbles at the edges.",
         "targetRisePercent" : 30
       },
       "hoursAfterMix" : 2,
@@ -334,6 +338,7 @@
             "step" : "bake"
           }
         ],
+        "summary" : "At 80% rise your reading meets the target of about 75%. Go by the dough: a domed top and bubbles at the edges.",
         "targetRisePercent" : 75
       },
       "hoursAfterMix" : 6,
@@ -341,6 +346,88 @@
       "name" : "Ready now",
       "planScenario" : "Active starter, Sunday lunch",
       "rise" : 80,
+      "tempC" : 21
+    },
+    {
+      "expected" : {
+        "estimatedReadyAt" : "2026-10-10T13:30:00Z",
+        "now" : "2026-10-10T12:30:00Z",
+        "options" : [
+          {
+            "bulkEndsAt" : "2026-10-10T13:30:00Z",
+            "conflictLabel" : null,
+            "kind" : "shapeWhenReady",
+            "recommended" : true,
+            "steps" : [
+              {
+                "attended" : true,
+                "end" : "2026-10-10T13:50:00Z",
+                "id" : "shape",
+                "start" : "2026-10-10T13:30:00Z"
+              },
+              {
+                "attended" : false,
+                "end" : "2026-10-11T12:15:00Z",
+                "id" : "cold-proof",
+                "start" : "2026-10-10T13:50:00Z"
+              },
+              {
+                "attended" : true,
+                "end" : "2026-10-11T12:15:00Z",
+                "id" : "preheat",
+                "start" : "2026-10-11T11:30:00Z"
+              },
+              {
+                "attended" : true,
+                "end" : "2026-10-11T13:00:00Z",
+                "id" : "bake",
+                "start" : "2026-10-11T12:15:00Z"
+              }
+            ]
+          }
+        ],
+        "remindersAfterFirstOption" : [
+          {
+            "fireAt" : "2026-10-10T12:45:00Z",
+            "step" : "fold-1"
+          },
+          {
+            "fireAt" : "2026-10-10T13:00:00Z",
+            "step" : "check"
+          },
+          {
+            "fireAt" : "2026-10-10T13:15:00Z",
+            "step" : "fold-2"
+          },
+          {
+            "fireAt" : "2026-10-10T13:30:00Z",
+            "step" : "shape"
+          },
+          {
+            "fireAt" : "2026-10-10T13:45:00Z",
+            "step" : "fold-3"
+          },
+          {
+            "fireAt" : "2026-10-10T14:15:00Z",
+            "step" : "fold-4"
+          },
+          {
+            "fireAt" : "2026-10-11T11:30:00Z",
+            "step" : "preheat"
+          },
+          {
+            "fireAt" : "2026-10-11T12:15:00Z",
+            "step" : "bake"
+          }
+        ],
+        "summary" : "Only 15 min since mixing, so this is a very rough guess: a straight line says about 1 h. A reading after the first hour is much more reliable.",
+        "targetRisePercent" : 75
+      },
+      "hoursAfterMix" : 0.25,
+      "mixLateMinutes" : 0,
+      "name" : "Very early reading",
+      "planScenario" : "Active starter, Sunday lunch",
+      "rise" : 15,
       "tempC" : 21
     }
   ],

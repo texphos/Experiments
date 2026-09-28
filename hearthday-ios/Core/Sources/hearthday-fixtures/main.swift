@@ -125,6 +125,7 @@ let checkInScenarios: [CheckInScenario] = [
     CheckInScenario(name: "Slow overnight dough, late mix", plan: planScenarios[0], mixLateMinutes: 10, hoursAfterMix: 4, rise: 18, tempC: 20),
     CheckInScenario(name: "Warm evening dough racing ahead", plan: planScenarios[4], mixLateMinutes: 20, hoursAfterMix: 2, rise: 30, tempC: 27),
     CheckInScenario(name: "Ready now", plan: planScenarios[2], mixLateMinutes: 0, hoursAfterMix: 6, rise: 80, tempC: 21),
+    CheckInScenario(name: "Very early reading", plan: planScenarios[2], mixLateMinutes: 0, hoursAfterMix: 0.25, rise: 15, tempC: 21),
 ]
 
 var checkInOut: [[String: Any]] = []
@@ -166,6 +167,7 @@ for c in checkInScenarios {
             "now": iso.string(from: now),
             "estimatedReadyAt": iso.string(from: result.estimatedReadyAt),
             "targetRisePercent": result.targetRisePercent,
+            "summary": result.summary,
             "remindersAfterFirstOption": remindersAfterFirstOption,
             "options": result.options.map {
                 [
