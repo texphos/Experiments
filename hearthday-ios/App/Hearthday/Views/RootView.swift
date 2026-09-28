@@ -36,6 +36,9 @@ struct BakeTab: View {
                 HomeView()
             }
         }
+        // Starting or ending a bake replaces the whole stack, so the plan screen that was pushed to start it
+        // doesn't stay on top of the live bake.
+        .id(model.state.activeSession != nil)
     }
 }
 

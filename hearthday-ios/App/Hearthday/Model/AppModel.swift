@@ -194,4 +194,6 @@ final class AppModel {
 enum LaunchArgument {
     static let uiTesting = "-hearthday-ui-testing"
     static let resetState = "-hearthday-reset-state"
+    static let darkAppearance = "-hearthday-dark"
+    static let lightAppearance = "-hearthday-light"
 }

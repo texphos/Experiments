@@ -7,9 +7,10 @@ final class HearthdayUITests: XCTestCase {
         continueAfterFailure = false
     }
 
-    func launch(reset: Bool) -> XCUIApplication {
+    func launch(reset: Bool, dark: Bool = false) -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = ["-hearthday-ui-testing"] + (reset ? ["-hearthday-reset-state"] : [])
+        app.launchArguments = ["-hearthday-ui-testing", dark ? "-hearthday-dark" : "-hearthday-light"]
+            + (reset ? ["-hearthday-reset-state"] : [])
         app.launch()
         return app
     }
@@ -68,10 +69,12 @@ final class HearthdayUITests: XCTestCase {
         XCTAssertTrue(start.exists, "A plan should be offered, directly or via the earliest time that fits")
         snapshot(app, "\(appearance)-04-plan")
         tap(app, "plan.start")
+        XCTAssertTrue(element(app, "step.done").waitForExistence(timeout: 5), "Starting a bake shows the live bake")
+        XCTAssertFalse(element(app, "plan.start").exists, "The plan screen doesn't stay on top of the live bake")
     }
 
     func runLoop(appearance: String) throws {
-        let app = launch(reset: true)
+        let app = launch(reset: true, dark: appearance == "dark")
         completeOnboarding(app, appearance: appearance)
         planAndStart(app, appearance: appearance)
 
@@ -133,18 +136,14 @@ final class HearthdayUITests: XCTestCase {
     }
 
     func testCompleteLoopLight() throws {
-        XCUIDevice.shared.appearance = .light
         try runLoop(appearance: "light")
     }
 
     func testCompleteLoopDark() throws {
-        XCUIDevice.shared.appearance = .dark
         try runLoop(appearance: "dark")
-        XCUIDevice.shared.appearance = .light
     }
 
     func testBakeInProgressSurvivesTerminationAndRelaunch() throws {
-        XCUIDevice.shared.appearance = .light
         let app = launch(reset: true)
         completeOnboarding(app, appearance: "relaunch")
         planAndStart(app, appearance: "relaunch")

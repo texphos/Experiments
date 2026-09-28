@@ -89,8 +89,12 @@ final class ProStoreTests: XCTestCase {
         XCTAssertTrue(store.isPro)
         let transaction = try XCTUnwrap(session.allTransactions().first)
         try session.refundTransaction(identifier: transaction.identifier)
-        await store.refreshEntitlement()
-        XCTAssertFalse(store.isPro)
+        // The test session applies the refund asynchronously; allow it a few seconds to reach currentEntitlements.
+        for _ in 0..<20 where store.isPro {
+            try await Task.sleep(for: .milliseconds(250))
+            await store.refreshEntitlement()
+        }
+        XCTAssertFalse(store.isPro, "A refunded purchase no longer unlocks Pro")
     }
 
     func testMissingProductShowsAnExplicitUnavailableState() async throws {

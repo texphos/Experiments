@@ -2,6 +2,7 @@ name: Hearthday
 
 on:
   push:
+    branches: [main]
     paths:
       - "hearthday-ios/**"
       - ".github/workflows/hearthday.yml"
