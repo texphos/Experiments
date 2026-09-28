@@ -110,6 +110,20 @@ enum StepFactory {
         )
     }
 
+    /// Shaping after bulk finished in the fridge. There is no likely-ready window: the room-temperature model
+    /// doesn't describe chilled dough, so the baker goes by look and feel.
+    static func shapeCold(start: Date, minutes: Int) -> BakeStep {
+        BakeStep(
+            id: "shape",
+            kind: .shape,
+            start: start,
+            end: start.addingTimeInterval(TimeInterval(minutes * 60)),
+            attended: true,
+            title: "Shape",
+            detail: "Shape it straight from the fridge. Look for a domed top and some bubbles; if it has barely risen, give it time at room temperature first."
+        )
+    }
+
     static func coldRetard(start: Date, end: Date, process: ProcessSettings) -> BakeStep {
         BakeStep(
             id: "cold-proof",

@@ -36,6 +36,9 @@ final class ReplanIntegrityTests: XCTestCase {
             if let bulkEnd { XCTAssertLessThanOrEqual(fold.end, bulkEnd, "\(fold.id) after the end of bulk", file: file, line: line) }
         }
         if let shape = s.plan.step("shape"), s.completed["shape"] == nil {
+            if let bulk = s.plan.step("bulk") {
+                XCTAssertLessThanOrEqual(bulk.end, shape.start, "bulk ends after shaping", file: file, line: line)
+            }
             for fold in s.plan.steps where fold.kind == .fold && s.completed[fold.id] == nil {
                 XCTAssertLessThanOrEqual(fold.end, shape.start, "\(fold.id) after shaping", file: file, line: line)
             }
@@ -70,6 +73,9 @@ final class ReplanIntegrityTests: XCTestCase {
         XCTAssertEqual(fridge.steps[1].kind, .coldBulk)
         XCTAssertEqual(fridge.steps[1].start, transfer.end)
         XCTAssertFalse(fridge.steps[1].attended)
+        let shape = try XCTUnwrap(fridge.steps.first { $0.kind == .shape })
+        XCTAssertNil(shape.likelyStart, "No room-temperature ready window for chilled dough")
+        XCTAssertFalse(shape.detail.contains("Check in"), "Check-ins are refused once chilled, so the step can't suggest one")
 
         var applied = s
         applied.apply(fridge)

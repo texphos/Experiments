@@ -63,9 +63,9 @@ struct LiveBakeView: View {
                 case .stale:
                     StaleBakeCard(readyAt: session.plan.readyAt, onLog: { showingFinish = true }, onAbandon: { confirmingEnd = true })
                 case .overdue(let step, let minutesLate):
-                    NextStepCard(step: step, now: now, minutesLate: minutesLate, inBulk: session.isInBulk) { model.complete(step) }
+                    NextStepCard(step: step, now: now, minutesLate: minutesLate, inBulk: session.isInBulk, chilled: session.isChilled) { model.complete(step) }
                 case .due(let step), .upcoming(let step):
-                    NextStepCard(step: step, now: now, minutesLate: nil, inBulk: session.isInBulk) { model.complete(step) }
+                    NextStepCard(step: step, now: now, minutesLate: nil, inBulk: session.isInBulk, chilled: session.isChilled) { model.complete(step) }
                 }
 
                 if session.completed["shape"] != nil && session.shapeReadiness == nil {
@@ -114,6 +114,7 @@ private struct NextStepCard: View {
     var now: Date
     var minutesLate: Int?
     var inBulk: Bool
+    var chilled: Bool
     var onDone: () -> Void
 
     private var isDue: Bool { step.start <= now.addingTimeInterval(5 * 60) }
@@ -130,13 +131,13 @@ private struct NextStepCard: View {
             Text(heading)
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(minutesLate != nil ? Palette.warning : isDue ? Palette.ember : Palette.ash)
-            if minutesLate != nil && step.kind == .shape && inBulk {
+            if minutesLate != nil && step.kind == .shape && inBulk && !chilled {
                 Text("The dough may have gone past its best while you were away. Check it before shaping; if it’s very slack, shape gently and fridge it.")
                     .font(.footnote).foregroundStyle(Palette.rye)
             }
             Text(step.title).font(Typo.display(.title2)).foregroundStyle(Palette.rye)
             Text(step.detail).foregroundStyle(Palette.ash)
-            if let lo = step.likelyStart, let hi = step.likelyEnd {
+            if !chilled, let lo = step.likelyStart, let hi = step.likelyEnd {
                 Label("Likely ready \(Fmt.time(lo))–\(Fmt.time(hi)). Go by the dough, not the clock.", systemImage: "eye")
                     .font(.footnote).foregroundStyle(Palette.ash)
             }

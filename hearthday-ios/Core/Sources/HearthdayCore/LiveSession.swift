@@ -298,7 +298,9 @@ public struct BakeSession: Codable, Hashable, Identifiable, Sendable {
             }
         }
         if var bulk = plan.step("bulk") {
-            bulk.end = max(bulk.start, option.bulkEndsAt)
+            let lastKeptEnd = kept.map(\.end).max() ?? bulk.start
+            bulk.start = min(bulk.start, lastKeptEnd, option.bulkEndsAt)
+            bulk.end = option.bulkEndsAt
             kept.append(bulk)
         }
         plan.steps = sortSteps(kept + option.steps)
@@ -430,7 +432,8 @@ public enum LiveReplanner {
             }()
             let progressAtFridge = min(1, (elapsed + fridgeAt.timeIntervalSince(now)) / totalBulk)
             if let free = freeShape, progressAtFridge >= minimumColdBulkProgress, free > fridgeAt.addingTimeInterval(transfer) {
-                if let rest = tail(shapeAt: free, ctx: tailContext) {
+                if var rest = tail(shapeAt: free, ctx: tailContext) {
+                    rest[0] = StepFactory.shapeCold(start: free, minutes: process.shapeMinutes)
                     let moveToFridge = StepFactory.fridgeDough(start: fridgeAt, minutes: fridgeTransferMinutes)
                     let coldBulk = StepFactory.coldBulk(start: moveToFridge.end, end: free)
                     let comfortable = progressAtFridge >= comfortableColdBulkProgress
