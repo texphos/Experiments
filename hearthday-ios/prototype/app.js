@@ -323,7 +323,7 @@
       body = `<p class="muted">Plans that learn your kitchen.</p>
         <div class="card"><p><strong>Personal timing.</strong> Your logged bakes adjust future plans and narrow the likely-ready window.</p><p><strong>Unlimited formulas.</strong> Free includes ${FREE_FORMULAS}.</p><p><strong>Full journal.</strong> Free shows your last ${FREE_HISTORY} bakes; older ones are kept, never deleted.</p></div>
         <p><strong>Always free:</strong> <span class="muted">planning around your busy times, live check-ins and re-planning, reminders, and seeing what calibration has learned.</span></p>
-        <button class="btn" disabled>Unlock for $14.99 (proposed price)</button>
+        <button class="btn" disabled>Unlock for $9.99 (proposed price)</button>
         <p class="small muted">One-time purchase, no subscription. In this prototype the button is disabled: purchases only happen through StoreKit in the native app, and nothing is sold here.</p>`;
     }
     return `<div class="sheet-backdrop" data-action="closeSheet"><div class="sheet" role="dialog" aria-modal="true" aria-label="${title}" data-stop>
