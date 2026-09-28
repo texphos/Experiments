@@ -119,3 +119,14 @@ hr { border: 0; border-top: 1px solid var(--hairline); margin: 4px 0; }
 .stars button { background: none; border: 0; font-size: 28px; color: var(--ember); min-width: 44px; min-height: 44px; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+.problems { margin: 0; padding-left: 20px; color: var(--warning); }
+.problems li { margin: 4px 0; }
+.reminders { margin: 0 0 8px; padding-left: 18px; font-size: 14px; line-height: 1.5; }
+.reminders .clock { font-weight: 600; font-variant-numeric: tabular-nums; }
+.reminders-updated { display: inline-block; margin: 0 0 6px; padding: 2px 10px; border-radius: 10px; font-size: 13px; font-weight: 600; background: #e8efe1; color: #3f5234; }
+@media (prefers-color-scheme: dark) {
+  .sim { background: #1c1612; color: #f3e9dc; }
+  .sim-buttons button { background: #2a211b; border-color: #3a3027; color: #f3e9dc; }
+  .sim-help { color: #b9aa9b; }
+  .reminders-updated { background: #2c3826; color: #c9dcb8; }
+}

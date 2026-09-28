@@ -13,8 +13,38 @@
     formulas: [{ id: "country", name: "Everyday country loaf", flourGrams: 500, hydrationPercent: 72, starterPercent: 20, saltPercent: 2 }],
     session: null, history: [], samples: [], simOffset: 0,
   });
+  // Mirrors AppState.repair(): anything unreadable is set aside rather than crashing the page or silently discarded.
+  let loadNotice = null;
+  function sanitize(raw) {
+    const d = defaults();
+    if (!raw || typeof raw !== "object") return d;
+    const num = (v, [lo, hi], fb) => (typeof v === "number" && Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : fb);
+    const s = Object.assign({}, d.settings, raw.settings && typeof raw.settings === "object" ? raw.settings : {});
+    s.kitchenTempC = num(s.kitchenTempC, H.LIMITS.tempC, d.settings.kitchenTempC);
+    s.blocks = Array.isArray(s.blocks) ? s.blocks.filter((b) => b && typeof b === "object" && H.blockIsValid(b)) : d.settings.blocks;
+    if (!H.FEED_RATIOS.includes(s.preferredFeedRatio)) s.preferredFeedRatio = d.settings.preferredFeedRatio;
+    const formulas = Array.isArray(raw.formulas) ? raw.formulas.filter((f) => f && typeof f === "object" && !H.formulaProblems(f).length) : [];
+    const rs = raw.session;
+    const session = rs && typeof rs === "object" && rs.plan && Array.isArray(rs.plan.steps) && rs.plan.steps.length
+      && rs.plan.steps.every((x) => x && typeof x.start === "number" && typeof x.end === "number") && rs.completed && typeof rs.completed === "object"
+      && Array.isArray(rs.checkIns) ? rs : null;
+    if (session && !session.id) session.id = `bake-${session.startedAt || 0}`;
+    return {
+      settings: s, formulas: formulas.length ? formulas : d.formulas, session,
+      history: Array.isArray(raw.history) ? raw.history.filter((r) => r && typeof r.finishedAt === "number") : [],
+      samples: Array.isArray(raw.samples) ? raw.samples.filter((x) => typeof x === "number" && Number.isFinite(x)) : [],
+      simOffset: num(raw.simOffset, [0, 60 * DAY], 0),
+    };
+  }
   let state;
-  try { state = Object.assign(defaults(), JSON.parse(localStorage.getItem(KEY) || "null") || {}); } catch (e) { state = defaults(); }
+  try {
+    const text = localStorage.getItem(KEY);
+    state = sanitize(text ? JSON.parse(text) : null);
+  } catch (e) {
+    try { localStorage.setItem(`${KEY}-unreadable-${Date.now()}`, localStorage.getItem(KEY)); } catch (e2) { /* ignore */ }
+    loadNotice = "Saved prototype data couldn’t be read, so it was set aside and Hearthday started fresh.";
+    state = defaults();
+  }
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* private mode: keep in memory */ } };
 
   const ui = { tab: "bake", page: 0, readyBy: null, tempC: null, feed: null, formulaId: null, result: null, planning: false, selected: 0, showResult: false, sheet: null, rise: 30, ciTemp: 21, ci: null, editBlock: null, rating: null, notes: "" };
@@ -185,10 +215,15 @@
     const back = `<button class="btn-link" data-action="closeResult" style="color:var(--crust)">‹ Back</button>`;
     if (ui.planning || !ui.result) return `${back}<p class="muted" style="text-align:center;padding:80px 0" role="status">Finding a plan that fits…</p>`;
     const r = ui.result;
+    if (r.invalid) {
+      return `${back}<div class="card stack" data-testid="plan-invalid">${stateMessage("✎", "Something needs fixing first", "Hearthday won’t guess a plan from values it can’t trust.")}
+        <ul class="problems">${r.invalid.map((c) => `<li>${esc(H.problemMessage(c))}</li>`).join("")}</ul>
+        <button class="btn-secondary" data-action="closeResult">Change the details</button></div>`;
+    }
     if (!r.feasible) {
       return `${back}<div class="card stack">${stateMessage("⚠︎", "That time doesn’t fit your week", esc(H.infeasibilityMessage(r)))}
         ${r.earliestFeasibleReadyAt ? `<button class="btn" data-action="earliest" data-t="${r.earliestFeasibleReadyAt}">Earliest that fits: ${dayTime(r.earliestFeasibleReadyAt)}</button>` : `<p class="muted small">No workable plan in the next three days. Try freeing up a busy time in Settings.</p>`}
-        <p class="small muted" style="text-align:center">Hearthday never schedules hands-on steps during your busy times. It will say no rather than hand you an alarm at 3 AM.</p></div>`;
+        <p class="small muted" style="text-align:center">Hearthday never schedules hands-on steps during your busy times. It says no rather than hand you an alarm at 3 AM.</p></div>`;
     }
     const plans = [r.primary].concat(r.alternatives);
     const p = plans[Math.min(ui.selected, plans.length - 1)];
@@ -215,13 +250,19 @@
       out += `<div class="card banner-warn"><h3 style="color:var(--warning)">⚠︎ Heads up</h3>${conflicts.map((c) => `<p>${esc(c.step.title)} at ${lower(dayTime(c.step.start))} now overlaps “${esc(c.busyLabel)}”.</p>`).join("")}
         ${inBulk ? `<button class="btn-secondary" data-action="checkin">Check the dough and re-plan</button>` : ""}</div>`;
     }
-    if (s.completed.bake != null) {
+    const status = H.session.status(s, n);
+    if (status.kind === "baked") {
       out += `<div class="card">${stateMessage("🍞", "Bread’s out", "Let it cool at least an hour before slicing. Then tell Hearthday how it went.")}<button class="btn" data-action="finish">Log this bake</button></div>`;
+    } else if (status.kind === "stale") {
+      out += `<div class="card stack" data-testid="live-stale">${stateMessage("🕰", "Did this bake finish?", `It was planned to come out ${lower(dayTime(s.plan.readyAt))}. Log how it went, or abandon it to plan a new one.`)}
+        <button class="btn" data-action="finish">Log this bake</button><button class="btn-secondary" style="color:var(--warning)" data-action="abandon">Abandon this bake</button></div>`;
     } else if (next) {
-      const due = next.start <= n + 5 * MIN;
-      out += `<div class="card stack" style="gap:8px"><span class="small" style="font-weight:600;color:${due ? "var(--ember)" : "var(--ash)"}">${due ? "Now" : `Next, in ${H.compact(Math.max(0, Math.round((next.start - n) / MIN)))}`}</span>
+      const due = status.kind !== "upcoming";
+      const late = status.kind === "overdue";
+      const label = late ? `Was due ${lower(dayTime(next.start))} · ${H.compact(status.minutesLate)} ago` : due ? "Now" : `Next, in ${H.compact(Math.max(0, Math.round((next.start - n) / MIN)))}`;
+      out += `<div class="card stack" style="gap:8px" ${late ? 'data-testid="live-overdue"' : ""}><span class="small" style="font-weight:600;color:${late ? "var(--warning)" : due ? "var(--ember)" : "var(--ash)"}">${label}</span>
         <h2>${esc(next.title)}</h2><p class="muted">${esc(next.detail)}</p>
-        ${next.likelyStart ? `<p class="small muted">👁 Likely ready ${time(next.likelyStart)}–${time(next.likelyEnd)}. Go by the dough, not the clock.</p>` : ""}
+        ${late && next.kind === "shape" && inBulk ? `<p class="small">The dough may have gone past its best while you were away. Check it before shaping; if it’s very slack, shape gently and fridge it.</p>` : ""}        ${next.likelyStart ? `<p class="small muted">👁 Likely ready ${time(next.likelyStart)}–${time(next.likelyEnd)}. Go by the dough, not the clock.</p>` : ""}
         <p class="clock" style="color:var(--crust)">${dayTime(next.start)} · ${H.compact(Math.round((next.end - next.start) / MIN))}</p>
         <button class="btn" data-action="done" data-id="${next.id}" aria-label="Mark ${esc(next.title)} done">${due ? "Done" : "Done early"}</button></div>`;
     }
@@ -290,8 +331,10 @@
         <div class="card">${stepper("citemp", "dough temperature", temp(ui.ciTemp))}</div>
         <button class="btn" data-action="replan">${ui.ci ? "Update options" : "Re-plan from here"}</button>`;
       if (ui.ci) {
-        body += `<h3>${esc(ui.ci.summary)}</h3>`;
-        if (!ui.ci.options.length) body += stateMessage("?", "No clean way to re-plan", "Every option would put a hands-on step in your busy times. Keep an eye on the dough; fridging it is almost always the safest pause.") + `<button class="btn-secondary" data-action="logCheckin">Log this check-in</button>`;
+        if (ui.ci.problems && ui.ci.problems.length) {
+          body += `<div class="card" data-testid="checkin-invalid"><h3>Check that reading</h3><ul class="problems">${ui.ci.problems.map((c) => `<li>${esc(H.problemMessage(c))}</li>`).join("")}</ul></div>`;
+        } else body += `<h3 data-testid="checkin-summary">${esc(ui.ci.summary)}</h3>`;
+        if (!ui.ci.options.length && !(ui.ci.problems && ui.ci.problems.length)) body += stateMessage("?", "No clean way to re-plan", "Every option would put a hands-on step in your busy times. Keep an eye on the dough; fridging it is almost always the safest pause.") + `<button class="btn-secondary" data-action="logCheckin">Log this check-in</button>`;
         body += ui.ci.options.map((o, i) => `<button class="option ${o.recommended ? "recommended" : ""}" data-action="choose" data-i="${i}">
           <div class="row between"><h3>${esc(o.title)}</h3>${o.recommended ? `<span class="tag">★ Suggested</span>` : ""}</div>
           <p class="small muted">${esc(o.detail)}</p><p class="small" style="color:var(--crust);font-weight:500">${o.shapeAt ? `Shape ${lower(dayTime(o.shapeAt))} · ` : ""}Bread ${lower(dayTime(o.readyAt))}</p>
@@ -308,15 +351,17 @@
       body = `<button class="btn-secondary" data-action="finish">Finish now and log it</button><button class="btn-secondary" style="color:var(--warning)" data-action="abandon">Abandon this bake</button><p class="small muted">Abandoning cancels reminders and adds nothing to your journal.</p>`;
     } else if (ui.sheet === "block") {
       const b = ui.editBlock;
-      title = b.isNew ? "New busy time" : "Edit busy time"; confirm = `<button data-action="saveBlock" ${b.weekdays.length && b.startMinute !== b.endMinute ? "" : "disabled"}>Save</button>`;
+      const blocking = H.blockProblems(b).filter((c) => c !== "busyLabelEmpty");
+      title = b.isNew ? "New busy time" : "Edit busy time"; confirm = `<button data-action="saveBlock" ${blocking.length ? "disabled" : ""}>Save</button>`;
       const hm = (m) => `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
       body = `<div class="card stack" style="gap:6px"><input type="text" data-action="blabel" value="${esc(b.label)}" placeholder="Label (e.g. School run)" aria-label="Label">
         <div class="segmented">${["sleep", "work", "other"].map((k) => `<button data-action="bkind" data-v="${k}" aria-pressed="${b.kind === k}">${k[0].toUpperCase() + k.slice(1)}</button>`).join("")}</div>
         <label class="field"><span>Starts</span><input type="time" data-action="bstart" value="${hm(b.startMinute)}"></label>
         <label class="field"><span>Ends</span><input type="time" data-action="bend" value="${hm(b.endMinute)}"></label>
-        ${b.endMinute <= b.startMinute ? `<p class="small muted">Ends the next morning.</p>` : ""}</div>
+        ${blocking.includes("busyZeroLength") ? `<p class="small" style="color:var(--warning)" role="alert">${H.problemMessage("busyZeroLength")}</p>`
+          : `<p class="small muted">${b.endMinute < b.startMinute ? "Ends the next day. " : ""}Times follow your iPhone’s clock, including daylight-saving changes.</p>`}</div>
         <div class="card"><h3>Starts on</h3><div class="row" style="gap:4px">${[1, 2, 3, 4, 5, 6, 7].map((d) => `<button class="chip" style="flex:1;padding:0" data-action="bday" data-d="${d}" aria-pressed="${b.weekdays.includes(d)}" aria-label="${WDL[d - 1]}">${WD[d - 1][0]}</button>`).join("")}</div>
-        ${b.weekdays.length ? "" : `<p class="small" style="color:var(--warning)">Pick at least one day.</p>`}</div>
+        ${b.weekdays.length ? "" : `<p class="small" style="color:var(--warning)" role="alert">${H.problemMessage("busyNoDays")}</p>`}</div>
         ${b.isNew ? "" : `<button class="btn-secondary" style="color:var(--warning)" data-action="deleteBlock">Delete busy time</button>`}`;
     } else if (ui.sheet === "pro") {
       title = "Hearthday Pro";
@@ -348,10 +393,26 @@
     tabs.innerHTML = [["bake", "🔥", "Bake"], ["journal", "📖", "Journal"], ["settings", "⚙︎", "Settings"]]
       .map(([id, ico, label]) => `<button role="tab" data-tab="${id}" aria-selected="${ui.tab === id}"><span class="ico" aria-hidden="true">${ico}</span>${label}</button>`).join("");
     document.getElementById("simNow").textContent = `${dayTime(now())}${state.simOffset ? " (simulated)" : ""}`;
+    renderReminders();
+    if (loadNotice) { screen.insertAdjacentHTML("afterbegin", `<div class="card banner-warn" role="alert">${esc(loadNotice)}</div>`); }
     if (focusedAction === "rise") { const el = screen.querySelector('[data-action="rise"]'); if (el) el.focus(); }
   }
 
-  function update(fn) { fn(); save(); render(); }
+  let remindersChangedAt = null;
+  function renderReminders() {
+    const el = document.getElementById("reminders");
+    if (!el) return;
+    const s = state.session;
+    const list = s ? H.session.reminders(s, now(), state.settings.blocks, cal) : [];
+    if (!s) { el.innerHTML = `<p class="sim-help">No bake in progress, so nothing is scheduled.</p>`; return; }
+    if (!list.length) { el.innerHTML = `<p class="sim-help">No reminders left for this bake.</p>`; return; }
+    const changed = remindersChangedAt != null && now() - remindersChangedAt < 2 * MIN;
+    el.innerHTML = `${changed ? `<p class="reminders-updated" data-testid="reminders-updated">Replaced for the re-planned bake</p>` : ""}
+      <ol class="reminders" data-testid="reminders">${list.slice(0, 8).map((r) => `<li><span class="clock">${esc(dayTime(r.fireAt))}</span> ${esc(r.title)}</li>`).join("")}</ol>
+      ${list.length > 8 ? `<p class="sim-help">and ${list.length - 8} more</p>` : ""}`;
+  }
+
+  function update(fn) { fn(); loadNotice = null; save(); render(); }
 
   function finishBake() {
     const s = state.session, n = now();
@@ -411,6 +472,7 @@
         ui.ciAt = now(); render(); break;
       case "choose": {
         const o = ui.ci.options[+el.dataset.i];
+        remindersChangedAt = now();
         update(() => { state.session.checkIns.push({ at: ui.ciAt, risePercent: ui.rise, tempC: ui.ciTemp }); H.session.apply(state.session, o); ui.sheet = null; ui.ci = null; });
         break;
       }
@@ -432,6 +494,7 @@
       case "bday": { const d = +el.dataset.d, w = ui.editBlock.weekdays; ui.editBlock.weekdays = w.includes(d) ? w.filter((x) => x !== d) : w.concat([d]); render(); break; }
       case "saveBlock": update(() => {
         const b = ui.editBlock;
+        if (H.blockProblems(b).some((c) => c !== "busyLabelEmpty")) return;
         const out = { label: b.label.trim() || { sleep: "Sleep", work: "Work", other: "Busy" }[b.kind], kind: b.kind, weekdays: b.weekdays.slice().sort(), startMinute: b.startMinute, endMinute: b.endMinute };
         if (b.isNew) s.blocks.push(out); else s.blocks[b.index] = out;
         ui.sheet = null;
@@ -456,7 +519,7 @@
     const el = e.target.closest("[data-action]");
     if (!el) return;
     const a = el.dataset.action;
-    if (a === "custom" && el.value) { const t = new Date(el.value).getTime(); if (t > now()) { ui.readyBy = t; render(); } }
+    if (a === "custom" && el.value) { const t = new Date(el.value).getTime(); if (Number.isFinite(t)) { ui.readyBy = t; render(); } }
     else if (a === "formula") { ui.formulaId = el.value; render(); }
     else if (a === "ratio") update(() => { state.settings.preferredFeedRatio = el.value; });
     else if (a === "bstart" || a === "bend") render();

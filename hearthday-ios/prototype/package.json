@@ -1,0 +1,12 @@
+{
+  "name": "hearthday-prototype",
+  "private": true,
+  "description": "Browser companion prototype for Hearthday. Not the iOS app.",
+  "scripts": {
+    "build": "python3 build_standalone.py",
+    "test": "node parity.test.js && node e2e.test.js"
+  },
+  "devDependencies": {
+    "puppeteer-core": "23.11.1"
+  }
+}
