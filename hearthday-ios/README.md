@@ -11,7 +11,7 @@ A native iPhone app (Swift/SwiftUI, iOS 17+) for home sourdough bakers with a we
 | The loop | Onboarding → plan (feasible, infeasible with the earliest time that fits, or invalid input) → start → live bake → dough check-in → re-plan options → finish → rate → journal. |
 | Persistence | Atomic JSON writes after every change. The file is versioned. Older files open with defaults, damaged values are repaired, unreadable or newer-version files are set aside (never overwritten) with a banner, and dates round-trip exactly. |
 | Recovery | On launch and every foreground, the app refreshes the clock, calendar and reminders. Missed steps show as overdue, and bakes long past their finish ask whether they finished. |
-| Notifications | Every pending reminder is replaced after each change (start, step done, re-plan, finish, abandon). Triggers are time-interval based, so they fire at the right moment after a time-zone change. The "check your dough" nudge is suppressed during busy times and while the dough is in the fridge. If notifications are denied, a banner links to Settings. |
+| Notifications | Every pending reminder is replaced after each change (start, step done, re-plan, finish, abandon). Triggers are time-interval based, so they fire at the right moment after a time-zone change. The "check your dough" nudge is suppressed during busy times and while the dough is in the fridge. If notifications are denied, a banner links to Settings. Permission is requested and awaited before the first reminders are scheduled. Syncs are serialized so a stale plan can't re-add reminders. Rejected reminders are reported on screen. |
 | Time zones and DST | Busy blocks are wall-clock rules whose end is computed as a local calendar time, never start plus a fixed duration. Skipped and repeated times resolve deterministically. See [architecture](docs/architecture.md#time-zones-and-daylight-saving). |
 | Input handling | Temperatures outside 14–32 °C, ready times in the past or more than 7 days ahead, broken formulas, implausible check-in readings and invalid busy times are all refused with a plain reason. |
 | Honest estimates | Fermentation times read as likely windows and straight-line estimates ("Go by the dough"). A test fails if generated copy says "guarantee", "will be ready", "exactly" and so on, or if an estimate reads as "about 0 h". |
@@ -74,10 +74,18 @@ The latest run and its artifacts are listed on the pull request's Checks tab. Se
 - The DST tests fail under the old fixed-duration logic: 15 failures in Swift, and the JS DST checks fail too.
 - Mutating a fermentation constant fails the parity test.
 - Each re-planning integrity fix fails its tests when reverted: the attended fridge transfer, excluding chilled bakes from calibration, the cold-proof bounds after late or early steps, fold pruning, bulk ending before shaping, and refusing check-ins once chilled. This holds in Swift (`ReplanIntegrityTests`) and in the JS parity scripts.
+- Each native-shell fix fails its `AppModelTests` when reverted: awaiting permission before scheduling, the serialized reminder queue, holding an unreadable store read-only, and refreshing the time zone on resume. This was checked by running `AppModel` and its tests on Linux against the real core, with a fake scheduler.
 
-**Not verified** (it needs hardware or an account, not more code):
-- Real notification delivery on a locked device.
-- An App Store sandbox purchase with a real Apple Account.
+**Tested with a fake scheduler, not with iOS.** The app-model tests replace `UNUserNotificationCenter` with a recording fake that mirrors its contract. They cover permission timing, serialized and coalesced syncs, denied permission, rejected requests and time-zone refresh. The real `NotificationScheduler` is compiled in CI but never exercised against the system.
+
+**Device-only checks** (they need hardware or an account, not more code):
+- The first-launch permission prompt: allow, then confirm reminders appear in Settings > Notifications > Scheduled Summary or fire on time. Deny, then confirm the "Reminders are off" banner appears.
+- Turning notifications off in Settings mid-bake, then returning to the app: the banner appears and nothing fires.
+- Real delivery on a locked device, including after the app has been terminated.
+- Rapid re-plans, then abandon: no stale reminder fires later.
+- Changing the time zone (Settings > General > Date & Time) mid-bake, with the app both open and suspended: the reminders' instants are unchanged, and a busy-block nudge follows the new local clock.
+- A storage-full or read-only data container, to exercise the "won't save changes" path for real. It is unit-tested with an injected failure.
+- An App Store sandbox purchase with a real Apple Account: error and interrupted purchases, Ask to Buy, restore on a second device, a refund, and erasing app data with Pro owned (Pro should come back after the StoreKit re-check).
 - VoiceOver reading order, the largest accessibility text sizes, Reduce Motion and measured contrast.
 - Performance on older devices.
 
