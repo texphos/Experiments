@@ -63,7 +63,7 @@ CI is in [`.github/workflows/hearthday.yml`](../.github/workflows/hearthday.yml)
 
 | Check | Result | Where |
 |---|---|---|
-| Xcode build and `xcodebuild test`, Xcode 16.4, iPhone 17 Pro simulator (iOS 26.2) | **116/116 pass, none skipped**: 95 core, 10 app-model, 8 StoreKit (`SKTestSession`), and 3 UI tests (full loop in light, full loop in dark, terminate and relaunch mid-bake) | macOS job; screenshots and `.xcresult` uploaded as artifacts |
+| Xcode build and `xcodebuild test`, Xcode 16.4, iPhone 17 Pro simulator (iOS 26.2) | **128/128 pass, none skipped**: 95 core, 19 app-model, 11 StoreKit (`SKTestSession`), and 3 UI tests (full loop in light, full loop in dark, terminate and relaunch mid-bake) | macOS job; screenshots and `.xcresult` uploaded as artifacts |
 | Unsigned Release build, generic iOS device | **Pass** | macOS job |
 | Committed `Hearthday.xcodeproj` equals XcodeGen output | **Pass** | macOS job |
 | `swift test` on Linux (Swift 6.1) and fixtures up to date | **Pass**, 95 tests | Linux job, and locally |
