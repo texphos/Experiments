@@ -202,6 +202,13 @@ final class AppModelTests: XCTestCase {
         XCTAssertNil(model.state.activeSession)
 
         _ = try await startBake(model)
+        let beforeMix = try XCTUnwrap(model.checkIn(risePercent: 20, tempC: 21))
+        XCTAssertEqual(beforeMix.problems.map(\.code), ["notInBulk"], "Check-ins are refused before mixing")
+        XCTAssertTrue(beforeMix.options.isEmpty)
+
+        while let step = model.state.activeSession?.nextAttendedStep, model.state.activeSession?.isInBulk == false {
+            model.complete(step)
+        }
         let bad = try XCTUnwrap(model.checkIn(risePercent: -10, tempC: 21))
         XCTAssertTrue(bad.options.isEmpty)
         XCTAssertEqual(bad.problems.map(\.code), ["riseOutOfRange"])
