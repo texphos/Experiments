@@ -166,7 +166,7 @@ private struct ShapeReadinessPrompt: View {
                 answer("Just right", "checkmark", .justRight)
                 answer("Over", "hare", .over)
             }
-            Text("Only “just right” bakes teach Hearthday your kitchen’s speed; the others are noted in your journal.")
+            Text("Only “just right” bakes without a fridge pause teach Hearthday your kitchen’s speed; the others are noted in your journal.")
                 .font(.footnote).foregroundStyle(Palette.ash)
         }
         .card()

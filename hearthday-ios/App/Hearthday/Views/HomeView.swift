@@ -11,7 +11,7 @@ struct PlanInput: Hashable {
 /// The core question, front and centre: when do you want bread?
 struct HomeView: View {
     @Environment(AppModel.self) private var model
-    @State private var readyBy: Date = HomeView.defaultReadyTime()
+    @State private var readyBy: Date?
     @State private var formulaID: UUID?
     @State private var tempC: Double?
     @State private var starterNeedsFeed: Bool?
@@ -19,6 +19,7 @@ struct HomeView: View {
     @State private var showingCustomTime = false
 
     private var settings: UserSettings { model.state.settings }
+    private var readyTime: Date { readyBy ?? HomeView.defaultReadyTime(availability: settings.availability) }
     private var formula: Formula {
         model.state.formulas.first { $0.id == formulaID } ?? model.state.formulas.first ?? .countryLoaf
     }
@@ -31,7 +32,7 @@ struct HomeView: View {
                 details
                 Button("Plan it") {
                     input = PlanInput(
-                        readyBy: readyBy,
+                        readyBy: readyTime,
                         formula: formula,
                         tempC: tempC ?? settings.kitchenTempC,
                         starterNeedsFeed: starterNeedsFeed ?? settings.starterUsuallyNeedsFeed
@@ -60,7 +61,7 @@ struct HomeView: View {
             PlanResultView(input: input)
         }
         .sheet(isPresented: $showingCustomTime) {
-            CustomTimeSheet(date: $readyBy)
+            CustomTimeSheet(date: Binding(get: { readyTime }, set: { readyBy = $0 }))
                 .presentationDetents([.medium])
         }
     }
@@ -75,12 +76,12 @@ struct HomeView: View {
                 .foregroundStyle(Palette.ash)
             Button { showingCustomTime = true } label: {
                 HStack(alignment: .firstTextBaseline) {
-                    Text(Fmt.dayTime(readyBy)).font(Typo.clock(.largeTitle)).foregroundStyle(Palette.crust)
+                    Text(Fmt.dayTime(readyTime)).font(Typo.clock(.largeTitle)).foregroundStyle(Palette.crust)
                     Image(systemName: "pencil").foregroundStyle(Palette.ash).accessibilityHidden(true)
                 }
                 .frame(minHeight: 44)
             }
-            .accessibilityLabel("Ready by \(Fmt.dayTime(readyBy))")
+            .accessibilityLabel("Ready by \(Fmt.dayTime(readyTime))")
             .accessibilityHint("Choose a different time")
         }
     }
@@ -88,8 +89,8 @@ struct HomeView: View {
     private var quickTimes: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                ForEach(HomeView.suggestions(), id: \.self) { date in
-                    let selected = abs(date.timeIntervalSince(readyBy)) < 60
+                ForEach(HomeView.suggestions(availability: settings.availability), id: \.self) { date in
+                    let selected = abs(date.timeIntervalSince(readyTime)) < 60
                     Button { readyBy = date } label: {
                         Text(Fmt.dayTime(date))
                             .font(.subheadline.weight(.medium))
@@ -147,25 +148,26 @@ struct HomeView: View {
         .card()
     }
 
-    static func defaultReadyTime(now: Date = .now) -> Date {
-        suggestions(now: now).first ?? now.addingTimeInterval(86_400)
+    static func defaultReadyTime(now: Date = .now, availability: Availability = .typicalWeekdayWorker) -> Date {
+        suggestions(now: now, availability: availability).first ?? now.addingTimeInterval(86_400)
     }
 
-    /// Tomorrow 10 AM, tomorrow 6 PM, next Saturday 10 AM, next Sunday noon, skipping anything within 14 h.
-    static func suggestions(now: Date = .now, calendar: Calendar = .current) -> [Date] {
+    /// Everyday bread times over the next few days, keeping only those at least 14 h away whose oven
+    /// slot is free, so a one-tap suggestion never starts with "that doesn't fit".
+    static func suggestions(now: Date = .now, availability: Availability, calendar: Calendar = .current) -> [Date] {
         func at(_ dayOffset: Int, _ hour: Int) -> Date? {
             guard let day = calendar.date(byAdding: .day, value: dayOffset, to: calendar.startOfDay(for: now)) else { return nil }
             return calendar.date(bySettingHour: hour, minute: 0, second: 0, of: day)
         }
-        func next(weekday: Int, hour: Int) -> Date? {
-            (1...8).lazy.compactMap { at($0, hour) }.first { calendar.component(.weekday, from: $0) == weekday && $0.timeIntervalSince(now) > 14 * 3600 }
-        }
-        let candidates = [at(1, 10), at(1, 18), next(weekday: 7, hour: 10), next(weekday: 1, hour: 12)].compactMap { $0 }
+        let oven = TimeInterval((ProcessSettings().preheatMinutes + ProcessSettings().bakeMinutes) * 60)
+        let timeline = availability.timeline(from: now, to: now.addingTimeInterval(5 * 86_400), calendar: calendar)
+        let candidates = (1...4).flatMap { offset in [at(offset, 10), at(offset, 19), at(offset, 12)] }.compactMap { $0 }
         var seen = Set<Date>()
-        return candidates
+        let fitting = candidates
             .filter { $0.timeIntervalSince(now) > 14 * 3600 }
-            .filter { seen.insert($0).inserted }
-            .sorted()
+            .filter { timeline.isFree(start: $0.addingTimeInterval(-oven), duration: oven) }
+            .filter { seen.insert(calendar.startOfDay(for: $0)).inserted }
+        return Array(fitting.sorted().prefix(4))
     }
 }
 
