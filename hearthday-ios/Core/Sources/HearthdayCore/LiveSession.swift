@@ -367,7 +367,7 @@ public enum LiveReplanner {
         if remaining == 0 {
             summary = "At \(Int(risePercent.rounded()))% rise your reading meets the target of about \(Int(target.rounded()))%. Go by the dough: a domed top and bubbles at the edges."
         } else {
-            summary = "About \(pct)% of the way to a \(Int(target.rounded()))% rise. Likely ready in about \(DurationText.halfHours(remaining / 3600)) h. That’s a straight-line estimate from one reading, so check again if you can."
+            summary = "About \(pct)% of the way to a \(Int(target.rounded()))% rise. Likely ready in about \(DurationText.approximate(hours: remaining / 3600)). That’s a straight-line estimate from one reading, so check again if you can."
         }
 
         return CheckInResult(

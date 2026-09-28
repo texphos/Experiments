@@ -387,6 +387,7 @@ hr { border: 0; border-top: 1px solid var(--hairline); margin: 4px 0; }
     return half ? `${whole}½` : `${whole}`;
   }
   function hoursRange(lo, hi) { const a = halfHours(lo), b = halfHours(hi); return a === b ? `about ${a} h` : `${a}–${b} h`; }
+  const approximate = (h) => (h < 0.75 ? `${Math.max(5, Math.round(h * 12) * 5)} min` : `${halfHours(h)} h`);
   function compact(minutes) { const h = Math.floor(minutes / 60), m = minutes % 60; return h === 0 ? `${m} min` : m === 0 ? `${h} h` : `${h} h ${m} min`; }
 
   const PROCESS = {
@@ -880,7 +881,7 @@ hr { border: 0; border-top: 1px solid var(--hairline); margin: 4px 0; }
     }
     const summary = remaining === 0
       ? `At ${Math.round(risePercent)}% rise your reading meets the target of about ${Math.round(target)}%. Go by the dough: a domed top and bubbles at the edges.`
-      : `About ${Math.round(progress * 100)}% of the way to a ${Math.round(target)}% rise. Likely ready in about ${halfHours(remaining / HOUR)} h. That’s a straight-line estimate from one reading, so check again if you can.`;
+      : `About ${Math.round(progress * 100)}% of the way to a ${Math.round(target)}% rise. Likely ready in about ${approximate(remaining / HOUR)}. That’s a straight-line estimate from one reading, so check again if you can.`;
     for (const o of options) { o.readyAt = o.steps.length ? o.steps[o.steps.length - 1].end : o.bulkEndsAt; const sh = o.steps.find((x) => x.kind === "shape"); o.shapeAt = sh ? sh.start : null; }
     return { progress, targetRisePercent: target, estimatedReadyAt: readyAt, summary, options, problems: [] };
   }

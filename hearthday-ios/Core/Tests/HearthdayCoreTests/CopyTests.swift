@@ -71,4 +71,20 @@ final class CopyTests: XCTestCase {
                                           availability: .typicalWeekdayWorker, calendar: TestClock.calendar, model: FermentationModel())
         XCTAssertTrue(ready.summary.contains("Go by the dough"))
     }
+
+    func testNearlyReadyDoughNeverReadsAsZeroHoursAway() {
+        let plan = makeFridgePlan(mixAt: TestClock.date(10, 10), readyAt: TestClock.date(11, 11))
+        var s = BakeSession(plan: plan, startedAt: TestClock.date(10, 10))
+        s.complete("mix", at: plan.step("mix")!.end)
+        for (minutes, rise) in [(30.0, 60.0), (240, 70), (240, 74), (120, 45)] {
+            let r = LiveReplanner.checkIn(session: s, now: plan.step("mix")!.end.addingTimeInterval(minutes * 60), risePercent: rise, tempC: 21,
+                                          availability: .typicalWeekdayWorker, calendar: TestClock.calendar, model: FermentationModel())
+            XCTAssertFalse(r.summary.contains("about 0 "), r.summary)
+            XCTAssertFalse(r.summary.contains("about 0."), r.summary)
+        }
+        XCTAssertEqual(DurationText.approximate(hours: 0.01), "5 min")
+        XCTAssertEqual(DurationText.approximate(hours: 0.3), "20 min")
+        XCTAssertEqual(DurationText.approximate(hours: 0.8), "1 h")
+        XCTAssertEqual(DurationText.approximate(hours: 2.4), "2½ h")
+    }
 }

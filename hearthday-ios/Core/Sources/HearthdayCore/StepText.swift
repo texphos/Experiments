@@ -17,6 +17,14 @@ public enum DurationText {
     }
 
     /// "1 h 25 min", "40 min".
+    /// A rough duration for estimates: nearest 5 minutes under an hour (never "0"), nearest half hour above.
+    public static func approximate(hours: Double) -> String {
+        if hours < 0.75 {
+            return "\(max(5, Int((hours * 12).rounded()) * 5)) min"
+        }
+        return "\(halfHours(hours)) h"
+    }
+
     public static func compact(minutes: Int) -> String {
         let h = minutes / 60
         let m = minutes % 60
