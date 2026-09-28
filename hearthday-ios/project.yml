@@ -1,0 +1,83 @@
+# XcodeGen spec (https://github.com/yonaskolb/XcodeGen). The generated Hearthday.xcodeproj is committed;
+# regenerate with `xcodegen generate` after changing this file. CI checks that the two stay in sync.
+name: Hearthday
+options:
+  bundleIdPrefix: app.hearthday
+  deploymentTarget:
+    iOS: "17.0"
+  xcodeVersion: "16.0"
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    DEVELOPMENT_TEAM: ""
+packages:
+  HearthdayCore:
+    path: Core
+targets:
+  Hearthday:
+    type: application
+    platform: iOS
+    sources:
+      - path: App/Hearthday
+        excludes:
+          - "Resources/Hearthday.storekit"
+      # Local StoreKit test configuration: referenced by the scheme for debug runs, never copied into the app.
+      - path: App/Hearthday/Resources/Hearthday.storekit
+        buildPhase: none
+    dependencies:
+      - package: HearthdayCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.hearthday.ios
+        MARKETING_VERSION: 0.1.0
+        CURRENT_PROJECT_VERSION: 1
+        TARGETED_DEVICE_FAMILY: "1"
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Hearthday
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: UIInterfaceOrientationPortrait
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.food-and-drink
+  HearthdayTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: App/HearthdayTests
+      # SKTestSession loads the configuration from the test bundle.
+      - path: App/Hearthday/Resources/Hearthday.storekit
+        buildPhase: resources
+    dependencies:
+      - target: Hearthday
+      - package: HearthdayCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.hearthday.ios.tests
+        GENERATE_INFOPLIST_FILE: YES
+  HearthdayUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: App/HearthdayUITests
+    dependencies:
+      - target: Hearthday
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.hearthday.ios.uitests
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  Hearthday:
+    build:
+      targets:
+        Hearthday: all
+    run:
+      config: Debug
+      storeKitConfiguration: App/Hearthday/Resources/Hearthday.storekit
+    test:
+      config: Debug
+      gatherCoverageData: true
+      targets:
+        - HearthdayTests
+        - HearthdayUITests
+        - package: HearthdayCore/HearthdayCoreTests
+    archive:
+      config: Release

@@ -1,0 +1,8 @@
+.build/
+xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+DerivedData/
+.DS_Store
+node_modules/
+*.xcresult
+e2e-screenshots/

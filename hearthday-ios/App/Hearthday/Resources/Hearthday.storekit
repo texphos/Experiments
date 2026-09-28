@@ -1,0 +1,33 @@
+{
+  "identifier" : "8C1F6B2E-5A34-4F0B-9E7D-4B7C2A9D1E01",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "9.99",
+      "familyShareable" : true,
+      "internalID" : "6740000001",
+      "localizations" : [
+        {
+          "description" : "Personal timing from your bakes, unlimited formulas and your full journal. One-time purchase.",
+          "displayName" : "Hearthday Pro",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "app.hearthday.pro",
+      "referenceName" : "Hearthday Pro (lifetime)",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_failTransactionsEnabled" : false
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

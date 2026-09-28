@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hearthday — browser companion prototype (not the iOS app)</title>
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="app.css" />
+</head>
+<body>
+  <header class="proto-banner" role="note">
+    <strong>Browser companion prototype.</strong>
+    This is not the native iOS app. It runs a JavaScript port of the Swift planning core (checked against Swift-generated
+    fixtures) so the experience can be reviewed on any computer. Visuals approximate the SwiftUI design; purchases,
+    notifications and haptics exist only in the native app.
+  </header>
+
+  <main class="stage">
+    <section class="phone" aria-label="Hearthday prototype screen">
+      <div class="notch" aria-hidden="true"></div>
+      <div id="screen" class="screen"></div>
+      <nav id="tabs" class="tabs" aria-label="Tabs"></nav>
+    </section>
+
+    <aside class="sim" aria-label="Prototype controls">
+      <h2>Simulated clock</h2>
+      <p class="sim-now" id="simNow"></p>
+      <div class="sim-buttons">
+        <button data-sim="15">+15 min</button>
+        <button data-sim="60">+1 h</button>
+        <button data-sim="240">+4 h</button>
+        <button data-sim="next">Jump to next step</button>
+        <button data-sim="real">Back to real time</button>
+      </div>
+      <p class="sim-help">Time travel lets you walk through a whole bake in a few minutes. Try a plan for tomorrow, start it,
+        jump ahead to mixing, then use <em>Check the dough</em> with a fast rise to see the re-plan options.</p>
+      <h2>Reminders the iPhone would get</h2>
+      <div id="reminders" aria-live="polite"></div>
+      <p class="sim-help">The native app replaces every pending notification whenever the plan changes. This list is computed by the
+        same rules; nothing is actually sent from the browser.</p>
+      <h2>Reset</h2>
+      <div class="sim-buttons">
+        <button data-sim="reset">Erase prototype data</button>
+      </div>
+      <p class="sim-help">Everything is stored in this browser's localStorage only.</p>
+    </aside>
+  </main>
+
+  <script src="core.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

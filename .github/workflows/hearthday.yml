@@ -1,0 +1,146 @@
+name: Hearthday
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "hearthday-ios/**"
+      - ".github/workflows/hearthday.yml"
+  pull_request:
+    paths:
+      - "hearthday-ios/**"
+      - ".github/workflows/hearthday.yml"
+  workflow_dispatch:
+
+# Read-only token, no secrets, no deployment. Standard GitHub-hosted runners only (free for public repos).
+permissions:
+  contents: read
+
+concurrency:
+  group: hearthday-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: hearthday-ios
+
+jobs:
+  core-linux:
+    name: Core tests (Linux, swift test)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container: swift:6.1
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install time-zone data
+        run: apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq tzdata
+      - name: swift test
+        working-directory: hearthday-ios/Core
+        shell: bash
+        run: |
+          set -o pipefail
+          swift test 2>&1 | tee ../core-tests.log
+      - name: Fixtures are up to date
+        working-directory: hearthday-ios/Core
+        run: |
+          swift run -q hearthday-fixtures > /tmp/fixtures.json
+          diff -u ../prototype/fixtures.json /tmp/fixtures.json
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: core-linux-log
+          path: hearthday-ios/core-tests.log
+          retention-days: 5
+
+  prototype:
+    name: Prototype (parity, standalone build, headless browser)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Parity with Swift fixtures
+        run: node prototype/parity.test.js
+      - name: Standalone file is up to date
+        run: |
+          python3 prototype/build_standalone.py
+          git diff --exit-code -- prototype/hearthday-prototype.html
+      - name: End-to-end in headless Chrome
+        working-directory: hearthday-ios/prototype
+        run: |
+          npm ci
+          CHROME_PATH="$(which google-chrome || which chromium)" node e2e.test.js
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: prototype-screenshots
+          path: hearthday-ios/prototype/e2e-screenshots/
+          retention-days: 5
+
+  ios:
+    name: iOS app (Xcode build, unit, StoreKit and UI tests)
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          xcrun simctl list runtimes
+      - name: Regenerated project matches committed project
+        run: |
+          curl -sSL -o /tmp/xcodegen.zip https://github.com/yonaskolb/XcodeGen/releases/download/2.44.1/xcodegen.zip
+          unzip -q /tmp/xcodegen.zip -d /tmp/xcodegen
+          /tmp/xcodegen/xcodegen/bin/xcodegen generate --spec project.yml
+          git diff --exit-code -- Hearthday.xcodeproj
+      - name: Pick an iPhone simulator
+        id: sim
+        run: |
+          UDID=$(xcrun simctl list devices available -j | python3 -c '
+          import json, sys
+          d = json.load(sys.stdin)["devices"]
+          ios = sorted((k for k in d if "iOS" in k), key=lambda k: [int(x) for x in k.split("iOS-")[-1].split("-")])
+          for rt in reversed(ios):
+              for dev in d[rt]:
+                  if dev["name"].startswith("iPhone") and dev.get("isAvailable"):
+                      print(dev["udid"]); sys.exit()
+          ')
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+          xcrun simctl list devices | grep "$UDID"
+      - name: Test (unit, StoreKit, UI in light and dark)
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -project Hearthday.xcodeproj -scheme Hearthday \
+            -destination "id=${{ steps.sim.outputs.udid }}" \
+            -resultBundlePath "$RUNNER_TEMP/Hearthday.xcresult" \
+            CODE_SIGNING_ALLOWED=NO 2>&1 | tee xcodebuild-test.log | grep -E "Test (Case|Suite)|error:|\*\* TEST" || true
+          grep -q "\*\* TEST SUCCEEDED \*\*" xcodebuild-test.log
+      - name: Release build for device (unsigned)
+        run: |
+          set -o pipefail
+          xcodebuild build -project Hearthday.xcodeproj -scheme Hearthday -configuration Release \
+            -destination "generic/platform=iOS" CODE_SIGNING_ALLOWED=NO 2>&1 | tail -n 5
+      - name: Export test screenshots and summary
+        if: always()
+        run: |
+          mkdir -p "$RUNNER_TEMP/export"
+          xcrun xcresulttool export attachments --path "$RUNNER_TEMP/Hearthday.xcresult" --output-path "$RUNNER_TEMP/export" || true
+          xcrun xcresulttool get test-results summary --path "$RUNNER_TEMP/Hearthday.xcresult" > "$RUNNER_TEMP/export/summary.json" || true
+          xcrun xcresulttool get test-results tests --path "$RUNNER_TEMP/Hearthday.xcresult" > "$RUNNER_TEMP/export/tests.json" || true
+          cp xcodebuild-test.log "$RUNNER_TEMP/export/" || true
+          ls "$RUNNER_TEMP/export" | head -50
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ios-test-results
+          path: ${{ runner.temp }}/export/
+          retention-days: 5
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: ios-xcresult
+          path: ${{ runner.temp }}/Hearthday.xcresult
+          retention-days: 5

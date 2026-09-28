@@ -1,0 +1,673 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1A88DBEB65431265BFAE3017 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 603D67764D75B665C8970A54 /* AppModel.swift */; };
+		39D79D918E1AE96F85F3FEC4 /* PlanResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55F194AF487F3A8346FDCE7B /* PlanResultView.swift */; };
+		5837E16162D2C6D0EF43901D /* AppModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF12C3A094E2C101AF40B56F /* AppModelTests.swift */; };
+		5E94ADA89D409F555E6FC339 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BEC447470F6910234724632 /* OnboardingView.swift */; };
+		62357829C87230B8C800C7E5 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E52DFB408D9C41AD55FEB81 /* RootView.swift */; };
+		6A34E2571BFD27D42C74FF5A /* ProStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEB6556D3806695F8F2541C2 /* ProStoreTests.swift */; };
+		6FB16057C84B4BAD7E671516 /* ProView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C69EA4ACF20AD65F879A9933 /* ProView.swift */; };
+		73167AFB5D14BD71687BC62E /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A014EC75E744544B131E6277 /* SettingsView.swift */; };
+		964CE3AE45A7C7293C089627 /* ProStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C7EB93D52F934608E70DEC3 /* ProStore.swift */; };
+		9DF3F4F9C6931141822D0AC8 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 657D86A8C81B7D7C381CD816 /* HistoryView.swift */; };
+		A28D5E93DE18CA832C896F2F /* LiveBakeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 941B1DAB39BAF6A975ABBD79 /* LiveBakeView.swift */; };
+		B2AE8A68D24B7D1204C4232E /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE269652660D89C03C7AC1E6 /* Theme.swift */; };
+		B349F3FDE38A33F2F2E97BE4 /* Hearthday.storekit in Resources */ = {isa = PBXBuildFile; fileRef = DFFA5D466666B91747AC21F5 /* Hearthday.storekit */; };
+		B3F4B7D0BA58D0DB109B086F /* HearthdayUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DFD5A95744DAC659F918BBD /* HearthdayUITests.swift */; };
+		B7D3FD5978875D445E1526D2 /* HearthdayCore in Frameworks */ = {isa = PBXBuildFile; productRef = 6E97982297942573E5740232 /* HearthdayCore */; };
+		C29FB0520C7E62C6094CE1D2 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF13B0A901923124B0F3AB4 /* HomeView.swift */; };
+		E00A71D9BBA8F5C6BC6AD06C /* HearthdayCore in Frameworks */ = {isa = PBXBuildFile; productRef = A79A6F7BCA4112D615B1A255 /* HearthdayCore */; };
+		E63EFD686358DF40A03C85DD /* AvailabilityViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64A80D5F62154D938F85B9C5 /* AvailabilityViews.swift */; };
+		E8F116DFAB801D2438484903 /* HearthdayApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0003586DAFA10E1C1493C70 /* HearthdayApp.swift */; };
+		F97E627033180329765C0F58 /* CheckInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E0E459E92DD832F8617E0A5 /* CheckInView.swift */; };
+		F9FCDC9C7030AC91A1684A45 /* Formatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA7ACE4C4353CE925F413639 /* Formatters.swift */; };
+		FA8840290941E4FF50BB5DAD /* NotificationScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7058E4A5206D04124514759C /* NotificationScheduler.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		5F2D17B08516704C271ABB51 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 25AA3A52958C481417D53B84 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DAB27B24203BEBCA02C2A8E1;
+			remoteInfo = Hearthday;
+		};
+		7DE1252B618A74FF137A2780 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 25AA3A52958C481417D53B84 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DAB27B24203BEBCA02C2A8E1;
+			remoteInfo = Hearthday;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		06439A55BC8AFDD1049947BD /* HearthdayUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = HearthdayUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		0C7EB93D52F934608E70DEC3 /* ProStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProStore.swift; sourceTree = "<group>"; };
+		3BEC447470F6910234724632 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		4EE7AE1FF1CCED38C59BEE28 /* Core */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Core; path = Core; sourceTree = SOURCE_ROOT; };
+		54E067916F54CC9533C0C7CB /* HearthdayTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = HearthdayTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		55F194AF487F3A8346FDCE7B /* PlanResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanResultView.swift; sourceTree = "<group>"; };
+		603D67764D75B665C8970A54 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		64A80D5F62154D938F85B9C5 /* AvailabilityViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvailabilityViews.swift; sourceTree = "<group>"; };
+		657D86A8C81B7D7C381CD816 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
+		6DFD5A95744DAC659F918BBD /* HearthdayUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HearthdayUITests.swift; sourceTree = "<group>"; };
+		6E52DFB408D9C41AD55FEB81 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		7058E4A5206D04124514759C /* NotificationScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationScheduler.swift; sourceTree = "<group>"; };
+		7CF13B0A901923124B0F3AB4 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		8E0E459E92DD832F8617E0A5 /* CheckInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckInView.swift; sourceTree = "<group>"; };
+		941B1DAB39BAF6A975ABBD79 /* LiveBakeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveBakeView.swift; sourceTree = "<group>"; };
+		A014EC75E744544B131E6277 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		AA7ACE4C4353CE925F413639 /* Formatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatters.swift; sourceTree = "<group>"; };
+		B0003586DAFA10E1C1493C70 /* HearthdayApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HearthdayApp.swift; sourceTree = "<group>"; };
+		B3C8437F3B6453EBEB36FBAC /* Hearthday.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Hearthday.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BEB6556D3806695F8F2541C2 /* ProStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProStoreTests.swift; sourceTree = "<group>"; };
+		C69EA4ACF20AD65F879A9933 /* ProView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProView.swift; sourceTree = "<group>"; };
+		CE269652660D89C03C7AC1E6 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		DF12C3A094E2C101AF40B56F /* AppModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModelTests.swift; sourceTree = "<group>"; };
+		DFFA5D466666B91747AC21F5 /* Hearthday.storekit */ = {isa = PBXFileReference; path = Hearthday.storekit; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		4B4B3D00AED8861D62E15DD1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E00A71D9BBA8F5C6BC6AD06C /* HearthdayCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6F3092CCECA2B40AF24DDDBC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B7D3FD5978875D445E1526D2 /* HearthdayCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1AE8BFA6A9FB6CF3B1F6AFBC /* Design */ = {
+			isa = PBXGroup;
+			children = (
+				AA7ACE4C4353CE925F413639 /* Formatters.swift */,
+				CE269652660D89C03C7AC1E6 /* Theme.swift */,
+			);
+			path = Design;
+			sourceTree = "<group>";
+		};
+		3112C4098A64F1B6819EB9AE /* Hearthday */ = {
+			isa = PBXGroup;
+			children = (
+				B0003586DAFA10E1C1493C70 /* HearthdayApp.swift */,
+				1AE8BFA6A9FB6CF3B1F6AFBC /* Design */,
+				66C9267C00AC4A39B6BCC9A4 /* Model */,
+				CF5F6224C39A857944224DFB /* Views */,
+			);
+			name = Hearthday;
+			path = App/Hearthday;
+			sourceTree = "<group>";
+		};
+		66C9267C00AC4A39B6BCC9A4 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				603D67764D75B665C8970A54 /* AppModel.swift */,
+				7058E4A5206D04124514759C /* NotificationScheduler.swift */,
+				0C7EB93D52F934608E70DEC3 /* ProStore.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		6E4F2891086824ECC84F1A09 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				DFFA5D466666B91747AC21F5 /* Hearthday.storekit */,
+			);
+			name = Resources;
+			path = App/Hearthday/Resources;
+			sourceTree = "<group>";
+		};
+		84058221E4179934F57756E7 /* HearthdayUITests */ = {
+			isa = PBXGroup;
+			children = (
+				6DFD5A95744DAC659F918BBD /* HearthdayUITests.swift */,
+			);
+			name = HearthdayUITests;
+			path = App/HearthdayUITests;
+			sourceTree = "<group>";
+		};
+		96665035212109ABE3815412 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B3C8437F3B6453EBEB36FBAC /* Hearthday.app */,
+				54E067916F54CC9533C0C7CB /* HearthdayTests.xctest */,
+				06439A55BC8AFDD1049947BD /* HearthdayUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		ACC7EBF58B99E019C8275D69 /* HearthdayTests */ = {
+			isa = PBXGroup;
+			children = (
+				DF12C3A094E2C101AF40B56F /* AppModelTests.swift */,
+				BEB6556D3806695F8F2541C2 /* ProStoreTests.swift */,
+			);
+			name = HearthdayTests;
+			path = App/HearthdayTests;
+			sourceTree = "<group>";
+		};
+		AF2CCF3D94281CEE72E22E04 = {
+			isa = PBXGroup;
+			children = (
+				3112C4098A64F1B6819EB9AE /* Hearthday */,
+				ACC7EBF58B99E019C8275D69 /* HearthdayTests */,
+				84058221E4179934F57756E7 /* HearthdayUITests */,
+				C745B3C965AAFBF4D99C81A7 /* Packages */,
+				6E4F2891086824ECC84F1A09 /* Resources */,
+				96665035212109ABE3815412 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		C745B3C965AAFBF4D99C81A7 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				4EE7AE1FF1CCED38C59BEE28 /* Core */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
+		CF5F6224C39A857944224DFB /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				64A80D5F62154D938F85B9C5 /* AvailabilityViews.swift */,
+				8E0E459E92DD832F8617E0A5 /* CheckInView.swift */,
+				657D86A8C81B7D7C381CD816 /* HistoryView.swift */,
+				7CF13B0A901923124B0F3AB4 /* HomeView.swift */,
+				941B1DAB39BAF6A975ABBD79 /* LiveBakeView.swift */,
+				3BEC447470F6910234724632 /* OnboardingView.swift */,
+				55F194AF487F3A8346FDCE7B /* PlanResultView.swift */,
+				C69EA4ACF20AD65F879A9933 /* ProView.swift */,
+				6E52DFB408D9C41AD55FEB81 /* RootView.swift */,
+				A014EC75E744544B131E6277 /* SettingsView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		60E4F75F24A7ADD3A93E18BC /* HearthdayUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6B09EBDA43FD3346B50F7D68 /* Build configuration list for PBXNativeTarget "HearthdayUITests" */;
+			buildPhases = (
+				FBFB361948826BC3771FDBB3 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BCBB9EFDFE77BA2269C72807 /* PBXTargetDependency */,
+			);
+			name = HearthdayUITests;
+			packageProductDependencies = (
+			);
+			productName = HearthdayUITests;
+			productReference = 06439A55BC8AFDD1049947BD /* HearthdayUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		CA9B5B60828107D531FD5328 /* HearthdayTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7DBECC2E0505BD1161F2B391 /* Build configuration list for PBXNativeTarget "HearthdayTests" */;
+			buildPhases = (
+				EF9A0BF0B643806215B68095 /* Sources */,
+				E4E3D54CF46D7C5F7F5B73E9 /* Resources */,
+				4B4B3D00AED8861D62E15DD1 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				05E9884CCD4D6921A4CAA889 /* PBXTargetDependency */,
+			);
+			name = HearthdayTests;
+			packageProductDependencies = (
+				A79A6F7BCA4112D615B1A255 /* HearthdayCore */,
+			);
+			productName = HearthdayTests;
+			productReference = 54E067916F54CC9533C0C7CB /* HearthdayTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		DAB27B24203BEBCA02C2A8E1 /* Hearthday */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7B9BD3E18BC40153E5030559 /* Build configuration list for PBXNativeTarget "Hearthday" */;
+			buildPhases = (
+				006AE5AA4A948BDA61C0551A /* Sources */,
+				6F3092CCECA2B40AF24DDDBC /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Hearthday;
+			packageProductDependencies = (
+				6E97982297942573E5740232 /* HearthdayCore */,
+			);
+			productName = Hearthday;
+			productReference = B3C8437F3B6453EBEB36FBAC /* Hearthday.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		25AA3A52958C481417D53B84 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					60E4F75F24A7ADD3A93E18BC = {
+						DevelopmentTeam = "";
+						TestTargetID = DAB27B24203BEBCA02C2A8E1;
+					};
+					CA9B5B60828107D531FD5328 = {
+						DevelopmentTeam = "";
+					};
+					DAB27B24203BEBCA02C2A8E1 = {
+						DevelopmentTeam = "";
+					};
+				};
+			};
+			buildConfigurationList = 4C1550EEE00250BA92615D84 /* Build configuration list for PBXProject "Hearthday" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = AF2CCF3D94281CEE72E22E04;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				4BE4C9E2E25EF12DCC9CA7DA /* XCLocalSwiftPackageReference "Core" */,
+			);
+			preferredProjectObjectVersion = 77;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				DAB27B24203BEBCA02C2A8E1 /* Hearthday */,
+				CA9B5B60828107D531FD5328 /* HearthdayTests */,
+				60E4F75F24A7ADD3A93E18BC /* HearthdayUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		E4E3D54CF46D7C5F7F5B73E9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B349F3FDE38A33F2F2E97BE4 /* Hearthday.storekit in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		006AE5AA4A948BDA61C0551A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1A88DBEB65431265BFAE3017 /* AppModel.swift in Sources */,
+				E63EFD686358DF40A03C85DD /* AvailabilityViews.swift in Sources */,
+				F97E627033180329765C0F58 /* CheckInView.swift in Sources */,
+				F9FCDC9C7030AC91A1684A45 /* Formatters.swift in Sources */,
+				E8F116DFAB801D2438484903 /* HearthdayApp.swift in Sources */,
+				9DF3F4F9C6931141822D0AC8 /* HistoryView.swift in Sources */,
+				C29FB0520C7E62C6094CE1D2 /* HomeView.swift in Sources */,
+				A28D5E93DE18CA832C896F2F /* LiveBakeView.swift in Sources */,
+				FA8840290941E4FF50BB5DAD /* NotificationScheduler.swift in Sources */,
+				5E94ADA89D409F555E6FC339 /* OnboardingView.swift in Sources */,
+				39D79D918E1AE96F85F3FEC4 /* PlanResultView.swift in Sources */,
+				964CE3AE45A7C7293C089627 /* ProStore.swift in Sources */,
+				6FB16057C84B4BAD7E671516 /* ProView.swift in Sources */,
+				62357829C87230B8C800C7E5 /* RootView.swift in Sources */,
+				73167AFB5D14BD71687BC62E /* SettingsView.swift in Sources */,
+				B2AE8A68D24B7D1204C4232E /* Theme.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EF9A0BF0B643806215B68095 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5837E16162D2C6D0EF43901D /* AppModelTests.swift in Sources */,
+				6A34E2571BFD27D42C74FF5A /* ProStoreTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FBFB361948826BC3771FDBB3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B3F4B7D0BA58D0DB109B086F /* HearthdayUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		05E9884CCD4D6921A4CAA889 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DAB27B24203BEBCA02C2A8E1 /* Hearthday */;
+			targetProxy = 7DE1252B618A74FF137A2780 /* PBXContainerItemProxy */;
+		};
+		BCBB9EFDFE77BA2269C72807 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DAB27B24203BEBCA02C2A8E1 /* Hearthday */;
+			targetProxy = 5F2D17B08516704C271ABB51 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		106291C1E2E1BF551A95AB81 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.hearthday.ios.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Hearthday.app/Hearthday";
+			};
+			name = Release;
+		};
+		2E94E3558B4F771476381B35 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Hearthday;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.food-and-drink";
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.hearthday.ios;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		3075FEEAC11394183D049605 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Hearthday;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.food-and-drink";
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.hearthday.ios;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		4FD34345C60515B874B723AA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		68BB9253BF8EFA1F70A0FA63 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.hearthday.ios.uitests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Hearthday;
+			};
+			name = Debug;
+		};
+		6FD7BBD912EA621FDDC77104 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		862DCEAF85583ACD78B57FE4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.hearthday.ios.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Hearthday.app/Hearthday";
+			};
+			name = Debug;
+		};
+		9FF660D23806C71B3290EF10 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.hearthday.ios.uitests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Hearthday;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		4C1550EEE00250BA92615D84 /* Build configuration list for PBXProject "Hearthday" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4FD34345C60515B874B723AA /* Debug */,
+				6FD7BBD912EA621FDDC77104 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		6B09EBDA43FD3346B50F7D68 /* Build configuration list for PBXNativeTarget "HearthdayUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				68BB9253BF8EFA1F70A0FA63 /* Debug */,
+				9FF660D23806C71B3290EF10 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		7B9BD3E18BC40153E5030559 /* Build configuration list for PBXNativeTarget "Hearthday" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2E94E3558B4F771476381B35 /* Debug */,
+				3075FEEAC11394183D049605 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		7DBECC2E0505BD1161F2B391 /* Build configuration list for PBXNativeTarget "HearthdayTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				862DCEAF85583ACD78B57FE4 /* Debug */,
+				106291C1E2E1BF551A95AB81 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		4BE4C9E2E25EF12DCC9CA7DA /* XCLocalSwiftPackageReference "Core" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Core;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		6E97982297942573E5740232 /* HearthdayCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = HearthdayCore;
+		};
+		A79A6F7BCA4112D615B1A255 /* HearthdayCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = HearthdayCore;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 25AA3A52958C481417D53B84 /* Project object */;
+}
