@@ -124,6 +124,16 @@ final class LiveSessionTests: XCTestCase {
         XCTAssertGreaterThan(sample.observedSpeed, 1)
     }
 
+    func testFridgePausedBulkDoesNotTeachCalibration() throws {
+        var s = startedSession()
+        let result = checkIn(s, at: TestClock.date(10, 16), rise: 30)
+        s.apply(try XCTUnwrap(result.options.first { $0.kind == .fridgeNow }))
+        s.complete("shape", at: TestClock.date(11, 7, 20))
+        s.shapeReadiness = .justRight
+        XCTAssertNotNil(s.actualBulkHours)
+        XCTAssertNil(s.calibrationSample(), "Overnight fridge time is not room-temperature fermentation")
+    }
+
     func testRemindersCoverPendingHandsOnSteps() {
         let s = startedSession()
         let specs = Reminders.specs(for: s, now: TestClock.date(10, 12, 30))

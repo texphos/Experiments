@@ -148,9 +148,13 @@ public struct BakeSession: Codable, Hashable, Identifiable, Sendable {
         return temps.reduce(0, +) / Double(temps.count)
     }
 
-    /// A calibration sample, only when the baker judged the dough "just right" at shaping.
+    /// A calibration sample, only when the baker judged the dough "just right" at shaping and bulk ran
+    /// entirely at room temperature; a fridge pause mid-bulk would make the dough look slow.
     public func calibrationSample(baseModel: FermentationModel = FermentationModel()) -> Calibration.Sample? {
-        guard shapeReadiness == .justRight, let actual = actualBulkHours, let date = completed["shape"] else { return nil }
+        guard shapeReadiness == .justRight,
+              !plan.steps.contains(where: { $0.kind == .coldBulk }),
+              let actual = actualBulkHours,
+              let date = completed["shape"] else { return nil }
         var model = baseModel
         model.speedFactor = 1
         let modelHours = model.bulkHours(tempC: averageTempC, inoculationPercent: plan.inoculationPercent)
@@ -280,7 +284,9 @@ public enum LiveReplanner {
                     options.append(ReplanOption(
                         kind: .fridgeNow,
                         title: fridgeAt.timeIntervalSince(now) < 300 ? "Fridge the dough now" : "Fridge the dough before \(label ?? "then")",
-                        detail: comfortable
+                        detail: progressAtFridge >= 0.95
+                            ? "It should be about ready by then. Chilling slows it right down so you can shape it cold when you’re free."
+                            : comfortable
                             ? "It goes in about \(pctIn)% of the way through bulk and keeps fermenting slowly as it chills. Shape it cold when you’re free."
                             : "It would go in only about \(pctIn)% of the way through bulk. If it hasn’t risen much by morning, give it time at room temperature before shaping.",
                         bulkEndsAt: fridgeAt,
