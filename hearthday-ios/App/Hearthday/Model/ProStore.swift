@@ -72,27 +72,31 @@ final class ProStore {
             purchaseMessage = Self.message(for: result, entitled: isPro)
         } catch {
             await refreshEntitlement()
-            purchaseMessage = isPro
-                ? "Pro is unlocked."
-                : "The purchase didn’t go through. If you were charged, use Restore or check your Apple Account purchase history."
+            purchaseMessage = isPro ? Self.unlockedMessage : Self.errorMessage
         }
     }
+
+    // An error or an unverified result doesn't tell the app whether the App Store charged the baker, so these
+    // messages never say either way. They point to Restore and to Apple's purchase history and support instead.
+    static let unlockedMessage = "Thank you. Pro is unlocked on this Apple Account."
+    static let errorMessage = "The App Store reported a problem, so Pro isn’t unlocked on this iPhone yet. Tap Restore purchase in a moment. If the purchase appears in your Apple Account purchase history and Pro still isn’t unlocked, use Report a Problem there or contact Apple Support."
+    static let unverifiedMessage = "The App Store couldn’t verify this purchase, so Pro isn’t unlocked yet. Tap Restore purchase in a moment. If the purchase appears in your Apple Account purchase history and Pro still isn’t unlocked, use Report a Problem there or contact Apple Support."
+    static let notActiveYetMessage = "The App Store accepted the purchase but Pro isn’t active on this iPhone yet. Tap Restore purchase in a moment."
+    static let pendingMessage = "Your purchase is waiting for approval. Pro unlocks as soon as it goes through."
 
     /// What to tell the baker after a purchase attempt. Success is only claimed when the entitlement is verified.
     static func message(for result: Product.PurchaseResult, entitled: Bool) -> String? {
         switch result {
         case .success(.verified):
-            return entitled
-                ? "Thank you. Pro is unlocked on this Apple Account."
-                : "The App Store confirmed the purchase but Pro isn’t active yet. Try Restore in a moment."
+            return entitled ? unlockedMessage : notActiveYetMessage
         case .success(.unverified):
-            return "The App Store couldn’t verify that purchase, so Pro isn’t unlocked. Try Restore; if it keeps happening, contact Apple support."
+            return entitled ? unlockedMessage : unverifiedMessage
         case .pending:
-            return "Your purchase is waiting for approval. Pro unlocks as soon as it goes through."
+            return pendingMessage
         case .userCancelled:
             return nil
         @unknown default:
-            return entitled ? nil : "The purchase didn’t complete."
+            return entitled ? nil : errorMessage
         }
     }
 

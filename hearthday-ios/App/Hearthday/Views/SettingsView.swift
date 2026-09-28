@@ -3,6 +3,7 @@ import HearthdayCore
 
 struct SettingsView: View {
     @Environment(AppModel.self) private var model
+    @Environment(ProStore.self) private var proStore
     @State private var showingPro = false
     @State private var editingFormula: Formula?
     @State private var confirmingReset = false
@@ -100,7 +101,10 @@ struct SettingsView: View {
                 FormulaEditor(formula: f, isNew: !model.state.formulas.contains { $0.id == f.id })
             }
             .confirmationDialog("Erase everything?", isPresented: $confirmingReset, titleVisibility: .visible) {
-                Button("Erase all data", role: .destructive) { model.resetEverything() }
+                Button("Erase all data", role: .destructive) {
+                    model.resetEverything()
+                    Task { await proStore.refreshEntitlement() }
+                }
             } message: {
                 Text("This removes your busy times, formulas, journal and calibration from this iPhone. A Pro purchase stays with your Apple Account and can be restored.")
             }

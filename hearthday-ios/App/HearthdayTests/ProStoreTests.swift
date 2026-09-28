@@ -1,6 +1,7 @@
 import XCTest
 import StoreKit
 import StoreKitTest
+import HearthdayCore
 @testable import Hearthday
 
 /// Runs real StoreKit 2 calls against the local `Hearthday.storekit` configuration. No App Store account or
@@ -52,6 +53,59 @@ final class ProStoreTests: XCTestCase {
         let message = try XCTUnwrap(store.purchaseMessage)
         XCTAssertFalse(message.localizedCaseInsensitiveContains("unlocked on"), message)
         XCTAssertFalse(message.localizedCaseInsensitiveContains("thank you"), message)
+        XCTAssertTrue(message.contains("Restore purchase"), message)
+    }
+
+    /// An error or unverified result doesn't prove whether the baker was charged, so the copy never says.
+    func testFailureCopyMakesNoClaimAboutCharges() {
+        let failures = [ProStore.errorMessage, ProStore.unverifiedMessage, ProStore.notActiveYetMessage]
+        let banned = ["nothing was charged", "not charged", "haven’t been charged", "wasn’t charged", "charged twice", "didn’t go through", "no charge", "refund"]
+        for message in failures {
+            for phrase in banned {
+                XCTAssertFalse(message.localizedCaseInsensitiveContains(phrase), "“\(phrase)” in: \(message)")
+            }
+            XCTAssertTrue(message.contains("Restore purchase"), message)
+        }
+        for message in [ProStore.errorMessage, ProStore.unverifiedMessage] {
+            XCTAssertTrue(message.contains("purchase history") && message.contains("Apple Support"), message)
+        }
+    }
+
+    // MARK: Erasing app data
+
+    func makeModel() throws -> (AppModel, JSONFileStore) {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let fileStore = JSONFileStore(url: dir.appendingPathComponent("state.json"))
+        return (AppModel.load(from: fileStore, notifications: NoopNotifications()), fileStore)
+    }
+
+    func testResetKeepsAVerifiedPurchaseAfterRecheckingStoreKit() async throws {
+        let (model, fileStore) = try makeModel()
+        let store = ProStore()
+        store.onEntitlementChange = { model.setPro($0) }
+        await store.start()
+        await store.purchase()
+        XCTAssertTrue(model.state.isPro)
+
+        model.resetEverything()
+        await store.refreshEntitlement()
+        XCTAssertTrue(model.state.isPro, "A verified purchase survives erasing local data")
+        XCTAssertTrue(try fileStore.load().isPro, "and is saved for offline launches")
+        XCTAssertTrue(model.state.history.isEmpty)
+    }
+
+    func testResetDropsACachedFlagThatStoreKitNoLongerVerifies() async throws {
+        let (model, fileStore) = try makeModel()
+        model.setPro(true)
+        let store = ProStore()
+        store.onEntitlementChange = { model.setPro($0) }
+        await store.start()
+
+        model.resetEverything()
+        await store.refreshEntitlement()
+        XCTAssertFalse(model.state.isPro, "Only a verified entitlement keeps Pro after a reset")
+        XCTAssertFalse(try fileStore.load().isPro)
     }
 
     func testAskToBuyIsPendingNotUnlocked() async throws {

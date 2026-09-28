@@ -8,25 +8,31 @@ enum ReminderPermission: Equatable, Sendable {
     case denied
 }
 
+/// Some reminders were rejected by iOS. The rest were scheduled.
+struct ReminderSchedulingError: Error, Equatable {
+    var failedCount: Int
+    var totalCount: Int
+}
+
 protocol NotificationScheduling: Sendable {
     func requestAuthorizationIfNeeded() async -> ReminderPermission
     func permission() async -> ReminderPermission
-    /// Replaces every pending Hearthday reminder with `specs`. Called after every state change.
-    func replaceAll(with specs: [ReminderSpec], now: Date)
+    /// Replaces every pending Hearthday reminder with `specs` and returns the permission it saw. Nothing is added
+    /// unless notifications are allowed. Throws `ReminderSchedulingError` when iOS rejects any request.
+    /// Callers must not overlap calls; `AppModel` runs them one at a time and only ever sends the latest state.
+    func replaceAll(with specs: [ReminderSpec], now: Date) async throws -> ReminderPermission
 }
 
 struct NoopNotifications: NotificationScheduling {
     func requestAuthorizationIfNeeded() async -> ReminderPermission { .unknown }
     func permission() async -> ReminderPermission { .unknown }
-    func replaceAll(with specs: [ReminderSpec], now: Date) {}
+    func replaceAll(with specs: [ReminderSpec], now: Date) async throws -> ReminderPermission { .unknown }
 }
 
 /// Local notifications only. Nothing leaves the device.
 ///
-/// Removal and additions are issued synchronously and in order, with no completion-handler round trip, so two
-/// quick plan changes can't interleave and leave the older plan's reminders behind. Triggers are time
-/// intervals from now rather than calendar components: a plan is a sequence of absolute instants, and a
-/// time-zone change must not move "shape in 3 hours" to a different moment.
+/// Triggers are time intervals from now rather than calendar components: a plan is a sequence of absolute
+/// instants, and a time-zone change must not move "shape in 3 hours" to a different moment.
 struct NotificationScheduler: NotificationScheduling {
     static let categoryID = "hearthday.step"
 
@@ -40,7 +46,11 @@ struct NotificationScheduler: NotificationScheduling {
     }
 
     func permission() async -> ReminderPermission {
-        switch await UNUserNotificationCenter.current().notificationSettings().authorizationStatus {
+        Self.permission(for: await UNUserNotificationCenter.current().notificationSettings().authorizationStatus)
+    }
+
+    static func permission(for status: UNAuthorizationStatus) -> ReminderPermission {
+        switch status {
         case .authorized, .provisional, .ephemeral: return .allowed
         case .denied: return .denied
         case .notDetermined: return .unknown
@@ -48,13 +58,19 @@ struct NotificationScheduler: NotificationScheduling {
         }
     }
 
-    func replaceAll(with specs: [ReminderSpec], now: Date) {
+    func replaceAll(with specs: [ReminderSpec], now: Date) async throws -> ReminderPermission {
         let center = UNUserNotificationCenter.current()
         center.removeAllPendingNotificationRequests()
         if specs.isEmpty { center.removeAllDeliveredNotifications() }
+        let permission = await permission()
+        guard permission == .allowed else { return permission }
+
+        var failed = 0
+        var total = 0
         for spec in specs {
             let seconds = spec.fireAt.timeIntervalSince(now)
             guard seconds >= 1 else { continue }
+            total += 1
             let content = UNMutableNotificationContent()
             content.title = spec.title
             content.body = spec.body
@@ -62,7 +78,13 @@ struct NotificationScheduler: NotificationScheduling {
             content.categoryIdentifier = Self.categoryID
             content.threadIdentifier = "hearthday.bake"
             let trigger = UNTimeIntervalNotificationTrigger(timeInterval: seconds, repeats: false)
-            center.add(UNNotificationRequest(identifier: "hearthday.\(spec.id)", content: content, trigger: trigger))
+            do {
+                try await center.add(UNNotificationRequest(identifier: "hearthday.\(spec.id)", content: content, trigger: trigger))
+            } catch {
+                failed += 1
+            }
         }
+        if failed > 0 { throw ReminderSchedulingError(failedCount: failed, totalCount: total) }
+        return permission
     }
 }

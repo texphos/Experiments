@@ -44,7 +44,7 @@ struct PlanResultView: View {
                             .card()
                         StepList(plan: plan, session: nil)
                         EstimateNote(plan: plan)
-                        Button("Start this bake") { model.start(plan) }
+                        Button("Start this bake") { Task { await model.start(plan) } }
                             .buttonStyle(PrimaryButtonStyle())
                             .accessibilityIdentifier("plan.start")
                             .padding(.bottom)

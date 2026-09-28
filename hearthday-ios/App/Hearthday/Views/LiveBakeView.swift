@@ -48,6 +48,11 @@ struct LiveBakeView: View {
             VStack(alignment: .leading, spacing: 16) {
                 if model.reminderPermission == .denied && status != .baked {
                     RemindersOffBanner()
+                } else if let problem = model.reminderProblem, status != .baked {
+                    Label(problem, systemImage: "bell.badge.slash")
+                        .font(.subheadline).foregroundStyle(Palette.warning)
+                        .card()
+                        .accessibilityIdentifier("live.reminderProblem")
                 }
 
                 if !conflicts.isEmpty && status != .stale {

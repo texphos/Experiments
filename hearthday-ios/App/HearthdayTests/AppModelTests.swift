@@ -2,19 +2,57 @@ import XCTest
 import HearthdayCore
 @testable import Hearthday
 
-/// Records what the app asked iOS to schedule, standing in for UNUserNotificationCenter.
+/// Records what the app asked iOS to schedule, standing in for UNUserNotificationCenter. Like the real
+/// scheduler it removes everything first and only adds reminders while notifications are allowed.
 final class RecordingNotifications: NotificationScheduling, @unchecked Sendable {
     private let lock = NSLock()
     private var _batches: [[ReminderSpec]] = []
-    var permissionToReport: ReminderPermission = .allowed
+    private var _events: [String] = []
+    private var _permission: ReminderPermission = .allowed
+    private var _inFlight = 0
+    private var _maxInFlight = 0
+    private var _failNext: ReminderSchedulingError?
+    /// When set, the permission `requestAuthorizationIfNeeded` grants if it hasn't been decided yet.
+    var grantOnRequest: ReminderPermission? = .allowed
+    /// Makes each replace take a while, so overlapping callers would show up.
+    var replaceDelay: Duration?
 
     var batches: [[ReminderSpec]] { lock.withLock { _batches } }
     var pending: [ReminderSpec] { batches.last ?? [] }
+    var events: [String] { lock.withLock { _events } }
+    var maxConcurrentReplaces: Int { lock.withLock { _maxInFlight } }
+    var permissionToReport: ReminderPermission {
+        get { lock.withLock { _permission } }
+        set { lock.withLock { _permission = newValue } }
+    }
+    func failNextReplace(_ error: ReminderSchedulingError) { lock.withLock { _failNext = error } }
 
-    func requestAuthorizationIfNeeded() async -> ReminderPermission { permissionToReport }
+    func requestAuthorizationIfNeeded() async -> ReminderPermission {
+        lock.withLock {
+            _events.append("request")
+            if _permission == .unknown, let grant = grantOnRequest { _permission = grant }
+            return _permission
+        }
+    }
     func permission() async -> ReminderPermission { permissionToReport }
-    func replaceAll(with specs: [ReminderSpec], now: Date) {
-        lock.withLock { _batches.append(specs.filter { $0.fireAt > now }) }
+    func replaceAll(with specs: [ReminderSpec], now: Date) async throws -> ReminderPermission {
+        let permission: ReminderPermission = lock.withLock {
+            _inFlight += 1
+            _maxInFlight = max(_maxInFlight, _inFlight)
+            _events.append("replace:\(_permission)")
+            return _permission
+        }
+        defer { lock.withLock { _inFlight -= 1 } }
+        if let replaceDelay { try? await Task.sleep(for: replaceDelay) }
+        return try lock.withLock {
+            let allowed = permission == .allowed
+            _batches.append(allowed ? specs.filter { $0.fireAt > now } : [])
+            if let error = _failNext {
+                _failNext = nil
+                throw error
+            }
+            return permission
+        }
     }
 }
 
@@ -72,14 +110,15 @@ final class AppModelTests: XCTestCase {
     func startBake(_ model: AppModel) async throws -> BakePlan {
         let result = await model.plan(readyBy: saturday10(), formula: .countryLoaf, tempC: 21, starterNeedsFeed: true)
         let plan = try XCTUnwrap(result.primary, "\(result)")
-        model.start(plan)
+        await model.start(plan)
         return plan
     }
 
-    func completeNext(_ model: AppModel, at date: Date? = nil) throws -> BakeStep {
+    func completeNext(_ model: AppModel, at date: Date? = nil) async throws -> BakeStep {
         let step = try XCTUnwrap(model.state.activeSession?.nextAttendedStep)
         clock.set(date ?? step.end)
         model.complete(step)
+        await model.remindersSettled()
         return step
     }
 
@@ -90,8 +129,8 @@ final class AppModelTests: XCTestCase {
         XCTAssertEqual(notifications.pending, Reminders.specs(for: model.state.activeSession!, now: clock.now, availability: model.state.settings.availability, calendar: utc))
         XCTAssertFalse(notifications.pending.isEmpty)
 
-        while model.state.activeSession?.isInBulk == false { _ = try completeNext(model) }
-        while model.state.activeSession?.nextAttendedStep?.kind == .fold { _ = try completeNext(model) }
+        while model.state.activeSession?.isInBulk == false { _ = try await completeNext(model) }
+        while model.state.activeSession?.nextAttendedStep?.kind == .fold { _ = try await completeNext(model) }
 
         // Dough racing ahead on a Friday evening: 3 h after mixing it's already up 60%.
         clock.set(model.state.activeSession!.bulkClockStart.addingTimeInterval(3 * 3600))
@@ -100,6 +139,7 @@ final class AppModelTests: XCTestCase {
         XCTAssertTrue(result.problems.isEmpty)
         let option = try XCTUnwrap(result.options.first { $0.recommended } ?? result.options.first)
         model.apply(option, checkIn: CheckIn(at: clock.now, risePercent: 60, tempC: 23))
+        await model.remindersSettled()
 
         let session = try XCTUnwrap(model.state.activeSession)
         XCTAssertEqual(session.replanCount, 1)
@@ -109,14 +149,15 @@ final class AppModelTests: XCTestCase {
         XCTAssertEqual(try store.load().activeSession, session, "Every change is on disk immediately")
 
         if model.state.activeSession?.nextAttendedStep?.kind == .fridgeDough {
-            _ = try completeNext(model)
+            _ = try await completeNext(model)
             XCTAssertEqual(model.state.activeSession?.isChilled, true)
         }
-        let shape = try completeNext(model)
+        let shape = try await completeNext(model)
         XCTAssertEqual(shape.kind, .shape)
         model.setShapeReadiness(.justRight)
-        while model.state.activeSession?.isBaked == false { _ = try completeNext(model) }
+        while model.state.activeSession?.isBaked == false { _ = try await completeNext(model) }
         model.finish(rating: 5, notes: "Good oven spring")
+        await model.remindersSettled()
 
         XCTAssertNil(model.state.activeSession)
         XCTAssertEqual(notifications.pending, [], "Finishing cancels every reminder")
@@ -133,11 +174,11 @@ final class AppModelTests: XCTestCase {
         let result = await model.plan(readyBy: sunday10, formula: .countryLoaf, tempC: 21, starterNeedsFeed: true)
         let plan = try XCTUnwrap(result.primary, "\(result)")
         XCTAssertEqual(plan.proofMode, .fridge, "Friday morning to Sunday 10:00 plans an overnight cold proof")
-        model.start(plan)
-        while model.state.activeSession?.nextAttendedStep?.kind != .shape { _ = try completeNext(model) }
+        await model.start(plan)
+        while model.state.activeSession?.nextAttendedStep?.kind != .shape { _ = try await completeNext(model) }
         let bakeBefore = try XCTUnwrap(model.state.activeSession?.plan.step("bake")?.start)
         let shape = try XCTUnwrap(model.state.activeSession?.nextAttendedStep)
-        _ = try completeNext(model, at: shape.end.addingTimeInterval(12 * 3600))
+        _ = try await completeNext(model, at: shape.end.addingTimeInterval(12 * 3600))
 
         let session = try XCTUnwrap(model.state.activeSession)
         let retard = try XCTUnwrap(session.plan.step("cold-proof"))
@@ -154,7 +195,7 @@ final class AppModelTests: XCTestCase {
     func testReopeningMidBakeRestoresTheSessionAndRebuildsReminders() async throws {
         let first = onboardedModel()
         _ = try await startBake(first)
-        _ = try completeNext(first)
+        _ = try await completeNext(first)
         let saved = try XCTUnwrap(first.state.activeSession)
 
         clock.advance(2 * 3600)
@@ -192,6 +233,7 @@ final class AppModelTests: XCTestCase {
         let model = onboardedModel()
         _ = try await startBake(model)
         model.abandon()
+        await model.remindersSettled()
         XCTAssertEqual(notifications.pending, [])
         XCTAssertTrue(model.state.history.isEmpty)
         XCTAssertNil(try store.load().activeSession)
@@ -250,4 +292,151 @@ final class AppModelTests: XCTestCase {
         XCTAssertTrue(model.state.isPro, "Erasing data doesn't forfeit a purchase")
         XCTAssertEqual(model.state.formulas.count, 1)
     }
+
+    // MARK: Reminder scheduling around permission, overlap and failure
+
+    func testStartWaitsForThePermissionAnswerThenSchedulesReminders() async throws {
+        notifications.permissionToReport = .unknown
+        let model = onboardedModel()
+        _ = try await startBake(model)
+        let events = notifications.events
+        let request = try XCTUnwrap(events.firstIndex(of: "request"), "\(events)")
+        XCTAssertEqual(events.last, "replace:allowed", "The last sync runs after the grant: \(events)")
+        XCTAssertGreaterThan(try XCTUnwrap(events.lastIndex(of: "replace:allowed")), request)
+        XCTAssertEqual(model.reminderPermission, .allowed)
+        XCTAssertFalse(notifications.pending.isEmpty)
+        XCTAssertEqual(notifications.pending, Reminders.specs(for: model.state.activeSession!, now: clock.now, availability: model.state.settings.availability, calendar: utc))
+    }
+
+    func testDeniedPermissionAtStartIsReportedAndNothingIsScheduled() async throws {
+        notifications.permissionToReport = .unknown
+        notifications.grantOnRequest = .denied
+        let model = onboardedModel()
+        _ = try await startBake(model)
+        XCTAssertEqual(model.reminderPermission, .denied)
+        XCTAssertEqual(notifications.pending, [])
+        XCTAssertNotNil(model.state.activeSession, "The bake still starts; the live screen shows the reminders-off banner")
+    }
+
+    func testPermissionTurnedOffLaterIsPickedUpByTheNextSync() async throws {
+        let model = onboardedModel()
+        _ = try await startBake(model)
+        XCTAssertEqual(model.reminderPermission, .allowed)
+        notifications.permissionToReport = .denied
+        _ = try await completeNext(model)
+        XCTAssertEqual(model.reminderPermission, .denied)
+        XCTAssertEqual(notifications.pending, [])
+    }
+
+    func testRapidChangesNeverOverlapAndAnAbandonedBakeLeavesNoReminders() async throws {
+        let model = onboardedModel()
+        _ = try await startBake(model)
+        notifications.replaceDelay = .milliseconds(80)
+        let batchesBefore = notifications.batches.count
+        for _ in 0..<3 {
+            guard let step = model.state.activeSession?.nextAttendedStep else { break }
+            clock.set(step.end)
+            model.complete(step)
+        }
+        model.abandon()
+        await model.remindersSettled()
+        XCTAssertEqual(notifications.maxConcurrentReplaces, 1, "One replace at a time")
+        XCTAssertEqual(notifications.pending, [], "An older plan can't be re-added after abandoning")
+        XCTAssertLessThanOrEqual(notifications.batches.count - batchesBefore, 2, "Changes made while a replace is running collapse into one")
+    }
+
+    func testRapidReplansEndOnTheLatestPlan() async throws {
+        let model = onboardedModel()
+        _ = try await startBake(model)
+        notifications.replaceDelay = .milliseconds(50)
+        while model.state.activeSession?.isInBulk == false {
+            let step = model.state.activeSession!.nextAttendedStep!
+            clock.set(step.end)
+            model.complete(step)
+        }
+        await model.remindersSettled()
+        XCTAssertEqual(notifications.pending, Reminders.specs(for: model.state.activeSession!, now: clock.now, availability: model.state.settings.availability, calendar: utc))
+        XCTAssertEqual(notifications.maxConcurrentReplaces, 1)
+    }
+
+    func testSchedulingFailuresAreShownUntilASyncSucceeds() async throws {
+        let model = onboardedModel()
+        _ = try await startBake(model)
+        XCTAssertNil(model.reminderProblem)
+        notifications.failNextReplace(ReminderSchedulingError(failedCount: 2, totalCount: 7))
+        _ = try await completeNext(model)
+        XCTAssertEqual(model.reminderProblem, "2 of 7 reminders couldn’t be scheduled. Keep an eye on this screen for the next step.")
+        _ = try await completeNext(model)
+        XCTAssertNil(model.reminderProblem)
+    }
+
+    // MARK: Activation
+
+    func testResumePicksUpATimeZoneChangeAndReschedules() async throws {
+        let model = onboardedModel()
+        _ = try await startBake(model)
+        var newYork = Calendar(identifier: .gregorian)
+        newYork.timeZone = TimeZone(identifier: "America/New_York")!
+        model.followsSystemCalendar = true
+        model.systemCalendar = { newYork }
+        let batches = notifications.batches.count
+        clock.advance(3600)
+        await model.resume()
+        XCTAssertEqual(model.calendar.timeZone.identifier, "America/New_York")
+        XCTAssertEqual(notifications.batches.count, batches + 1, "Reminders are rebuilt on activation")
+        XCTAssertEqual(notifications.pending, Reminders.specs(for: model.state.activeSession!, now: clock.now, availability: model.state.settings.availability, calendar: newYork))
+    }
+
+    // MARK: Unreadable file that can't be set aside
+
+    func testUnreadableFileThatCannotBeSetAsideIsNeverOverwritten() async throws {
+        let original = Data("{broken".utf8)
+        try original.write(to: store.url)
+        let gate = QuarantineGate()
+        let model = AppModel.load(from: store, notifications: notifications, clock: { [testClock = clock!] in testClock.now }, quarantine: { store in
+            if gate.blocked { throw CocoaError(.fileWriteNoPermission) }
+            return try store.quarantineCorruptFile()
+        })
+        model.calendar = utc
+        model.followsSystemCalendar = false
+        XCTAssertTrue(model.isHoldingUnreadableFile)
+        XCTAssertTrue(model.loadProblem?.contains("won’t save changes") ?? false, model.loadProblem ?? "nil")
+
+        model.update { $0.settings.hasCompletedOnboarding = true }
+        _ = try await startBake(model)
+        await model.resume()
+        XCTAssertEqual(try Data(contentsOf: store.url), original, "The only copy is untouched while it can't be backed up")
+        XCTAssertTrue(model.isHoldingUnreadableFile)
+
+        gate.blocked = false
+        await model.resume()
+        XCTAssertFalse(model.isHoldingUnreadableFile)
+        let backups = try FileManager.default.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil).filter { $0.lastPathComponent.contains("unreadable") }
+        XCTAssertEqual(backups.count, 1)
+        let backup = try XCTUnwrap(backups.first)
+        XCTAssertEqual(try Data(contentsOf: backup), original, "The original is kept as a backup")
+        XCTAssertEqual(try store.load().activeSession, model.state.activeSession, "Only now is the current state saved")
+    }
+
+    func testUnreadableFileThatBecomesReadableIsNotOverwritten() async throws {
+        try Data("{broken".utf8).write(to: store.url)
+        let gate = QuarantineGate()
+        let model = AppModel.load(from: store, notifications: notifications, clock: { [testClock = clock!] in testClock.now }, quarantine: { _ in
+            throw CocoaError(.fileWriteNoPermission)
+        })
+        _ = gate
+        var saved = AppState()
+        saved.settings.hasCompletedOnboarding = true
+        saved.settings.kitchenTempC = 19
+        try JSONFileStore(url: store.url).save(saved)
+        model.update { $0.settings.kitchenTempC = 25 }
+        await model.resume()
+        XCTAssertTrue(model.isHoldingUnreadableFile)
+        XCTAssertTrue(model.loadProblem?.contains("can be read again") ?? false, model.loadProblem ?? "nil")
+        XCTAssertEqual(try store.load().settings.kitchenTempC, 19, "A file that became readable again is left for the next launch to load")
+    }
+}
+
+final class QuarantineGate: @unchecked Sendable {
+    var blocked = true
 }

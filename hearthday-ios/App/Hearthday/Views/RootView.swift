@@ -54,15 +54,18 @@ private struct ProblemBanner: View {
                     .accessibilityHidden(true)
                 Text(message).font(.footnote).foregroundStyle(Palette.rye)
                 Spacer(minLength: 0)
-                Button {
-                    model.loadProblem = nil
-                    model.saveProblem = nil
-                } label: {
-                    Image(systemName: "xmark").frame(width: 44, height: 44)
+                if !model.isHoldingUnreadableFile {
+                    Button {
+                        model.loadProblem = nil
+                        model.saveProblem = nil
+                    } label: {
+                        Image(systemName: "xmark").frame(width: 44, height: 44)
+                    }
+                    .accessibilityLabel("Dismiss")
                 }
-                .accessibilityLabel("Dismiss")
             }
             .padding(.leading, 14)
+            .padding(.vertical, model.isHoldingUnreadableFile ? 12 : 0)
             .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             .padding(.horizontal)
             .accessibilityElement(children: .contain)
