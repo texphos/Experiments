@@ -150,7 +150,8 @@ final class AppModel {
     }
 
     func complete(_ step: BakeStep) {
-        update { $0.completeStep(step.id, at: clock()) }
+        let calendar = self.calendar
+        update { $0.completeStep(step.id, at: clock(), calendar: calendar) }
     }
 
     func apply(_ option: ReplanOption, checkIn: CheckIn) {

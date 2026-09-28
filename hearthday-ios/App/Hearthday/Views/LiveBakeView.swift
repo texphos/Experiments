@@ -51,7 +51,7 @@ struct LiveBakeView: View {
                 }
 
                 if !conflicts.isEmpty && status != .stale {
-                    ConflictBanner(conflicts: conflicts, canCheckIn: session.isInBulk) { showingCheckIn = true }
+                    ConflictBanner(conflicts: conflicts, canCheckIn: session.canCheckIn) { showingCheckIn = true }
                 }
 
                 switch status {
@@ -76,7 +76,14 @@ struct LiveBakeView: View {
                     PassiveCard(step: passive, now: now)
                 }
 
-                if session.isInBulk {
+                if let note = session.adjustmentNote, status != .baked {
+                    Label(note, systemImage: "clock.arrow.circlepath")
+                        .font(.subheadline).foregroundStyle(Palette.rye)
+                        .card()
+                        .accessibilityIdentifier("live.adjustment")
+                }
+
+                if session.canCheckIn {
                     Button {
                         showingCheckIn = true
                     } label: {

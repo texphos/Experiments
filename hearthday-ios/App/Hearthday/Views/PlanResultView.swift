@@ -149,6 +149,7 @@ struct StepList: View {
         case .bulk: return "clock"
         case .shape: return "circle.dashed"
         case .coldRetard, .coldBulk: return "snowflake"
+        case .fridgeDough: return "refrigerator"
         case .roomProof: return "hourglass.bottomhalf.filled"
         case .preheat: return "thermometer.sun"
         case .bake: return "flame"

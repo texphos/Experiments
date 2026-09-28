@@ -108,6 +108,10 @@ final class AppModelTests: XCTestCase {
         XCTAssertEqual(notifications.pending, Reminders.specs(for: session, now: clock.now, availability: model.state.settings.availability, calendar: utc))
         XCTAssertEqual(try store.load().activeSession, session, "Every change is on disk immediately")
 
+        if model.state.activeSession?.nextAttendedStep?.kind == .fridgeDough {
+            _ = try completeNext(model)
+            XCTAssertEqual(model.state.activeSession?.isChilled, true)
+        }
         let shape = try completeNext(model)
         XCTAssertEqual(shape.kind, .shape)
         model.setShapeReadiness(.justRight)
@@ -121,6 +125,27 @@ final class AppModelTests: XCTestCase {
         XCTAssertEqual(record.rating, 5)
         XCTAssertEqual(record.originalReadyAt, plan.readyAt)
         XCTAssertEqual(try store.load().history, model.state.history)
+    }
+
+    func testShapingLateMovesTheBakeAndItsReminderAndSaysWhy() async throws {
+        let model = onboardedModel()
+        let plan = try await startBake(model)
+        try XCTSkipUnless(plan.proofMode == .fridge, "This scenario needs a cold proof")
+        while model.state.activeSession?.nextAttendedStep?.kind != .shape { _ = try completeNext(model) }
+        let bakeBefore = try XCTUnwrap(model.state.activeSession?.plan.step("bake")?.start)
+        let shape = try XCTUnwrap(model.state.activeSession?.nextAttendedStep)
+        _ = try completeNext(model, at: shape.end.addingTimeInterval(12 * 3600))
+
+        let session = try XCTUnwrap(model.state.activeSession)
+        let retard = try XCTUnwrap(session.plan.step("cold-proof"))
+        let bake = try XCTUnwrap(session.plan.step("bake"))
+        XCTAssertGreaterThanOrEqual(retard.end.timeIntervalSince(retard.start), 8 * 3600, "Never a negative or too-short cold proof")
+        XCTAssertEqual(retard.end, bake.start)
+        XCTAssertGreaterThan(bake.start, bakeBefore)
+        XCTAssertNotNil(session.adjustmentNote)
+        XCTAssertEqual(notifications.pending, Reminders.specs(for: session, now: clock.now, availability: model.state.settings.availability, calendar: utc))
+        XCTAssertEqual(notifications.pending.first { $0.title == "Bake" }?.fireAt, bake.start)
+        XCTAssertEqual(try store.load().activeSession, session)
     }
 
     func testReopeningMidBakeRestoresTheSessionAndRebuildsReminders() async throws {
