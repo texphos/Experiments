@@ -15,18 +15,32 @@ hearthday-ios/
 │   │   ├── LiveSession.swift    check-ins → re-plan options, calibration samples
 │   │   ├── Calibration.swift    per-user speed factor and uncertainty
 │   │   ├── Reminders.swift      plan → reminder list (UI-independent)
+│   │   ├── Validation.swift     input limits and plain-language problems
 │   │   ├── StepText.swift       user-facing step copy
-│   │   └── AppState.swift       persisted state, free/Pro limits, JSONFileStore
+│   │   └── AppState.swift       persisted state, schema version, repair, free/Pro limits, JSONFileStore
 │   ├── Sources/hearthday-fixtures/  emits prototype/fixtures.json for JS parity
-│   └── Tests/HearthdayCoreTests/    44 XCTest cases
-├── App/Hearthday/        SwiftUI app (iOS 17); NOT compiled in the authoring environment
+│   └── Tests/HearthdayCoreTests/    79 XCTest cases (planner, DST, validation, recovery, reminders, copy…)
+├── App/Hearthday/        SwiftUI app (iOS 17), built and tested on macOS CI
 │   ├── Model/            AppModel (@Observable), NotificationScheduler, ProStore (StoreKit 2)
 │   ├── Views/            onboarding, home, plan, live bake, check-in, journal, settings, Pro
 │   ├── Design/           Theme (palette, type, components), Formatters
-│   └── Resources/        Hearthday.storekit (local StoreKit test config)
-├── project.yml           XcodeGen spec
+│   └── Resources/        Hearthday.storekit (local StoreKit config; copied into the test bundle only)
+├── App/HearthdayTests/   AppModel loop/persistence/reminder tests and SKTestSession StoreKit tests
+├── App/HearthdayUITests/ full-loop UI tests in light and dark, relaunch test, screenshots as attachments
+├── project.yml           XcodeGen spec; Hearthday.xcodeproj is generated from it and committed
 └── prototype/            browser companion (a JS port of Core plus a mock UI), not the native app
+                          hearthday-prototype.html is a single-file build that opens offline
 ```
+
+CI (`.github/workflows/hearthday.yml`) runs three jobs on every pull-request update:
+
+1. **Linux:** `swift test` for the core, and a check that `prototype/fixtures.json` matches what the Swift core generates.
+2. **Prototype:** JS parity against those fixtures, a check that the single-file build is current, and a headless-Chrome end-to-end test against the single-file build over `file://`.
+3. **macOS:**
+   - Regenerate the Xcode project with XcodeGen 2.44.1 and fail on any diff.
+   - `xcodebuild test` on an iPhone simulator, covering the core, app unit, StoreKit and UI tests.
+   - An unsigned Release build for generic iOS.
+   - Export the `.xcresult` screenshots and summary as artifacts.
 
 **Why this split.** All of the logic that could be wrong (time arithmetic, the fermentation model, the planner search, re-planning, calibration, persistence) lives in `HearthdayCore`. That package builds and tests on Linux. The SwiftUI layer is thin: it renders state and forwards intents to `AppModel`.
 
@@ -36,10 +50,11 @@ hearthday-ios/
 |---|---|---|
 | No accounts, backend or analytics | Zero running cost, a simple privacy story ("Data Not Collected" is the target label) and one less thing to fail | No cross-device sync and no usage data. Validation relies on TestFlight feedback and App Store Connect's aggregate metrics. |
 | JSON file in Application Support (`JSONFileStore`, atomic writes) | The state is small (a handful of formulas and bakes). It is easy to migrate and inspect. | Not suitable for large histories. SwiftData is an option later. |
-| Corrupt file quarantined, not deleted | Never silently destroy a user's journal | The user sees a "started fresh" banner. |
+| Corrupt file quarantined, not deleted; `schemaVersion` with lenient decoding and `repair()` | Never silently destroy a user's journal. Files from older builds open with defaults, out-of-range values are clamped, and a file from a *newer* build is set aside instead of being overwritten. | The user sees a "started fresh" banner with the reason. |
+| Dates stored as `timeIntervalSinceReferenceDate` doubles | Exact round-trips, so a reopened bake produces identical reminders | Less readable by hand. ISO-8601 strings are still accepted on read. |
 | Exhaustive 15-minute grid search in the planner | The search space is small (mix time × proof mode × inoculation × feed ratio). It is deterministic and easy to explain. | It runs off the main thread (`Task.detached`). A 15-minute resolution is enough for bread. |
-| Local notifications only (`UNCalendarNotificationTrigger`, `hearthday.` prefix) | No push server needed | If the user changes the device clock or time zone, reminders are rebuilt on the next foreground (`scenePhase` → `refreshClock`). |
-| StoreKit 2 non-consumable, `Transaction.updates` listener, `AppStore.sync` restore | Current Apple API. No receipt server. | The entitlement is cached in `AppState.isPro` and reconciled at launch. |
+| Local notifications only (`UNTimeIntervalNotificationTrigger`, `hearthday.` prefix), fully replaced after every state change | No push server. Plan steps are absolute instants, so an interval trigger fires at the right moment even after a time-zone change. Removing all pending requests before adding new ones means a re-planned bake never keeps a stale alert. | Reminders are recomputed on launch and every foreground (`AppModel.resume()`), which also re-reads the permission and shows a "reminders are off" banner with a Settings link if denied. |
+| StoreKit 2 non-consumable, `Transaction.updates` listener, `AppStore.sync` restore | Current Apple API. No receipt server. | Pro is set **only** from a verified, unrevoked entry in `Transaction.currentEntitlements`. A purchase result never unlocks anything by itself, so pending (Ask to Buy), cancelled, failed and unverified results can't show success. If the product can't be loaded, the Pro screen shows an explicit unavailable state. |
 | JS port of the core for the prototype, parity-tested against Swift fixtures | The prototype should behave like the real planner rather than a mock | It is a second implementation to keep in sync. The parity test catches drift (confirmed by mutating a constant: 6 of 15 checks failed). |
 
 ## Fermentation model (a planning heuristic, not a guarantee)
@@ -67,17 +82,44 @@ hearthday-ios/
 
 ## Verification status (honest)
 
+The README has the current evidence, with a link to the CI run. In summary:
+
 | Check | Status |
 |---|---|
-| `swift test` in `Core/` (Swift 6.1.2, Linux) | 44 tests pass |
-| JS parity (`node prototype/parity.test.js`) | 15 checks pass against fixtures regenerated from Swift |
-| Prototype end-to-end in headless Chrome (puppeteer-core, not committed) | Passes: onboarding → plan → start → check-in → option → finish → journal |
-| SwiftUI app compiled or type-checked | **No.** Xcode isn't available on Linux. Only `swiftc -parse` (syntax only) was run on the app sources. Expect some compile fixes on first open in Xcode. |
-| App run on simulator or device, StoreKit sandbox, notifications, VoiceOver | **Not done** |
+| Core, app-model, StoreKit (`SKTestSession`) and UI tests on an iOS simulator | Passing in macOS CI (Xcode 16.4, iPhone simulator) |
+| Unsigned Release build for generic iOS | Passing in macOS CI |
+| `swift test` in `Core/` (Swift 6.1, Linux) | Passing locally and in CI |
+| JS parity and headless-Chrome end-to-end tests for the prototype | Passing locally and in CI |
+| Physical device, App Store sandbox purchase, real notification delivery, VoiceOver and Dynamic Type audit | **Not done.** These need an Apple Developer account and a device, which is owner work. |
+
+## Time zones and daylight saving
+
+Busy blocks are **wall-clock** rules ("Sleep, 23:00–07:00, every day"). Each occurrence's start and end are computed as local calendar times on the right day, never as start plus a fixed duration. So the night of a spring-forward change is 7 hours and a fall-back night is 9. Fermentation steps are **physical** durations between absolute instants.
+
+`Availability.wallClock` resolves the two awkward cases deterministically, identically on Apple platforms, Linux and in the JS port:
+
+- A time skipped by spring-forward (02:30) moves forward by the gap (03:30), matching JavaScript `Date`.
+- A repeated fall-back time takes its first occurrence.
+
+`DSTTests` covers both transitions, every night of 2026 in five zones, whole plans that cross each change, and a device time-zone change mid-bake. Those tests fail under the old fixed-duration logic.
+
+## Recovery after closing and reopening
+
+State is written atomically after every change. On iOS it uses `completeFileProtectionUntilFirstUserAuthentication`, so background reminder rebuilds can still read it after the first unlock.
+
+On launch and on every foreground, `AppModel.resume()` refreshes the clock and calendar, rebuilds reminders from the saved bake and re-reads notification permission. `BakeSession.status(now:)` then tells the live screen what to show:
+
+| Status | When | What the live screen shows |
+|---|---|---|
+| Upcoming | Before the next step is due | The next step |
+| Due | From 5 minutes before the step until the 15-minute grace period ends | The step as due now |
+| Overdue | After the grace period | "Was due … ago", plus a shaping caution if bulk ran long |
+| Stale | More than 12 hours past the planned finish | "Did this bake finish?" with Log and Abandon |
+| Baked | Once the bake is done | The finished state |
 
 ## Known limitations
 
-- **Daylight-saving transitions:** busy blocks are wall-clock and weekly. The planner uses `Calendar` arithmetic, but nothing tests a bake that crosses a DST change.
+- **Daylight-saving edge cases are policy, not physics.** A step that lands inside a skipped hour is shown at the shifted time. An overnight dough spanning fall-back gets an extra hour of wall-clock time but not of fermentation.
 - **Linear extrapolation** of rise underestimates late-bulk acceleration and overestimates early lag. It is good enough for decisions, not for precision.
 - **Temperature is entered by hand.** No sensor or weather integration.
 - **Single oven, single dough.** Batches and multiple doughs are roadmap items.

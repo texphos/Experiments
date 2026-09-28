@@ -8,13 +8,19 @@ Status: draft for owner review · 2026-09-28
 
 A launch only happens if E1 and E2 pass ([validation-experiments.md](validation-experiments.md)). Public launch also needs E3 to pass.
 
-## Phase 0: make it real on a Mac (no spend)
+## Phase 0: device validation (no spend beyond the developer account in Phase 2)
 
-1. Open on a Mac with Xcode 16 or later: `brew install xcodegen && xcodegen generate`, then fix any compile errors (the SwiftUI code has only been syntax-checked).
-2. Run it in the simulator with the local StoreKit config. Test purchase, restore and the unavailable state.
-3. Run the Accessibility Inspector, VoiceOver, the largest Dynamic Type size, dark mode and Reduce Motion.
-4. Test notifications while backgrounded and locked. Test a time-zone change and a bake that crosses daylight saving.
-5. Build the known gaps: the notifications-denied banner and the opt-in counter export for E3.
+Already done in CI:
+- The app builds with Xcode 16.4.
+- Unit, StoreKit and full-loop UI tests pass on a simulator in light and dark.
+- DST cases are covered by core tests.
+
+Still owner work:
+
+1. Open `Hearthday.xcodeproj` on a Mac. Run on a simulator with the local StoreKit config and try purchase, restore and the unavailable state by hand.
+2. Run the Accessibility Inspector, VoiceOver, the largest Dynamic Type size and Reduce Motion.
+3. On a physical iPhone, which needs a signing team: test notifications while backgrounded and locked, and change the time zone mid-bake.
+4. Build the opt-in counter export for E3 (roadmap M2).
 
 ## Phase 1: interviews and head-to-head (E1, E2)
 

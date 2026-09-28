@@ -41,7 +41,11 @@ The native app has **not** been run on a device or simulator (there was no Xcode
 - **Corrupt saved data:** the file is moved aside (quarantined, not deleted) and a banner explains that the app started fresh.
 - **Save failure:** a persistent banner.
 - **StoreKit unavailable:** the reason plus "Try again". The paywall never shows a price it couldn't load.
-- **Notifications denied: a known gap.** The plan still works in the app, but nothing yet tells the user that reminders are off. A banner with a link to Settings is on the roadmap as a pre-TestFlight fix.
+- **Purchase pending, cancelled or failed:** each has its own message. Success is only shown once a verified entitlement is active. A failure message points to Restore and Apple Account purchase history in case the user was charged.
+- **Notifications denied:** the live bake shows "Reminders are off" with a button that opens Hearthday's notification settings. The plan keeps working in the app.
+- **Invalid input:** out-of-range temperatures, ready times in the past or more than 7 days ahead, and broken formulas get "Something needs fixing first" with a plain reason, never an extrapolated plan. Implausible check-in readings get "Check that reading". Busy-time and formula editors disable Save until the entry is valid.
+- **Reopened after time away:** a missed step shows "Was due … ago" in the warning colour, with a shaping caution if bulk ran long. A bake more than 12 hours past its planned finish asks "Did this bake finish?" and offers Log or Abandon.
+- **Saved by a newer version:** the file is kept, not overwritten, with a message to update the app.
 
 ## Accessibility
 
@@ -50,7 +54,8 @@ The native app has **not** been run on a device or simulator (there was no Xcode
 - The ribbon, rise slider and temperature stepper expose spoken values ("3 hands-on steps", "60 percent", "24 °C").
 - Decorative images are hidden from VoiceOver. Empty states read as a single combined element.
 - Minimum hit targets are 44 pt. Primary buttons are 52 pt tall.
-- **Not yet verified:** VoiceOver order, Reduce Motion, large accessibility text sizes and contrast on a real device. These need an Accessibility Inspector pass on a Mac.
+- Light and dark palettes are dynamic colours. UI tests walk the whole loop in both appearances and save screenshots.
+- **Not yet verified:** VoiceOver reading order, Reduce Motion, the largest accessibility text sizes and measured contrast on a real device. These need a manual Accessibility Inspector and VoiceOver pass on a Mac or device.
 
 ## Paywall
 

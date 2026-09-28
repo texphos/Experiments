@@ -6,16 +6,22 @@ Milestones are ordered by dependency and gated by experiments. Each lists the co
 
 ## M0: Done in this branch
 
-- `HearthdayCore`: availability, fermentation model, backward planner with infeasibility explanation and earliest feasible time, live check-in re-planning, calibration (excluding fridge-paused bulks), reminders, persistence with quarantine. 44 XCTest cases.
-- SwiftUI app: onboarding, home with feasible suggestions, plan result, infeasible state, live bake, check-in, finish and rate, journal with calibration, settings (busy times, kitchen, formulas, erase), an honest Pro paywall, and a StoreKit 2 config. **Not compiled yet.**
-- Browser companion prototype: a JS port of the core, parity-tested against Swift fixtures, with an end-to-end walk in headless Chrome.
+- `HearthdayCore`: availability with DST-correct wall-clock busy blocks, fermentation model, backward planner with infeasibility explanation and earliest feasible time, input validation, live check-in re-planning with hedged copy, calibration (excluding fridge-paused bulks), reminders, recovery status, and versioned persistence with repair and quarantine. 80 XCTest cases.
+- SwiftUI app: onboarding, home, plan result (feasible, infeasible and invalid), live bake (due, overdue and stale), check-in, finish and rate, journal with calibration, settings, an honest Pro paywall with verified-only StoreKit 2, and a notifications-off banner. Built and tested in macOS CI with app-model, StoreKit (`SKTestSession`) and full-loop UI tests in light and dark.
+- Committed, reproducible `Hearthday.xcodeproj`. CI fails if it drifts from `project.yml`.
+- Browser companion prototype: a JS port of the core, parity-tested against Swift fixtures, as a single offline HTML file, with a committed headless-Chrome end-to-end test.
 - Docs: strategy, research sources, design, architecture, pricing and economics, validation, launch, and unsent drafts.
 
-## M1: Compile and harden on a Mac (before any tester sees it)
+## M1: Owner-gated device validation (before any tester sees it)
 
-- **Changes:** App target compile fixes; a `ProStore` sandbox test; UI tests for onboarding → plan → check-in; snapshot tests for Dynamic Type and dark mode.
-- **Gaps to close:** the notifications-denied banner; a DST-crossing planner test; migration versioning for the `AppState` JSON.
-- **Risk:** the SwiftUI code has only been syntax-checked, so the number of compile issues is unknown (expected to be small and local).
+- **Needs the owner:** an Apple Developer account, a signing team and a physical iPhone.
+- **Checks:**
+  - Notifications delivered while locked.
+  - Sandbox purchase, restore and refund with a real Apple Account.
+  - A VoiceOver pass and the largest Dynamic Type size.
+  - Reduce Motion.
+  - A bake across a real time-zone change.
+- **Risk:** device-only behaviour (notification delivery timing, sandbox account state) that the simulator doesn't reproduce.
 
 ## M2: Beta instrumentation without analytics (for E3 and E6)
 
