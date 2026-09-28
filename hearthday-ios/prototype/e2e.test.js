@@ -171,6 +171,66 @@ function check(name, cond, detail) {
   await click('[data-testid="live-stale"] [data-action="abandon"]');
   check("abandoning clears the bake and its reminders", (await stored()).session === null && /nothing is scheduled/.test(await page.$eval("#reminders", (e) => e.innerText)));
 
+  console.log("Fridge rescue and late shaping");
+  // Built from the same core the page runs: a fridge-proof bake mixed 2 h ago, with bedtime 30 min away, so the
+  // check-in offers "fridge before bed". Busy times are set to that bedtime so the page sees the same conflict.
+  await fresh(); await onboard();
+  const rescue = await page.evaluate(() => {
+    const H = window.HearthdayCore, cal = H.makeCalendar(false), real = Date.now();
+    const p = H.plan({ now: real, readyBy: real + 34 * H.HOUR, kitchenTempC: 21, blocks: [], proofModes: ["fridge"], starterNeedsFeed: false, allowInoculationAdjustment: false }, cal).primary;
+    if (!p) return { error: "no plan" };
+    const s = H.newSession(p, real);
+    const mix = H.planStep(p, "mix");
+    H.session.complete(s, "mix", mix.end, [], cal);
+    const simNow = H.session.bulkClockStart(s) + 2 * H.HOUR;
+    for (const st of s.plan.steps.slice()) if (st.kind === "fold") H.session.complete(s, st.id, st.end);
+    const bed = new Date(simNow + 30 * H.MIN);
+    const start = bed.getHours() * 60 + bed.getMinutes();
+    const blocks = [{ label: "Sleep", kind: "sleep", weekdays: [1, 2, 3, 4, 5, 6, 7], startMinute: start, endMinute: (start + 9 * 60) % 1440 }];
+    const r = H.checkIn(s, simNow, 40, 21, blocks, cal, {});
+    const fridge = r.options.find((o) => o.kind === "fridgeNow");
+    if (!fridge) return { error: `no fridge option: ${r.options.map((o) => o.kind).join(",")} ${r.summary}` };
+    H.session.apply(s, fridge);
+    const st = JSON.parse(localStorage.getItem("hearthday-prototype-v1"));
+    st.settings.blocks = blocks;
+    st.session = s;
+    st.simOffset = simNow - real;
+    localStorage.setItem("hearthday-prototype-v1", JSON.stringify(st));
+    return { ok: true };
+  });
+  check("fridge rescue scenario could be built", rescue.ok, rescue.error);
+  if (rescue.ok) {
+    await page.reload();
+    const live = await text();
+    check("putting the dough in the fridge is a hands-on step with a reminder",
+      /Next, in .*\n?.*Put the dough in the fridge/s.test(live) && /Put the dough in the fridge/.test(await page.$eval("#reminders", (e) => e.innerText)), live.slice(0, 300));
+    check("check-ins stay available until the dough actually goes in", await has('[data-action="checkin"]'));
+    await click('[data-sim="next"]');
+    await click('[data-action="done"]');
+    check("once chilled, check-ins are gone", !(await has('[data-action="checkin"]')));
+    const chilledText = await text();
+    check("the chilled dough shows as finishing bulk in the fridge", /Finish bulk in fridge/.test(chilledText));
+    check("shaping chilled dough gives no room-temperature window and suggests no check-in",
+      /Shape it straight from the fridge/.test(chilledText) && !/Likely ready/.test(chilledText) && !/Check in first/.test(chilledText), chilledText.slice(0, 400));
+    await shot("fridge-chilled");
+    await page.evaluate(() => {
+      const st = JSON.parse(localStorage.getItem("hearthday-prototype-v1"));
+      const bake = st.session.plan.steps.find((x) => x.id === "bake");
+      st.simOffset = bake.start - 2 * 3600e3 - Date.now();
+      localStorage.setItem("hearthday-prototype-v1", JSON.stringify(st));
+    });
+    await page.reload();
+    const lateLabel = await page.$eval('[data-action="done"]', (b) => b.getAttribute("aria-label")).catch(() => "");
+    check("shape is the overdue step", /Shape/.test(lateLabel), lateLabel);
+    await click('[data-action="done"]');
+    const note = await page.$eval('[data-testid="live-adjustment"]', (e) => e.innerText).catch(() => "");
+    check("shaping late moves the bake and says why", /Shaping ran late, so the bake moved later to give the cold proof at least 8 h/.test(note), note);
+    const after = (await stored()).session.plan.steps;
+    const retard = after.find((x) => x.id === "cold-proof"), bakeStep = after.find((x) => x.id === "bake");
+    check("the cold proof is never shorter than 8 h", retard.end - retard.start >= 8 * 3600e3 && retard.end === bakeStep.start);
+    await shot("late-shape-adjusted");
+  }
+
   console.log("Corrupt saved data");
   await page.evaluate(() => localStorage.setItem("hearthday-prototype-v1", "{not json"));
   await page.reload();

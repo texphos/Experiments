@@ -100,6 +100,8 @@
     busyNoDays: "Choose at least one day.",
     busyTimeInvalid: "Choose a valid start and end time.",
     busyZeroLength: "Start and end can’t be the same time.",
+    doughIsChilled: "The dough is in the fridge, so its rise can’t be compared with room-temperature targets. Shape it cold at the planned time, going by how it looks and feels.",
+    notInBulk: "Check-ins are for the time between mixing and shaping.",
   };
   const problemMessage = (code) => PROBLEM_TEXT[code] || "Something in that entry isn’t valid.";
 
@@ -222,14 +224,16 @@
     fold: (n, count, s, min) => step(`fold-${n}`, "fold", s, s + min * MIN, true, `Fold ${n} of ${count}`, `One set of stretch-and-folds, about ${min} min.`),
     bulk: (s, e, lo, hi, rise) => step("bulk", "bulk", s, e, false, "Bulk ferment", `Likely ${hoursRange(lo, hi)} from mixing. Aim for about ${Math.round(rise)}% rise, a domed top and bubbles at the edges.`),
     shape: (s, min, ls, le, rise) => step("shape", "shape", s, s + min * MIN, true, "Shape", `Shape once the dough is up about ${Math.round(rise)}%. Check in first if it looks early or slow.`, { likelyStart: ls, likelyEnd: le }),
+    shapeCold: (s, min) => step("shape", "shape", s, s + min * MIN, true, "Shape", "Shape it straight from the fridge. Look for a domed top and some bubbles; if it has barely risen, give it time at room temperature first."),
     coldRetard: (s, e, p) => step("cold-proof", "coldRetard", s, e, false, "Cold proof in fridge", `${halfHours((e - s) / HOUR)} h planned. ${p.retardPreferredLowHours}–${p.retardPreferredHighHours} h is typical; ${p.retardMinHours}–${p.retardMaxHours} h is workable.`),
     roomProof: (s, e, lo, hi) => step("room-proof", "roomProof", s, e, false, "Proof at room temperature", `Likely ${hoursRange(lo, hi)}. Bake when a floured poke springs back slowly.`),
+    fridgeDough: (s, min) => step("fridge", "fridgeDough", s, s + min * MIN, true, "Put the dough in the fridge", "Cover it and move it to the fridge. Chilling slows bulk right down; you’ll shape it cold."),
     coldBulk: (s, e) => step("cold-bulk", "coldBulk", s, e, false, "Finish bulk in fridge", "The dough keeps rising slowly while it chills. Shape it straight from the fridge."),
     preheat: (s, min) => step("preheat", "preheat", s, s + min * MIN, true, "Preheat oven", `Oven and pot, about ${min} min.`),
     bake: (s, min) => step("bake", "bake", s, s + min * MIN, true, "Bake", `Score and bake, lid on for the first half, about ${min} min in total.`),
   };
 
-  const STEP_ORDER = ["feedStarter", "starterRise", "mix", "fold", "bulk", "coldBulk", "shape", "coldRetard", "roomProof", "preheat", "bake"];
+  const STEP_ORDER = ["feedStarter", "starterRise", "mix", "fold", "bulk", "fridgeDough", "coldBulk", "shape", "coldRetard", "roomProof", "preheat", "bake"];
   const sortSteps = (steps) => steps.slice().sort((a, b) => a.start - b.start || STEP_ORDER.indexOf(a.kind) - STEP_ORDER.indexOf(b.kind));
   const ceilToGrid = (t, g) => Math.ceil(t / g) * g;
   const floorToMinute = (t) => Math.floor(t / MIN) * MIN;
@@ -483,12 +487,13 @@
 
   // ---------- Live session ----------
   function newSession(plan, startedAt) {
-    return { id: `bake-${startedAt}`, plan: clonePlan(plan), originalReadyAt: plan.readyAt, startedAt, completed: {}, checkIns: [], shapeReadiness: null, finishedAt: null, replanCount: 0 };
+    return { id: `bake-${startedAt}`, plan: clonePlan(plan), originalReadyAt: plan.readyAt, startedAt, completed: {}, checkIns: [], shapeReadiness: null, finishedAt: null, replanCount: 0, adjustmentNote: null };
   }
   function clonePlan(p) { return makePlan(Object.assign({}, p, { steps: p.steps.map((s) => Object.assign({}, s)) })); }
 
   const GRACE_MINUTES = 15;
   const EARLY_READING_MINUTES = 45;
+  const FRIDGE_TRANSFER_MINUTES = 5;
   const STALE_AFTER_HOURS = 12;
   const session = {
     nextAttendedStep: (s) => s.plan.steps.find((x) => x.attended && s.completed[x.id] == null) || null,
@@ -499,6 +504,9 @@
       return s.completed.mix != null ? s.completed.mix - (mix.end - mix.start) : mix.start;
     },
     isInBulk: (s) => s.completed.mix != null && s.completed.shape == null,
+    /** Mirrors BakeSession.isChilled: once the dough went into the fridge (or a legacy plan has a cold bulk). */
+    isChilled: (s) => s.completed.fridge != null || (!planStep(s.plan, "fridge") && s.plan.steps.some((x) => x.kind === "coldBulk")),
+    canCheckIn: (s) => session.isInBulk(s) && !session.isChilled(s),
     /** Mirrors BakeSession.status(now:): upcoming, due, overdue (with minutesLate), baked or stale. */
     status(s, now) {
       if (s.completed.bake != null) return { kind: "baked" };
@@ -523,12 +531,14 @@
       }
       return out.sort((a, b) => a.fireAt - b.fireAt);
     },
-    complete(s, id, now) {
+    /** Mirrors BakeSession.complete: late/early mix or shape may move the bake to keep the cold proof workable. */
+    complete(s, id, now, blocks, cal, process) {
       const st = planStep(s.plan, id);
       if (!st || s.completed[id] != null) return;
       s.completed[id] = now;
       if (id === "mix") { const d = now - st.end; if (Math.abs(d) >= MIN) shiftDough(s, d); }
       if (id === "shape") { const d = now - st.end; if (Math.abs(d) >= MIN) shiftAfterShape(s, d); }
+      if (id === "mix" || id === "shape") keepColdProofWorkable(s, id === "mix" ? "Mixing" : "Shaping", blocks, cal, process || PROCESS);
       if (id === "bake") s.finishedAt = now;
       s.plan = makePlan(s.plan);
     },
@@ -538,10 +548,14 @@
       const tl = timeline(blocks, now - HOUR, Math.max(...pending.map((x) => x.end)), cal);
       return pending.map((x) => { const c = tl.conflict(x.start, x.end - x.start); return c ? { step: x, busyLabel: c.label } : null; }).filter(Boolean);
     },
+    /** Room-temperature bulk only: ends at the fridge transfer when the dough was chilled. */
     actualBulkHours(s) {
       const done = s.completed.shape, sh = planStep(s.plan, "shape");
       if (done == null || !sh) return null;
-      return (done - (sh.end - sh.start) - session.bulkClockStart(s)) / HOUR;
+      let end = done - (sh.end - sh.start);
+      if (s.completed.fridge != null) end = s.completed.fridge - FRIDGE_TRANSFER_MINUTES * MIN;
+      else if (session.isChilled(s)) { const cold = s.plan.steps.find((x) => x.kind === "coldBulk"); if (cold) end = cold.start; }
+      return Math.max(0, (end - session.bulkClockStart(s)) / HOUR);
     },
     averageTempC(s) {
       if (!s.checkIns.length) return s.plan.kitchenTempC;
@@ -550,21 +564,57 @@
     },
     calibrationSample(s) {
       const actual = session.actualBulkHours(s);
-      if (s.shapeReadiness !== "justRight" || actual == null || s.plan.steps.some((x) => x.kind === "coldBulk")) return null;
+      if (s.shapeReadiness !== "justRight" || actual == null || session.isChilled(s) || s.completed.fridge != null
+        || s.plan.steps.some((x) => x.kind === "coldBulk" || x.kind === "fridgeDough")) return null;
       const t = session.averageTempC(s);
       return { date: s.completed.shape, tempC: t, inoculationPercent: s.plan.inoculationPercent, modelHours: bulkHours(makeModel(), t, s.plan.inoculationPercent), actualHours: actual };
     },
     apply(s, option) {
-      const kept = s.plan.steps.filter((x) => ["feedStarter", "starterRise", "mix", "fold"].includes(x.kind));
+      if (session.isChilled(s)) return;
+      const kept = s.plan.steps.filter((x) => ["feedStarter", "starterRise", "mix"].includes(x.kind)
+        || (x.kind === "fold" && (s.completed[x.id] != null || x.end <= option.bulkEndsAt)));
       const bulk = planStep(s.plan, "bulk");
-      if (bulk) kept.push(Object.assign({}, bulk, { end: option.bulkEndsAt }));
+      if (bulk) {
+        const lastKeptEnd = kept.length ? Math.max(...kept.map((x) => x.end)) : bulk.start;
+        kept.push(Object.assign({}, bulk, { start: Math.min(bulk.start, lastKeptEnd, option.bulkEndsAt), end: option.bulkEndsAt }));
+      }
       s.plan.steps = sortSteps(kept.concat(option.steps.map((x) => Object.assign({}, x))));
       if (option.steps.some((x) => x.kind === "coldRetard")) s.plan.proofMode = "fridge";
       if (option.steps.some((x) => x.kind === "roomProof")) s.plan.proofMode = "room";
       s.plan = makePlan(s.plan);
       s.replanCount += 1;
+      s.adjustmentNote = null;
     },
   };
+
+  function keepColdProofWorkable(s, reason, blocks, cal, p) {
+    const retard = planStep(s.plan, "cold-proof"), bake = planStep(s.plan, "bake"), preheat = planStep(s.plan, "preheat");
+    if (!retard || !bake || !preheat || [retard, bake, preheat].some((x) => s.completed[x.id] != null)) return;
+    const low = retard.start + p.retardMinHours * HOUR, high = retard.start + p.retardMaxHours * HOUR;
+    const current = bake.start;
+    if (current >= low && current <= high) return;
+    const grid = p.gridMinutes * MIN;
+    let candidates = [];
+    for (let t = ceilToGrid(low, grid); t <= high; t += grid) candidates.push(t);
+    if (!candidates.length) candidates = [low];
+    candidates.sort((a, b) => { const da = Math.abs(a - current), db = Math.abs(b - current); return da !== db ? da - db : a - b; });
+    const ph = preheat.end - preheat.start, bk = bake.end - bake.start;
+    let chosen = candidates[0];
+    if (blocks) {
+      const tl = timeline(blocks, low - ph - HOUR, high + bk + HOUR, cal);
+      const free = candidates.find((t) => tl.isFree(t - ph, ph + bk));
+      if (free != null) chosen = free;
+    }
+    s.plan.steps = sortSteps(s.plan.steps.map((x) => {
+      if (x.id === retard.id) return Steps.coldRetard(retard.start, chosen, p);
+      if (x.id === preheat.id) return Object.assign({}, x, { start: chosen - ph, end: chosen });
+      if (x.id === bake.id) return Object.assign({}, x, { start: chosen, end: chosen + bk });
+      return x;
+    }));
+    s.adjustmentNote = current < low
+      ? `${reason} ran late, so the bake moved later to give the cold proof at least ${p.retardMinHours} h.`
+      : `${reason} was early, so the bake moved earlier to keep the cold proof under ${p.retardMaxHours} h.`;
+  }
 
   function shiftDough(s, d) {
     const room = s.plan.proofMode === "room";
@@ -626,7 +676,9 @@
   function checkIn(s, now, risePercent, tempC, blocks, cal, modelOverrides, process) {
     const p = process || PROCESS;
     const model = makeModel(modelOverrides);
-    const problems = checkInProblems(risePercent, tempC);
+    let problems = checkInProblems(risePercent, tempC);
+    if (session.isChilled(s)) problems = ["doughIsChilled"];
+    else if (!session.isInBulk(s)) problems = ["notInBulk"];
     if (problems.length) {
       return { progress: 0, targetRisePercent: 0, estimatedReadyAt: now, summary: problems.map(problemMessage).join(" "), options: [], problems };
     }
@@ -659,11 +711,19 @@
     } else {
       const conflict = tl.conflict(readyAt, shapeDuration);
       const label = conflict ? conflict.label : null;
-      const fridgeAt = conflict && conflict.start > now ? Math.max(now, conflict.start - 10 * MIN) : now;
+      // The transfer is hands-on: 10 minutes before the busy block when that slot is free, otherwise right now.
+      const transfer = FRIDGE_TRANSFER_MINUTES * MIN;
+      let fridgeAt = now;
+      if (conflict && conflict.start > now) {
+        const before = Math.max(now, conflict.start - 10 * MIN);
+        if (before - now < 5 * MIN || tl.isFree(before, transfer)) fridgeAt = before;
+      }
       const progressAtFridge = Math.min(1, (elapsed + (fridgeAt - now)) / totalBulk);
-      if (freeShape != null && progressAtFridge >= 0.35 && freeShape > fridgeAt) {
+      if (freeShape != null && progressAtFridge >= 0.35 && freeShape > fridgeAt + transfer) {
         const rest = tail(freeShape, ctx);
         if (rest) {
+          rest[0] = Steps.shapeCold(freeShape, p.shapeMinutes);
+          const moveToFridge = Steps.fridgeDough(fridgeAt, FRIDGE_TRANSFER_MINUTES);
           const comfortable = progressAtFridge >= 0.5;
           const pctIn = Math.round(progressAtFridge * 100);
           options.push({
@@ -674,7 +734,7 @@
               : comfortable
               ? `It goes in about ${pctIn}% of the way through bulk and keeps fermenting slowly as it chills. Shape it cold when you’re free.`
               : `It would go in only about ${pctIn}% of the way through bulk. If it hasn’t risen much by morning, give it time at room temperature before shaping.`,
-            bulkEndsAt: fridgeAt, steps: [Steps.coldBulk(fridgeAt, freeShape)].concat(rest), conflictLabel: null, recommended: comfortable,
+            bulkEndsAt: fridgeAt, steps: [moveToFridge, Steps.coldBulk(moveToFridge.end, freeShape)].concat(rest), conflictLabel: null, recommended: comfortable,
           });
         }
       }
@@ -712,7 +772,7 @@
     makeCalendar, typicalWeekdayWorker, intervals, timeline, blockDuration,
     LIMITS, blockIsValid, blockProblems, formulaProblems, requestProblems, checkInProblems, problemMessage,
     makeModel, bulkHours, roomProofHours, starterPeakHours, targetRisePercent, calibration,
-    halfHours, hoursRange, compact, approximate,
+    halfHours, hoursRange, compact, approximate, FRIDGE_TRANSFER_MINUTES,
     plan, infeasibilityMessage, leverSummary, planStep,
     newSession, session, checkIn,
   };

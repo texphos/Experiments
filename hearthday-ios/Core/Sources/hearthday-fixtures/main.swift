@@ -6,8 +6,18 @@ import HearthdayCore
 var calendar = Calendar(identifier: .gregorian)
 calendar.timeZone = TimeZone(identifier: "UTC")!
 
-let iso = ISO8601DateFormatter()
-iso.timeZone = TimeZone(identifier: "UTC")!
+/// Rounds to the nearest second (ISO8601DateFormatter alone truncates), matching the prototype's comparison.
+struct RoundingISO {
+    let formatter: ISO8601DateFormatter = {
+        let f = ISO8601DateFormatter()
+        f.timeZone = TimeZone(identifier: "UTC")!
+        return f
+    }()
+    func string(from date: Date) -> String {
+        formatter.string(from: Date(timeIntervalSince1970: date.timeIntervalSince1970.rounded()))
+    }
+}
+let iso = RoundingISO()
 
 func d(_ day: Int, _ hour: Int, _ minute: Int = 0) -> Date {
     calendar.date(from: DateComponents(year: 2026, month: 10, day: day, hour: hour, minute: minute))!
@@ -182,6 +192,116 @@ for c in checkInScenarios {
     ])
 }
 
+// Scripted bakes: each action runs on a live session and a snapshot is recorded after it, so the prototype can
+// replay the same script and prove late/early completions, fridge transfers and repeated check-ins match.
+enum SessionAction {
+    /// Mark a step done `lateMinutes` after its current planned end (negative = early).
+    case complete(String, lateMinutes: Int = 0)
+    /// Folds that should be done by then are marked done on time first; `apply` picks an option by kind.
+    case checkIn(hoursAfterMix: Double, rise: Double, tempC: Double, apply: ReplanOption.Kind?)
+    case readiness(ShapeReadiness)
+
+    var json: [String: Any] {
+        switch self {
+        case let .complete(id, late): return ["op": "complete", "step": id, "lateMinutes": late]
+        case let .checkIn(h, rise, temp, apply):
+            return ["op": "checkIn", "hoursAfterMix": h, "rise": rise, "tempC": temp, "apply": apply?.rawValue ?? NSNull()]
+        case let .readiness(r): return ["op": "readiness", "value": r.rawValue]
+        }
+    }
+}
+
+struct SessionScenario {
+    var name: String
+    var plan: PlanScenario
+    var actions: [SessionAction]
+}
+
+let sessionScenarios: [SessionScenario] = [
+    SessionScenario(name: "Shaping 12 h late moves the bake to keep an 8 h cold proof", plan: planScenarios[4], actions: [
+        .complete("feed"), .complete("mix"), .complete("fold-1"), .complete("fold-2"), .complete("fold-3"), .complete("fold-4"),
+        .complete("shape", lateMinutes: 720),
+    ]),
+    SessionScenario(name: "Mixing 12 h late moves the bake into free oven time", plan: planScenarios[4], actions: [
+        .complete("feed"), .complete("mix", lateMinutes: 720), .complete("shape"),
+    ]),
+    SessionScenario(name: "Late shaping in a room-proof plan slides the bake with it", plan: planScenarios[0], actions: [
+        .complete("feed"), .complete("mix"), .complete("shape", lateMinutes: 90),
+    ]),
+    SessionScenario(name: "Fridge before bed, then chilled: no check-ins, no calibration", plan: planScenarios[0], actions: [
+        .complete("feed"), .complete("mix"),
+        .checkIn(hoursAfterMix: 2, rise: 30, tempC: 22, apply: .fridgeNow),
+        .complete("fridge"),
+        .checkIn(hoursAfterMix: 4, rise: 60, tempC: 21, apply: .shapeWhenReady),
+        .complete("shape"), .readiness(.justRight),
+    ]),
+    SessionScenario(name: "Repeated check-ins before the fridge transfer stay in order", plan: planScenarios[0], actions: [
+        .complete("feed"), .complete("mix"),
+        .checkIn(hoursAfterMix: 2, rise: 30, tempC: 22, apply: .fridgeNow),
+        .checkIn(hoursAfterMix: 2.5, rise: 34, tempC: 22, apply: .stayUp),
+        .checkIn(hoursAfterMix: 3, rise: 40, tempC: 22, apply: .fridgeNow),
+    ]),
+    SessionScenario(name: "Early-bulk check-in drops folds after the new shape time", plan: planScenarios[4], actions: [
+        .complete("mix"), .complete("fold-1"),
+        .checkIn(hoursAfterMix: 0.75, rise: 28, tempC: 27, apply: .shapeWhenReady),
+    ]),
+    SessionScenario(name: "Check-in before mixing is refused", plan: planScenarios[0], actions: [
+        .checkIn(hoursAfterMix: 1, rise: 20, tempC: 21, apply: nil),
+    ]),
+]
+
+var sessionOut: [[String: Any]] = []
+for sc in sessionScenarios {
+    guard let plan = Planner.plan(sc.plan.request, calendar: calendar).primary else { continue }
+    var session = BakeSession(plan: plan, startedAt: plan.firstStepAt)
+    let prefix = session.id.uuidString + "-"
+    var snapshots: [[String: Any]] = []
+    for action in sc.actions {
+        var snap: [String: Any] = [:]
+        switch action {
+        case let .complete(id, late):
+            guard let step = session.plan.step(id) else { snap["missing"] = id; break }
+            session.complete(id, at: step.end.addingTimeInterval(TimeInterval(late * 60)), availability: sc.plan.availability, calendar: calendar)
+        case let .checkIn(h, rise, temp, apply):
+            let now = session.bulkClockStart.addingTimeInterval(h * 3600)
+            for step in session.plan.steps where session.isInBulk && step.kind == .fold && step.end <= now && !session.isDone(step) {
+                session.complete(step.id, at: step.end)
+            }
+            let result = LiveReplanner.checkIn(
+                session: session, now: now, risePercent: rise, tempC: temp,
+                availability: sc.plan.availability, calendar: calendar, model: sc.plan.request.model
+            )
+            snap["now"] = iso.string(from: now)
+            snap["problems"] = result.problems.map(\.code)
+            snap["optionKinds"] = result.options.map(\.kind.rawValue)
+            if let kind = apply, let option = result.options.first(where: { $0.kind == kind }) {
+                session.apply(option)
+                snap["applied"] = kind.rawValue
+            }
+            snap["reminders"] = Reminders.specs(for: session, now: now, availability: sc.plan.availability, calendar: calendar).map {
+                ["step": String($0.id.dropFirst(prefix.count)), "fireAt": iso.string(from: $0.fireAt)]
+            }
+        case let .readiness(r):
+            session.shapeReadiness = r
+        }
+        snap["steps"] = stepsJSON(session.plan.steps)
+        snap["shapeDetail"] = session.plan.step("shape")?.detail ?? NSNull()
+        snap["shapeHasLikelyWindow"] = session.plan.step("shape")?.likelyStart != nil
+        snap["adjustmentNote"] = session.adjustmentNote ?? NSNull()
+        snap["isChilled"] = session.isChilled
+        snap["canCheckIn"] = session.canCheckIn
+        snap["actualBulkHours"] = session.actualBulkHours ?? NSNull()
+        snap["hasCalibrationSample"] = session.calibrationSample() != nil
+        snapshots.append(snap)
+    }
+    sessionOut.append([
+        "name": sc.name,
+        "planScenario": sc.plan.name,
+        "actions": sc.actions.map(\.json),
+        "snapshots": snapshots,
+    ])
+}
+
 // Wall-clock busy blocks across US daylight-saving changes (2026-03-08 spring forward, 2026-11-01 fall back).
 var newYork = Calendar(identifier: .gregorian)
 newYork.timeZone = TimeZone(identifier: "America/New_York")!
@@ -212,6 +332,7 @@ let root: [String: Any] = [
     "timeZone": "UTC",
     "planScenarios": planOut,
     "checkInScenarios": checkInOut,
+    "sessionScenarios": sessionOut,
     "dst": [
         "timeZone": "America/New_York",
         "blocks": dstBlocks.blocks.map {

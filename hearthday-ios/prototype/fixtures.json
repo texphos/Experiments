@@ -78,10 +78,16 @@
             "recommended" : true,
             "steps" : [
               {
+                "attended" : true,
+                "end" : "2026-10-09T22:55:00Z",
+                "id" : "fridge",
+                "start" : "2026-10-09T22:50:00Z"
+              },
+              {
                 "attended" : false,
                 "end" : "2026-10-10T07:00:00Z",
                 "id" : "cold-bulk",
-                "start" : "2026-10-09T22:50:00Z"
+                "start" : "2026-10-09T22:55:00Z"
               },
               {
                 "attended" : true,
@@ -143,6 +149,10 @@
           }
         ],
         "remindersAfterFirstOption" : [
+          {
+            "fireAt" : "2026-10-09T22:50:00Z",
+            "step" : "fridge"
+          },
           {
             "fireAt" : "2026-10-10T07:00:00Z",
             "step" : "shape"
@@ -402,14 +412,6 @@
           {
             "fireAt" : "2026-10-10T13:30:00Z",
             "step" : "shape"
-          },
-          {
-            "fireAt" : "2026-10-10T13:45:00Z",
-            "step" : "fold-3"
-          },
-          {
-            "fireAt" : "2026-10-10T14:15:00Z",
-            "step" : "fold-4"
           },
           {
             "fireAt" : "2026-10-11T11:30:00Z",
@@ -1792,6 +1794,2867 @@
         "uncertainty" : 0.2
       },
       "name" : "Invalid: implausible temperature and past time"
+    }
+  ],
+  "sessionScenarios" : [
+    {
+      "actions" : [
+        {
+          "lateMinutes" : 0,
+          "op" : "complete",
+          "step" : "feed"
+        },
+        {
+          "lateMinutes" : 0,
+          "op" : "complete",
+          "step" : "mix"
+        },
+        {
+          "lateMinutes" : 0,
+          "op" : "complete",
+          "step" : "fold-1"
+        },
+        {
+          "lateMinutes" : 0,
+          "op" : "complete",
+          "step" : "fold-2"
+        },
+        {
+          "lateMinutes" : 0,
+          "op" : "complete",
+          "step" : "fold-3"
+        },
+        {
+          "lateMinutes" : 0,
+          "op" : "complete",
+          "step" : "fold-4"
+        },
+        {
+          "lateMinutes" : 720,
+          "op" : "complete",
+          "step" : "shape"
+        }
+      ],
+      "name" : "Shaping 12 h late moves the bake to keep an 8 h cold proof",
+      "planScenario" : "Warm kitchen weekday evening loaf",
+      "snapshots" : [
+        {
+          "actualBulkHours" : null,
+          "adjustmentNote" : null,
+          "canCheckIn" : false,
+          "hasCalibrationSample" : false,
+          "isChilled" : false,
+          "shapeDetail" : "Shape once the dough is up about 37%. Check in first if it looks early or slow.",
+          "shapeHasLikelyWindow" : true,
+          "steps" : [
+            {
+              "attended" : true,
+              "end" : "2026-10-05T08:25:00Z",
+              "id" : "feed",
+              "start" : "2026-10-05T08:20:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-05T18:15:00Z",
+              "id" : "starter-rise",
+              "start" : "2026-10-05T08:25:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T18:35:00Z",
+              "id" : "mix",
+              "start" : "2026-10-05T18:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T18:50:00Z",
+              "id" : "fold-1",
+              "start" : "2026-10-05T18:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T19:20:00Z",
+              "id" : "fold-2",
+              "start" : "2026-10-05T19:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T19:50:00Z",
+              "id" : "fold-3",
+              "start" : "2026-10-05T19:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T20:20:00Z",
+              "id" : "fold-4",
+              "start" : "2026-10-05T20:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-05T22:30:00Z",
+              "id" : "bulk",
+              "start" : "2026-10-05T20:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T22:50:00Z",
+              "id" : "shape",
+              "start" : "2026-10-05T22:30:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-06T18:15:00Z",
+              "id" : "cold-proof",
+              "start" : "2026-10-05T22:50:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-06T18:15:00Z",
+              "id" : "preheat",
+              "start" : "2026-10-06T17:30:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-06T19:00:00Z",
+              "id" : "bake",
+              "start" : "2026-10-06T18:15:00Z"
+            }
+          ]
+        },
+        {
+          "actualBulkHours" : null,
+          "adjustmentNote" : null,
+          "canCheckIn" : true,
+          "hasCalibrationSample" : false,
+          "isChilled" : false,
+          "shapeDetail" : "Shape once the dough is up about 37%. Check in first if it looks early or slow.",
+          "shapeHasLikelyWindow" : true,
+          "steps" : [
+            {
+              "attended" : true,
+              "end" : "2026-10-05T08:25:00Z",
+              "id" : "feed",
+              "start" : "2026-10-05T08:20:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-05T18:15:00Z",
+              "id" : "starter-rise",
+              "start" : "2026-10-05T08:25:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T18:35:00Z",
+              "id" : "mix",
+              "start" : "2026-10-05T18:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T18:50:00Z",
+              "id" : "fold-1",
+              "start" : "2026-10-05T18:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T19:20:00Z",
+              "id" : "fold-2",
+              "start" : "2026-10-05T19:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T19:50:00Z",
+              "id" : "fold-3",
+              "start" : "2026-10-05T19:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T20:20:00Z",
+              "id" : "fold-4",
+              "start" : "2026-10-05T20:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-05T22:30:00Z",
+              "id" : "bulk",
+              "start" : "2026-10-05T20:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T22:50:00Z",
+              "id" : "shape",
+              "start" : "2026-10-05T22:30:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-06T18:15:00Z",
+              "id" : "cold-proof",
+              "start" : "2026-10-05T22:50:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-06T18:15:00Z",
+              "id" : "preheat",
+              "start" : "2026-10-06T17:30:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-06T19:00:00Z",
+              "id" : "bake",
+              "start" : "2026-10-06T18:15:00Z"
+            }
+          ]
+        },
+        {
+          "actualBulkHours" : null,
+          "adjustmentNote" : null,
+          "canCheckIn" : true,
+          "hasCalibrationSample" : false,
+          "isChilled" : false,
+          "shapeDetail" : "Shape once the dough is up about 37%. Check in first if it looks early or slow.",
+          "shapeHasLikelyWindow" : true,
+          "steps" : [
+            {
+              "attended" : true,
+              "end" : "2026-10-05T08:25:00Z",
+              "id" : "feed",
+              "start" : "2026-10-05T08:20:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-05T18:15:00Z",
+              "id" : "starter-rise",
+              "start" : "2026-10-05T08:25:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T18:35:00Z",
+              "id" : "mix",
+              "start" : "2026-10-05T18:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T18:50:00Z",
+              "id" : "fold-1",
+              "start" : "2026-10-05T18:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T19:20:00Z",
+              "id" : "fold-2",
+              "start" : "2026-10-05T19:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T19:50:00Z",
+              "id" : "fold-3",
+              "start" : "2026-10-05T19:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T20:20:00Z",
+              "id" : "fold-4",
+              "start" : "2026-10-05T20:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-05T22:30:00Z",
+              "id" : "bulk",
+              "start" : "2026-10-05T20:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T22:50:00Z",
+              "id" : "shape",
+              "start" : "2026-10-05T22:30:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-06T18:15:00Z",
+              "id" : "cold-proof",
+              "start" : "2026-10-05T22:50:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-06T18:15:00Z",
+              "id" : "preheat",
+              "start" : "2026-10-06T17:30:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-06T19:00:00Z",
+              "id" : "bake",
+              "start" : "2026-10-06T18:15:00Z"
+            }
+          ]
+        },
+        {
+          "actualBulkHours" : null,
+          "adjustmentNote" : null,
+          "canCheckIn" : true,
+          "hasCalibrationSample" : false,
+          "isChilled" : false,
+          "shapeDetail" : "Shape once the dough is up about 37%. Check in first if it looks early or slow.",
+          "shapeHasLikelyWindow" : true,
+          "steps" : [
+            {
+              "attended" : true,
+              "end" : "2026-10-05T08:25:00Z",
+              "id" : "feed",
+              "start" : "2026-10-05T08:20:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-05T18:15:00Z",
+              "id" : "starter-rise",
+              "start" : "2026-10-05T08:25:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T18:35:00Z",
+              "id" : "mix",
+              "start" : "2026-10-05T18:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T18:50:00Z",
+              "id" : "fold-1",
+              "start" : "2026-10-05T18:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T19:20:00Z",
+              "id" : "fold-2",
+              "start" : "2026-10-05T19:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T19:50:00Z",
+              "id" : "fold-3",
+              "start" : "2026-10-05T19:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T20:20:00Z",
+              "id" : "fold-4",
+              "start" : "2026-10-05T20:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-05T22:30:00Z",
+              "id" : "bulk",
+              "start" : "2026-10-05T20:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T22:50:00Z",
+              "id" : "shape",
+              "start" : "2026-10-05T22:30:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-06T18:15:00Z",
+              "id" : "cold-proof",
+              "start" : "2026-10-05T22:50:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-06T18:15:00Z",
+              "id" : "preheat",
+              "start" : "2026-10-06T17:30:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-06T19:00:00Z",
+              "id" : "bake",
+              "start" : "2026-10-06T18:15:00Z"
+            }
+          ]
+        },
+        {
+          "actualBulkHours" : null,
+          "adjustmentNote" : null,
+          "canCheckIn" : true,
+          "hasCalibrationSample" : false,
+          "isChilled" : false,
+          "shapeDetail" : "Shape once the dough is up about 37%. Check in first if it looks early or slow.",
+          "shapeHasLikelyWindow" : true,
+          "steps" : [
+            {
+              "attended" : true,
+              "end" : "2026-10-05T08:25:00Z",
+              "id" : "feed",
+              "start" : "2026-10-05T08:20:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-05T18:15:00Z",
+              "id" : "starter-rise",
+              "start" : "2026-10-05T08:25:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T18:35:00Z",
+              "id" : "mix",
+              "start" : "2026-10-05T18:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T18:50:00Z",
+              "id" : "fold-1",
+              "start" : "2026-10-05T18:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T19:20:00Z",
+              "id" : "fold-2",
+              "start" : "2026-10-05T19:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T19:50:00Z",
+              "id" : "fold-3",
+              "start" : "2026-10-05T19:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T20:20:00Z",
+              "id" : "fold-4",
+              "start" : "2026-10-05T20:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-05T22:30:00Z",
+              "id" : "bulk",
+              "start" : "2026-10-05T20:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T22:50:00Z",
+              "id" : "shape",
+              "start" : "2026-10-05T22:30:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-06T18:15:00Z",
+              "id" : "cold-proof",
+              "start" : "2026-10-05T22:50:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-06T18:15:00Z",
+              "id" : "preheat",
+              "start" : "2026-10-06T17:30:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-06T19:00:00Z",
+              "id" : "bake",
+              "start" : "2026-10-06T18:15:00Z"
+            }
+          ]
+        },
+        {
+          "actualBulkHours" : null,
+          "adjustmentNote" : null,
+          "canCheckIn" : true,
+          "hasCalibrationSample" : false,
+          "isChilled" : false,
+          "shapeDetail" : "Shape once the dough is up about 37%. Check in first if it looks early or slow.",
+          "shapeHasLikelyWindow" : true,
+          "steps" : [
+            {
+              "attended" : true,
+              "end" : "2026-10-05T08:25:00Z",
+              "id" : "feed",
+              "start" : "2026-10-05T08:20:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-05T18:15:00Z",
+              "id" : "starter-rise",
+              "start" : "2026-10-05T08:25:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T18:35:00Z",
+              "id" : "mix",
+              "start" : "2026-10-05T18:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T18:50:00Z",
+              "id" : "fold-1",
+              "start" : "2026-10-05T18:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T19:20:00Z",
+              "id" : "fold-2",
+              "start" : "2026-10-05T19:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T19:50:00Z",
+              "id" : "fold-3",
+              "start" : "2026-10-05T19:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T20:20:00Z",
+              "id" : "fold-4",
+              "start" : "2026-10-05T20:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-05T22:30:00Z",
+              "id" : "bulk",
+              "start" : "2026-10-05T20:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T22:50:00Z",
+              "id" : "shape",
+              "start" : "2026-10-05T22:30:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-06T18:15:00Z",
+              "id" : "cold-proof",
+              "start" : "2026-10-05T22:50:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-06T18:15:00Z",
+              "id" : "preheat",
+              "start" : "2026-10-06T17:30:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-06T19:00:00Z",
+              "id" : "bake",
+              "start" : "2026-10-06T18:15:00Z"
+            }
+          ]
+        },
+        {
+          "actualBulkHours" : 16.25,
+          "adjustmentNote" : "Shaping ran late, so the bake moved later to give the cold proof at least 8 h.",
+          "canCheckIn" : false,
+          "hasCalibrationSample" : false,
+          "isChilled" : false,
+          "shapeDetail" : "Shape once the dough is up about 37%. Check in first if it looks early or slow.",
+          "shapeHasLikelyWindow" : true,
+          "steps" : [
+            {
+              "attended" : true,
+              "end" : "2026-10-05T08:25:00Z",
+              "id" : "feed",
+              "start" : "2026-10-05T08:20:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-05T18:15:00Z",
+              "id" : "starter-rise",
+              "start" : "2026-10-05T08:25:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T18:35:00Z",
+              "id" : "mix",
+              "start" : "2026-10-05T18:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T18:50:00Z",
+              "id" : "fold-1",
+              "start" : "2026-10-05T18:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T19:20:00Z",
+              "id" : "fold-2",
+              "start" : "2026-10-05T19:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T19:50:00Z",
+              "id" : "fold-3",
+              "start" : "2026-10-05T19:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T20:20:00Z",
+              "id" : "fold-4",
+              "start" : "2026-10-05T20:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-05T22:30:00Z",
+              "id" : "bulk",
+              "start" : "2026-10-05T20:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T22:50:00Z",
+              "id" : "shape",
+              "start" : "2026-10-05T22:30:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-06T19:00:00Z",
+              "id" : "cold-proof",
+              "start" : "2026-10-06T10:50:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-06T19:00:00Z",
+              "id" : "preheat",
+              "start" : "2026-10-06T18:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-06T19:45:00Z",
+              "id" : "bake",
+              "start" : "2026-10-06T19:00:00Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "actions" : [
+        {
+          "lateMinutes" : 0,
+          "op" : "complete",
+          "step" : "feed"
+        },
+        {
+          "lateMinutes" : 720,
+          "op" : "complete",
+          "step" : "mix"
+        },
+        {
+          "lateMinutes" : 0,
+          "op" : "complete",
+          "step" : "shape"
+        }
+      ],
+      "name" : "Mixing 12 h late moves the bake into free oven time",
+      "planScenario" : "Warm kitchen weekday evening loaf",
+      "snapshots" : [
+        {
+          "actualBulkHours" : null,
+          "adjustmentNote" : null,
+          "canCheckIn" : false,
+          "hasCalibrationSample" : false,
+          "isChilled" : false,
+          "shapeDetail" : "Shape once the dough is up about 37%. Check in first if it looks early or slow.",
+          "shapeHasLikelyWindow" : true,
+          "steps" : [
+            {
+              "attended" : true,
+              "end" : "2026-10-05T08:25:00Z",
+              "id" : "feed",
+              "start" : "2026-10-05T08:20:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-05T18:15:00Z",
+              "id" : "starter-rise",
+              "start" : "2026-10-05T08:25:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T18:35:00Z",
+              "id" : "mix",
+              "start" : "2026-10-05T18:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T18:50:00Z",
+              "id" : "fold-1",
+              "start" : "2026-10-05T18:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T19:20:00Z",
+              "id" : "fold-2",
+              "start" : "2026-10-05T19:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T19:50:00Z",
+              "id" : "fold-3",
+              "start" : "2026-10-05T19:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T20:20:00Z",
+              "id" : "fold-4",
+              "start" : "2026-10-05T20:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-05T22:30:00Z",
+              "id" : "bulk",
+              "start" : "2026-10-05T20:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T22:50:00Z",
+              "id" : "shape",
+              "start" : "2026-10-05T22:30:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-06T18:15:00Z",
+              "id" : "cold-proof",
+              "start" : "2026-10-05T22:50:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-06T18:15:00Z",
+              "id" : "preheat",
+              "start" : "2026-10-06T17:30:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-06T19:00:00Z",
+              "id" : "bake",
+              "start" : "2026-10-06T18:15:00Z"
+            }
+          ]
+        },
+        {
+          "actualBulkHours" : null,
+          "adjustmentNote" : "Mixing ran late, so the bake moved later to give the cold proof at least 8 h.",
+          "canCheckIn" : true,
+          "hasCalibrationSample" : false,
+          "isChilled" : false,
+          "shapeDetail" : "Shape once the dough is up about 37%. Check in first if it looks early or slow.",
+          "shapeHasLikelyWindow" : true,
+          "steps" : [
+            {
+              "attended" : true,
+              "end" : "2026-10-05T08:25:00Z",
+              "id" : "feed",
+              "start" : "2026-10-05T08:20:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-05T18:15:00Z",
+              "id" : "starter-rise",
+              "start" : "2026-10-05T08:25:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T18:35:00Z",
+              "id" : "mix",
+              "start" : "2026-10-05T18:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-06T06:50:00Z",
+              "id" : "fold-1",
+              "start" : "2026-10-06T06:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-06T07:20:00Z",
+              "id" : "fold-2",
+              "start" : "2026-10-06T07:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-06T07:50:00Z",
+              "id" : "fold-3",
+              "start" : "2026-10-06T07:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-06T08:20:00Z",
+              "id" : "fold-4",
+              "start" : "2026-10-06T08:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-06T10:30:00Z",
+              "id" : "bulk",
+              "start" : "2026-10-06T08:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-06T10:50:00Z",
+              "id" : "shape",
+              "start" : "2026-10-06T10:30:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-06T19:00:00Z",
+              "id" : "cold-proof",
+              "start" : "2026-10-06T10:50:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-06T19:00:00Z",
+              "id" : "preheat",
+              "start" : "2026-10-06T18:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-06T19:45:00Z",
+              "id" : "bake",
+              "start" : "2026-10-06T19:00:00Z"
+            }
+          ]
+        },
+        {
+          "actualBulkHours" : 4.25,
+          "adjustmentNote" : "Mixing ran late, so the bake moved later to give the cold proof at least 8 h.",
+          "canCheckIn" : false,
+          "hasCalibrationSample" : false,
+          "isChilled" : false,
+          "shapeDetail" : "Shape once the dough is up about 37%. Check in first if it looks early or slow.",
+          "shapeHasLikelyWindow" : true,
+          "steps" : [
+            {
+              "attended" : true,
+              "end" : "2026-10-05T08:25:00Z",
+              "id" : "feed",
+              "start" : "2026-10-05T08:20:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-05T18:15:00Z",
+              "id" : "starter-rise",
+              "start" : "2026-10-05T08:25:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T18:35:00Z",
+              "id" : "mix",
+              "start" : "2026-10-05T18:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-06T06:50:00Z",
+              "id" : "fold-1",
+              "start" : "2026-10-06T06:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-06T07:20:00Z",
+              "id" : "fold-2",
+              "start" : "2026-10-06T07:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-06T07:50:00Z",
+              "id" : "fold-3",
+              "start" : "2026-10-06T07:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-06T08:20:00Z",
+              "id" : "fold-4",
+              "start" : "2026-10-06T08:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-06T10:30:00Z",
+              "id" : "bulk",
+              "start" : "2026-10-06T08:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-06T10:50:00Z",
+              "id" : "shape",
+              "start" : "2026-10-06T10:30:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-06T19:00:00Z",
+              "id" : "cold-proof",
+              "start" : "2026-10-06T10:50:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-06T19:00:00Z",
+              "id" : "preheat",
+              "start" : "2026-10-06T18:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-06T19:45:00Z",
+              "id" : "bake",
+              "start" : "2026-10-06T19:00:00Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "actions" : [
+        {
+          "lateMinutes" : 0,
+          "op" : "complete",
+          "step" : "feed"
+        },
+        {
+          "lateMinutes" : 0,
+          "op" : "complete",
+          "step" : "mix"
+        },
+        {
+          "lateMinutes" : 90,
+          "op" : "complete",
+          "step" : "shape"
+        }
+      ],
+      "name" : "Late shaping in a room-proof plan slides the bake with it",
+      "planScenario" : "Friday morning → Saturday 10:00",
+      "snapshots" : [
+        {
+          "actualBulkHours" : null,
+          "adjustmentNote" : null,
+          "canCheckIn" : false,
+          "hasCalibrationSample" : false,
+          "isChilled" : false,
+          "shapeDetail" : "Shape once the dough is up about 75%. Check in first if it looks early or slow.",
+          "shapeHasLikelyWindow" : true,
+          "steps" : [
+            {
+              "attended" : true,
+              "end" : "2026-10-09T08:20:00Z",
+              "id" : "feed",
+              "start" : "2026-10-09T08:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-09T20:15:00Z",
+              "id" : "starter-rise",
+              "start" : "2026-10-09T08:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T20:35:00Z",
+              "id" : "mix",
+              "start" : "2026-10-09T20:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T20:50:00Z",
+              "id" : "fold-1",
+              "start" : "2026-10-09T20:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T21:20:00Z",
+              "id" : "fold-2",
+              "start" : "2026-10-09T21:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T21:50:00Z",
+              "id" : "fold-3",
+              "start" : "2026-10-09T21:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T22:20:00Z",
+              "id" : "fold-4",
+              "start" : "2026-10-09T22:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-10T07:00:00Z",
+              "id" : "bulk",
+              "start" : "2026-10-09T22:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T07:20:00Z",
+              "id" : "shape",
+              "start" : "2026-10-10T07:00:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-10T09:15:00Z",
+              "id" : "room-proof",
+              "start" : "2026-10-10T07:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T09:15:00Z",
+              "id" : "preheat",
+              "start" : "2026-10-10T08:30:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T10:00:00Z",
+              "id" : "bake",
+              "start" : "2026-10-10T09:15:00Z"
+            }
+          ]
+        },
+        {
+          "actualBulkHours" : null,
+          "adjustmentNote" : null,
+          "canCheckIn" : true,
+          "hasCalibrationSample" : false,
+          "isChilled" : false,
+          "shapeDetail" : "Shape once the dough is up about 75%. Check in first if it looks early or slow.",
+          "shapeHasLikelyWindow" : true,
+          "steps" : [
+            {
+              "attended" : true,
+              "end" : "2026-10-09T08:20:00Z",
+              "id" : "feed",
+              "start" : "2026-10-09T08:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-09T20:15:00Z",
+              "id" : "starter-rise",
+              "start" : "2026-10-09T08:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T20:35:00Z",
+              "id" : "mix",
+              "start" : "2026-10-09T20:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T20:50:00Z",
+              "id" : "fold-1",
+              "start" : "2026-10-09T20:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T21:20:00Z",
+              "id" : "fold-2",
+              "start" : "2026-10-09T21:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T21:50:00Z",
+              "id" : "fold-3",
+              "start" : "2026-10-09T21:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T22:20:00Z",
+              "id" : "fold-4",
+              "start" : "2026-10-09T22:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-10T07:00:00Z",
+              "id" : "bulk",
+              "start" : "2026-10-09T22:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T07:20:00Z",
+              "id" : "shape",
+              "start" : "2026-10-10T07:00:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-10T09:15:00Z",
+              "id" : "room-proof",
+              "start" : "2026-10-10T07:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T09:15:00Z",
+              "id" : "preheat",
+              "start" : "2026-10-10T08:30:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T10:00:00Z",
+              "id" : "bake",
+              "start" : "2026-10-10T09:15:00Z"
+            }
+          ]
+        },
+        {
+          "actualBulkHours" : 12.25,
+          "adjustmentNote" : null,
+          "canCheckIn" : false,
+          "hasCalibrationSample" : false,
+          "isChilled" : false,
+          "shapeDetail" : "Shape once the dough is up about 75%. Check in first if it looks early or slow.",
+          "shapeHasLikelyWindow" : true,
+          "steps" : [
+            {
+              "attended" : true,
+              "end" : "2026-10-09T08:20:00Z",
+              "id" : "feed",
+              "start" : "2026-10-09T08:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-09T20:15:00Z",
+              "id" : "starter-rise",
+              "start" : "2026-10-09T08:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T20:35:00Z",
+              "id" : "mix",
+              "start" : "2026-10-09T20:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T20:50:00Z",
+              "id" : "fold-1",
+              "start" : "2026-10-09T20:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T21:20:00Z",
+              "id" : "fold-2",
+              "start" : "2026-10-09T21:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T21:50:00Z",
+              "id" : "fold-3",
+              "start" : "2026-10-09T21:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T22:20:00Z",
+              "id" : "fold-4",
+              "start" : "2026-10-09T22:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-10T07:00:00Z",
+              "id" : "bulk",
+              "start" : "2026-10-09T22:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T07:20:00Z",
+              "id" : "shape",
+              "start" : "2026-10-10T07:00:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-10T10:45:00Z",
+              "id" : "room-proof",
+              "start" : "2026-10-10T08:50:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T10:45:00Z",
+              "id" : "preheat",
+              "start" : "2026-10-10T10:00:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T11:30:00Z",
+              "id" : "bake",
+              "start" : "2026-10-10T10:45:00Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "actions" : [
+        {
+          "lateMinutes" : 0,
+          "op" : "complete",
+          "step" : "feed"
+        },
+        {
+          "lateMinutes" : 0,
+          "op" : "complete",
+          "step" : "mix"
+        },
+        {
+          "apply" : "fridgeNow",
+          "hoursAfterMix" : 2,
+          "op" : "checkIn",
+          "rise" : 30,
+          "tempC" : 22
+        },
+        {
+          "lateMinutes" : 0,
+          "op" : "complete",
+          "step" : "fridge"
+        },
+        {
+          "apply" : "shapeWhenReady",
+          "hoursAfterMix" : 4,
+          "op" : "checkIn",
+          "rise" : 60,
+          "tempC" : 21
+        },
+        {
+          "lateMinutes" : 0,
+          "op" : "complete",
+          "step" : "shape"
+        },
+        {
+          "op" : "readiness",
+          "value" : "justRight"
+        }
+      ],
+      "name" : "Fridge before bed, then chilled: no check-ins, no calibration",
+      "planScenario" : "Friday morning → Saturday 10:00",
+      "snapshots" : [
+        {
+          "actualBulkHours" : null,
+          "adjustmentNote" : null,
+          "canCheckIn" : false,
+          "hasCalibrationSample" : false,
+          "isChilled" : false,
+          "shapeDetail" : "Shape once the dough is up about 75%. Check in first if it looks early or slow.",
+          "shapeHasLikelyWindow" : true,
+          "steps" : [
+            {
+              "attended" : true,
+              "end" : "2026-10-09T08:20:00Z",
+              "id" : "feed",
+              "start" : "2026-10-09T08:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-09T20:15:00Z",
+              "id" : "starter-rise",
+              "start" : "2026-10-09T08:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T20:35:00Z",
+              "id" : "mix",
+              "start" : "2026-10-09T20:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T20:50:00Z",
+              "id" : "fold-1",
+              "start" : "2026-10-09T20:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T21:20:00Z",
+              "id" : "fold-2",
+              "start" : "2026-10-09T21:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T21:50:00Z",
+              "id" : "fold-3",
+              "start" : "2026-10-09T21:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T22:20:00Z",
+              "id" : "fold-4",
+              "start" : "2026-10-09T22:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-10T07:00:00Z",
+              "id" : "bulk",
+              "start" : "2026-10-09T22:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T07:20:00Z",
+              "id" : "shape",
+              "start" : "2026-10-10T07:00:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-10T09:15:00Z",
+              "id" : "room-proof",
+              "start" : "2026-10-10T07:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T09:15:00Z",
+              "id" : "preheat",
+              "start" : "2026-10-10T08:30:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T10:00:00Z",
+              "id" : "bake",
+              "start" : "2026-10-10T09:15:00Z"
+            }
+          ]
+        },
+        {
+          "actualBulkHours" : null,
+          "adjustmentNote" : null,
+          "canCheckIn" : true,
+          "hasCalibrationSample" : false,
+          "isChilled" : false,
+          "shapeDetail" : "Shape once the dough is up about 75%. Check in first if it looks early or slow.",
+          "shapeHasLikelyWindow" : true,
+          "steps" : [
+            {
+              "attended" : true,
+              "end" : "2026-10-09T08:20:00Z",
+              "id" : "feed",
+              "start" : "2026-10-09T08:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-09T20:15:00Z",
+              "id" : "starter-rise",
+              "start" : "2026-10-09T08:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T20:35:00Z",
+              "id" : "mix",
+              "start" : "2026-10-09T20:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T20:50:00Z",
+              "id" : "fold-1",
+              "start" : "2026-10-09T20:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T21:20:00Z",
+              "id" : "fold-2",
+              "start" : "2026-10-09T21:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T21:50:00Z",
+              "id" : "fold-3",
+              "start" : "2026-10-09T21:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T22:20:00Z",
+              "id" : "fold-4",
+              "start" : "2026-10-09T22:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-10T07:00:00Z",
+              "id" : "bulk",
+              "start" : "2026-10-09T22:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T07:20:00Z",
+              "id" : "shape",
+              "start" : "2026-10-10T07:00:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-10T09:15:00Z",
+              "id" : "room-proof",
+              "start" : "2026-10-10T07:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T09:15:00Z",
+              "id" : "preheat",
+              "start" : "2026-10-10T08:30:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T10:00:00Z",
+              "id" : "bake",
+              "start" : "2026-10-10T09:15:00Z"
+            }
+          ]
+        },
+        {
+          "actualBulkHours" : null,
+          "adjustmentNote" : null,
+          "applied" : "fridgeNow",
+          "canCheckIn" : true,
+          "hasCalibrationSample" : false,
+          "isChilled" : false,
+          "now" : "2026-10-09T22:15:00Z",
+          "optionKinds" : [
+            "fridgeNow",
+            "stayUp"
+          ],
+          "problems" : [
+
+          ],
+          "reminders" : [
+            {
+              "fireAt" : "2026-10-09T22:50:00Z",
+              "step" : "fridge"
+            },
+            {
+              "fireAt" : "2026-10-10T07:00:00Z",
+              "step" : "shape"
+            },
+            {
+              "fireAt" : "2026-10-10T08:30:00Z",
+              "step" : "preheat"
+            },
+            {
+              "fireAt" : "2026-10-10T09:15:00Z",
+              "step" : "bake"
+            }
+          ],
+          "shapeDetail" : "Shape it straight from the fridge. Look for a domed top and some bubbles; if it has barely risen, give it time at room temperature first.",
+          "shapeHasLikelyWindow" : false,
+          "steps" : [
+            {
+              "attended" : true,
+              "end" : "2026-10-09T08:20:00Z",
+              "id" : "feed",
+              "start" : "2026-10-09T08:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-09T20:15:00Z",
+              "id" : "starter-rise",
+              "start" : "2026-10-09T08:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T20:35:00Z",
+              "id" : "mix",
+              "start" : "2026-10-09T20:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T20:50:00Z",
+              "id" : "fold-1",
+              "start" : "2026-10-09T20:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T21:20:00Z",
+              "id" : "fold-2",
+              "start" : "2026-10-09T21:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T21:50:00Z",
+              "id" : "fold-3",
+              "start" : "2026-10-09T21:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T22:20:00Z",
+              "id" : "fold-4",
+              "start" : "2026-10-09T22:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-09T22:50:00Z",
+              "id" : "bulk",
+              "start" : "2026-10-09T22:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T22:55:00Z",
+              "id" : "fridge",
+              "start" : "2026-10-09T22:50:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-10T07:00:00Z",
+              "id" : "cold-bulk",
+              "start" : "2026-10-09T22:55:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T07:20:00Z",
+              "id" : "shape",
+              "start" : "2026-10-10T07:00:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-10T09:15:00Z",
+              "id" : "room-proof",
+              "start" : "2026-10-10T07:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T09:15:00Z",
+              "id" : "preheat",
+              "start" : "2026-10-10T08:30:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T10:00:00Z",
+              "id" : "bake",
+              "start" : "2026-10-10T09:15:00Z"
+            }
+          ]
+        },
+        {
+          "actualBulkHours" : null,
+          "adjustmentNote" : null,
+          "canCheckIn" : false,
+          "hasCalibrationSample" : false,
+          "isChilled" : true,
+          "shapeDetail" : "Shape it straight from the fridge. Look for a domed top and some bubbles; if it has barely risen, give it time at room temperature first.",
+          "shapeHasLikelyWindow" : false,
+          "steps" : [
+            {
+              "attended" : true,
+              "end" : "2026-10-09T08:20:00Z",
+              "id" : "feed",
+              "start" : "2026-10-09T08:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-09T20:15:00Z",
+              "id" : "starter-rise",
+              "start" : "2026-10-09T08:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T20:35:00Z",
+              "id" : "mix",
+              "start" : "2026-10-09T20:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T20:50:00Z",
+              "id" : "fold-1",
+              "start" : "2026-10-09T20:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T21:20:00Z",
+              "id" : "fold-2",
+              "start" : "2026-10-09T21:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T21:50:00Z",
+              "id" : "fold-3",
+              "start" : "2026-10-09T21:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T22:20:00Z",
+              "id" : "fold-4",
+              "start" : "2026-10-09T22:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-09T22:50:00Z",
+              "id" : "bulk",
+              "start" : "2026-10-09T22:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T22:55:00Z",
+              "id" : "fridge",
+              "start" : "2026-10-09T22:50:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-10T07:00:00Z",
+              "id" : "cold-bulk",
+              "start" : "2026-10-09T22:55:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T07:20:00Z",
+              "id" : "shape",
+              "start" : "2026-10-10T07:00:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-10T09:15:00Z",
+              "id" : "room-proof",
+              "start" : "2026-10-10T07:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T09:15:00Z",
+              "id" : "preheat",
+              "start" : "2026-10-10T08:30:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T10:00:00Z",
+              "id" : "bake",
+              "start" : "2026-10-10T09:15:00Z"
+            }
+          ]
+        },
+        {
+          "actualBulkHours" : null,
+          "adjustmentNote" : null,
+          "canCheckIn" : false,
+          "hasCalibrationSample" : false,
+          "isChilled" : true,
+          "now" : "2026-10-10T00:15:00Z",
+          "optionKinds" : [
+
+          ],
+          "problems" : [
+            "doughIsChilled"
+          ],
+          "reminders" : [
+            {
+              "fireAt" : "2026-10-10T07:00:00Z",
+              "step" : "shape"
+            },
+            {
+              "fireAt" : "2026-10-10T08:30:00Z",
+              "step" : "preheat"
+            },
+            {
+              "fireAt" : "2026-10-10T09:15:00Z",
+              "step" : "bake"
+            }
+          ],
+          "shapeDetail" : "Shape it straight from the fridge. Look for a domed top and some bubbles; if it has barely risen, give it time at room temperature first.",
+          "shapeHasLikelyWindow" : false,
+          "steps" : [
+            {
+              "attended" : true,
+              "end" : "2026-10-09T08:20:00Z",
+              "id" : "feed",
+              "start" : "2026-10-09T08:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-09T20:15:00Z",
+              "id" : "starter-rise",
+              "start" : "2026-10-09T08:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T20:35:00Z",
+              "id" : "mix",
+              "start" : "2026-10-09T20:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T20:50:00Z",
+              "id" : "fold-1",
+              "start" : "2026-10-09T20:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T21:20:00Z",
+              "id" : "fold-2",
+              "start" : "2026-10-09T21:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T21:50:00Z",
+              "id" : "fold-3",
+              "start" : "2026-10-09T21:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T22:20:00Z",
+              "id" : "fold-4",
+              "start" : "2026-10-09T22:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-09T22:50:00Z",
+              "id" : "bulk",
+              "start" : "2026-10-09T22:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T22:55:00Z",
+              "id" : "fridge",
+              "start" : "2026-10-09T22:50:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-10T07:00:00Z",
+              "id" : "cold-bulk",
+              "start" : "2026-10-09T22:55:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T07:20:00Z",
+              "id" : "shape",
+              "start" : "2026-10-10T07:00:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-10T09:15:00Z",
+              "id" : "room-proof",
+              "start" : "2026-10-10T07:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T09:15:00Z",
+              "id" : "preheat",
+              "start" : "2026-10-10T08:30:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T10:00:00Z",
+              "id" : "bake",
+              "start" : "2026-10-10T09:15:00Z"
+            }
+          ]
+        },
+        {
+          "actualBulkHours" : 2.5833333333333335,
+          "adjustmentNote" : null,
+          "canCheckIn" : false,
+          "hasCalibrationSample" : false,
+          "isChilled" : true,
+          "shapeDetail" : "Shape it straight from the fridge. Look for a domed top and some bubbles; if it has barely risen, give it time at room temperature first.",
+          "shapeHasLikelyWindow" : false,
+          "steps" : [
+            {
+              "attended" : true,
+              "end" : "2026-10-09T08:20:00Z",
+              "id" : "feed",
+              "start" : "2026-10-09T08:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-09T20:15:00Z",
+              "id" : "starter-rise",
+              "start" : "2026-10-09T08:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T20:35:00Z",
+              "id" : "mix",
+              "start" : "2026-10-09T20:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T20:50:00Z",
+              "id" : "fold-1",
+              "start" : "2026-10-09T20:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T21:20:00Z",
+              "id" : "fold-2",
+              "start" : "2026-10-09T21:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T21:50:00Z",
+              "id" : "fold-3",
+              "start" : "2026-10-09T21:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T22:20:00Z",
+              "id" : "fold-4",
+              "start" : "2026-10-09T22:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-09T22:50:00Z",
+              "id" : "bulk",
+              "start" : "2026-10-09T22:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T22:55:00Z",
+              "id" : "fridge",
+              "start" : "2026-10-09T22:50:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-10T07:00:00Z",
+              "id" : "cold-bulk",
+              "start" : "2026-10-09T22:55:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T07:20:00Z",
+              "id" : "shape",
+              "start" : "2026-10-10T07:00:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-10T09:15:00Z",
+              "id" : "room-proof",
+              "start" : "2026-10-10T07:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T09:15:00Z",
+              "id" : "preheat",
+              "start" : "2026-10-10T08:30:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T10:00:00Z",
+              "id" : "bake",
+              "start" : "2026-10-10T09:15:00Z"
+            }
+          ]
+        },
+        {
+          "actualBulkHours" : 2.5833333333333335,
+          "adjustmentNote" : null,
+          "canCheckIn" : false,
+          "hasCalibrationSample" : false,
+          "isChilled" : true,
+          "shapeDetail" : "Shape it straight from the fridge. Look for a domed top and some bubbles; if it has barely risen, give it time at room temperature first.",
+          "shapeHasLikelyWindow" : false,
+          "steps" : [
+            {
+              "attended" : true,
+              "end" : "2026-10-09T08:20:00Z",
+              "id" : "feed",
+              "start" : "2026-10-09T08:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-09T20:15:00Z",
+              "id" : "starter-rise",
+              "start" : "2026-10-09T08:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T20:35:00Z",
+              "id" : "mix",
+              "start" : "2026-10-09T20:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T20:50:00Z",
+              "id" : "fold-1",
+              "start" : "2026-10-09T20:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T21:20:00Z",
+              "id" : "fold-2",
+              "start" : "2026-10-09T21:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T21:50:00Z",
+              "id" : "fold-3",
+              "start" : "2026-10-09T21:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T22:20:00Z",
+              "id" : "fold-4",
+              "start" : "2026-10-09T22:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-09T22:50:00Z",
+              "id" : "bulk",
+              "start" : "2026-10-09T22:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T22:55:00Z",
+              "id" : "fridge",
+              "start" : "2026-10-09T22:50:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-10T07:00:00Z",
+              "id" : "cold-bulk",
+              "start" : "2026-10-09T22:55:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T07:20:00Z",
+              "id" : "shape",
+              "start" : "2026-10-10T07:00:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-10T09:15:00Z",
+              "id" : "room-proof",
+              "start" : "2026-10-10T07:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T09:15:00Z",
+              "id" : "preheat",
+              "start" : "2026-10-10T08:30:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T10:00:00Z",
+              "id" : "bake",
+              "start" : "2026-10-10T09:15:00Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "actions" : [
+        {
+          "lateMinutes" : 0,
+          "op" : "complete",
+          "step" : "feed"
+        },
+        {
+          "lateMinutes" : 0,
+          "op" : "complete",
+          "step" : "mix"
+        },
+        {
+          "apply" : "fridgeNow",
+          "hoursAfterMix" : 2,
+          "op" : "checkIn",
+          "rise" : 30,
+          "tempC" : 22
+        },
+        {
+          "apply" : "stayUp",
+          "hoursAfterMix" : 2.5,
+          "op" : "checkIn",
+          "rise" : 34,
+          "tempC" : 22
+        },
+        {
+          "apply" : "fridgeNow",
+          "hoursAfterMix" : 3,
+          "op" : "checkIn",
+          "rise" : 40,
+          "tempC" : 22
+        }
+      ],
+      "name" : "Repeated check-ins before the fridge transfer stay in order",
+      "planScenario" : "Friday morning → Saturday 10:00",
+      "snapshots" : [
+        {
+          "actualBulkHours" : null,
+          "adjustmentNote" : null,
+          "canCheckIn" : false,
+          "hasCalibrationSample" : false,
+          "isChilled" : false,
+          "shapeDetail" : "Shape once the dough is up about 75%. Check in first if it looks early or slow.",
+          "shapeHasLikelyWindow" : true,
+          "steps" : [
+            {
+              "attended" : true,
+              "end" : "2026-10-09T08:20:00Z",
+              "id" : "feed",
+              "start" : "2026-10-09T08:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-09T20:15:00Z",
+              "id" : "starter-rise",
+              "start" : "2026-10-09T08:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T20:35:00Z",
+              "id" : "mix",
+              "start" : "2026-10-09T20:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T20:50:00Z",
+              "id" : "fold-1",
+              "start" : "2026-10-09T20:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T21:20:00Z",
+              "id" : "fold-2",
+              "start" : "2026-10-09T21:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T21:50:00Z",
+              "id" : "fold-3",
+              "start" : "2026-10-09T21:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T22:20:00Z",
+              "id" : "fold-4",
+              "start" : "2026-10-09T22:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-10T07:00:00Z",
+              "id" : "bulk",
+              "start" : "2026-10-09T22:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T07:20:00Z",
+              "id" : "shape",
+              "start" : "2026-10-10T07:00:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-10T09:15:00Z",
+              "id" : "room-proof",
+              "start" : "2026-10-10T07:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T09:15:00Z",
+              "id" : "preheat",
+              "start" : "2026-10-10T08:30:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T10:00:00Z",
+              "id" : "bake",
+              "start" : "2026-10-10T09:15:00Z"
+            }
+          ]
+        },
+        {
+          "actualBulkHours" : null,
+          "adjustmentNote" : null,
+          "canCheckIn" : true,
+          "hasCalibrationSample" : false,
+          "isChilled" : false,
+          "shapeDetail" : "Shape once the dough is up about 75%. Check in first if it looks early or slow.",
+          "shapeHasLikelyWindow" : true,
+          "steps" : [
+            {
+              "attended" : true,
+              "end" : "2026-10-09T08:20:00Z",
+              "id" : "feed",
+              "start" : "2026-10-09T08:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-09T20:15:00Z",
+              "id" : "starter-rise",
+              "start" : "2026-10-09T08:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T20:35:00Z",
+              "id" : "mix",
+              "start" : "2026-10-09T20:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T20:50:00Z",
+              "id" : "fold-1",
+              "start" : "2026-10-09T20:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T21:20:00Z",
+              "id" : "fold-2",
+              "start" : "2026-10-09T21:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T21:50:00Z",
+              "id" : "fold-3",
+              "start" : "2026-10-09T21:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T22:20:00Z",
+              "id" : "fold-4",
+              "start" : "2026-10-09T22:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-10T07:00:00Z",
+              "id" : "bulk",
+              "start" : "2026-10-09T22:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T07:20:00Z",
+              "id" : "shape",
+              "start" : "2026-10-10T07:00:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-10T09:15:00Z",
+              "id" : "room-proof",
+              "start" : "2026-10-10T07:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T09:15:00Z",
+              "id" : "preheat",
+              "start" : "2026-10-10T08:30:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T10:00:00Z",
+              "id" : "bake",
+              "start" : "2026-10-10T09:15:00Z"
+            }
+          ]
+        },
+        {
+          "actualBulkHours" : null,
+          "adjustmentNote" : null,
+          "applied" : "fridgeNow",
+          "canCheckIn" : true,
+          "hasCalibrationSample" : false,
+          "isChilled" : false,
+          "now" : "2026-10-09T22:15:00Z",
+          "optionKinds" : [
+            "fridgeNow",
+            "stayUp"
+          ],
+          "problems" : [
+
+          ],
+          "reminders" : [
+            {
+              "fireAt" : "2026-10-09T22:50:00Z",
+              "step" : "fridge"
+            },
+            {
+              "fireAt" : "2026-10-10T07:00:00Z",
+              "step" : "shape"
+            },
+            {
+              "fireAt" : "2026-10-10T08:30:00Z",
+              "step" : "preheat"
+            },
+            {
+              "fireAt" : "2026-10-10T09:15:00Z",
+              "step" : "bake"
+            }
+          ],
+          "shapeDetail" : "Shape it straight from the fridge. Look for a domed top and some bubbles; if it has barely risen, give it time at room temperature first.",
+          "shapeHasLikelyWindow" : false,
+          "steps" : [
+            {
+              "attended" : true,
+              "end" : "2026-10-09T08:20:00Z",
+              "id" : "feed",
+              "start" : "2026-10-09T08:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-09T20:15:00Z",
+              "id" : "starter-rise",
+              "start" : "2026-10-09T08:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T20:35:00Z",
+              "id" : "mix",
+              "start" : "2026-10-09T20:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T20:50:00Z",
+              "id" : "fold-1",
+              "start" : "2026-10-09T20:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T21:20:00Z",
+              "id" : "fold-2",
+              "start" : "2026-10-09T21:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T21:50:00Z",
+              "id" : "fold-3",
+              "start" : "2026-10-09T21:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T22:20:00Z",
+              "id" : "fold-4",
+              "start" : "2026-10-09T22:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-09T22:50:00Z",
+              "id" : "bulk",
+              "start" : "2026-10-09T22:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T22:55:00Z",
+              "id" : "fridge",
+              "start" : "2026-10-09T22:50:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-10T07:00:00Z",
+              "id" : "cold-bulk",
+              "start" : "2026-10-09T22:55:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T07:20:00Z",
+              "id" : "shape",
+              "start" : "2026-10-10T07:00:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-10T09:15:00Z",
+              "id" : "room-proof",
+              "start" : "2026-10-10T07:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T09:15:00Z",
+              "id" : "preheat",
+              "start" : "2026-10-10T08:30:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T10:00:00Z",
+              "id" : "bake",
+              "start" : "2026-10-10T09:15:00Z"
+            }
+          ]
+        },
+        {
+          "actualBulkHours" : null,
+          "adjustmentNote" : null,
+          "applied" : "stayUp",
+          "canCheckIn" : true,
+          "hasCalibrationSample" : false,
+          "isChilled" : false,
+          "now" : "2026-10-09T22:45:00Z",
+          "optionKinds" : [
+            "fridgeNow",
+            "stayUp"
+          ],
+          "problems" : [
+
+          ],
+          "reminders" : [
+            {
+              "fireAt" : "2026-10-10T01:01:46Z",
+              "step" : "shape"
+            },
+            {
+              "fireAt" : "2026-10-10T08:45:00Z",
+              "step" : "preheat"
+            },
+            {
+              "fireAt" : "2026-10-10T09:30:00Z",
+              "step" : "bake"
+            }
+          ],
+          "shapeDetail" : "Shape once the dough is up about 65%. Check in first if it looks early or slow.",
+          "shapeHasLikelyWindow" : true,
+          "steps" : [
+            {
+              "attended" : true,
+              "end" : "2026-10-09T08:20:00Z",
+              "id" : "feed",
+              "start" : "2026-10-09T08:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-09T20:15:00Z",
+              "id" : "starter-rise",
+              "start" : "2026-10-09T08:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T20:35:00Z",
+              "id" : "mix",
+              "start" : "2026-10-09T20:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T20:50:00Z",
+              "id" : "fold-1",
+              "start" : "2026-10-09T20:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T21:20:00Z",
+              "id" : "fold-2",
+              "start" : "2026-10-09T21:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T21:50:00Z",
+              "id" : "fold-3",
+              "start" : "2026-10-09T21:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T22:20:00Z",
+              "id" : "fold-4",
+              "start" : "2026-10-09T22:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-10T01:01:46Z",
+              "id" : "bulk",
+              "start" : "2026-10-09T22:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T01:21:46Z",
+              "id" : "shape",
+              "start" : "2026-10-10T01:01:46Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-10T09:30:00Z",
+              "id" : "cold-proof",
+              "start" : "2026-10-10T01:21:46Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T09:30:00Z",
+              "id" : "preheat",
+              "start" : "2026-10-10T08:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T10:15:00Z",
+              "id" : "bake",
+              "start" : "2026-10-10T09:30:00Z"
+            }
+          ]
+        },
+        {
+          "actualBulkHours" : null,
+          "adjustmentNote" : null,
+          "applied" : "fridgeNow",
+          "canCheckIn" : true,
+          "hasCalibrationSample" : false,
+          "isChilled" : false,
+          "now" : "2026-10-09T23:15:00Z",
+          "optionKinds" : [
+            "fridgeNow",
+            "stayUp"
+          ],
+          "problems" : [
+
+          ],
+          "reminders" : [
+            {
+              "fireAt" : "2026-10-10T07:00:00Z",
+              "step" : "shape"
+            },
+            {
+              "fireAt" : "2026-10-10T14:45:00Z",
+              "step" : "preheat"
+            },
+            {
+              "fireAt" : "2026-10-10T15:30:00Z",
+              "step" : "bake"
+            }
+          ],
+          "shapeDetail" : "Shape it straight from the fridge. Look for a domed top and some bubbles; if it has barely risen, give it time at room temperature first.",
+          "shapeHasLikelyWindow" : false,
+          "steps" : [
+            {
+              "attended" : true,
+              "end" : "2026-10-09T08:20:00Z",
+              "id" : "feed",
+              "start" : "2026-10-09T08:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-09T20:15:00Z",
+              "id" : "starter-rise",
+              "start" : "2026-10-09T08:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T20:35:00Z",
+              "id" : "mix",
+              "start" : "2026-10-09T20:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T20:50:00Z",
+              "id" : "fold-1",
+              "start" : "2026-10-09T20:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T21:20:00Z",
+              "id" : "fold-2",
+              "start" : "2026-10-09T21:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T21:50:00Z",
+              "id" : "fold-3",
+              "start" : "2026-10-09T21:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T22:20:00Z",
+              "id" : "fold-4",
+              "start" : "2026-10-09T22:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-09T23:15:00Z",
+              "id" : "bulk",
+              "start" : "2026-10-09T22:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T23:20:00Z",
+              "id" : "fridge",
+              "start" : "2026-10-09T23:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-10T07:00:00Z",
+              "id" : "cold-bulk",
+              "start" : "2026-10-09T23:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T07:20:00Z",
+              "id" : "shape",
+              "start" : "2026-10-10T07:00:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-10T15:30:00Z",
+              "id" : "cold-proof",
+              "start" : "2026-10-10T07:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T15:30:00Z",
+              "id" : "preheat",
+              "start" : "2026-10-10T14:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T16:15:00Z",
+              "id" : "bake",
+              "start" : "2026-10-10T15:30:00Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "actions" : [
+        {
+          "lateMinutes" : 0,
+          "op" : "complete",
+          "step" : "mix"
+        },
+        {
+          "lateMinutes" : 0,
+          "op" : "complete",
+          "step" : "fold-1"
+        },
+        {
+          "apply" : "shapeWhenReady",
+          "hoursAfterMix" : 0.75,
+          "op" : "checkIn",
+          "rise" : 28,
+          "tempC" : 27
+        }
+      ],
+      "name" : "Early-bulk check-in drops folds after the new shape time",
+      "planScenario" : "Warm kitchen weekday evening loaf",
+      "snapshots" : [
+        {
+          "actualBulkHours" : null,
+          "adjustmentNote" : null,
+          "canCheckIn" : true,
+          "hasCalibrationSample" : false,
+          "isChilled" : false,
+          "shapeDetail" : "Shape once the dough is up about 37%. Check in first if it looks early or slow.",
+          "shapeHasLikelyWindow" : true,
+          "steps" : [
+            {
+              "attended" : true,
+              "end" : "2026-10-05T08:25:00Z",
+              "id" : "feed",
+              "start" : "2026-10-05T08:20:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-05T18:15:00Z",
+              "id" : "starter-rise",
+              "start" : "2026-10-05T08:25:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T18:35:00Z",
+              "id" : "mix",
+              "start" : "2026-10-05T18:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T18:50:00Z",
+              "id" : "fold-1",
+              "start" : "2026-10-05T18:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T19:20:00Z",
+              "id" : "fold-2",
+              "start" : "2026-10-05T19:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T19:50:00Z",
+              "id" : "fold-3",
+              "start" : "2026-10-05T19:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T20:20:00Z",
+              "id" : "fold-4",
+              "start" : "2026-10-05T20:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-05T22:30:00Z",
+              "id" : "bulk",
+              "start" : "2026-10-05T20:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T22:50:00Z",
+              "id" : "shape",
+              "start" : "2026-10-05T22:30:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-06T18:15:00Z",
+              "id" : "cold-proof",
+              "start" : "2026-10-05T22:50:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-06T18:15:00Z",
+              "id" : "preheat",
+              "start" : "2026-10-06T17:30:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-06T19:00:00Z",
+              "id" : "bake",
+              "start" : "2026-10-06T18:15:00Z"
+            }
+          ]
+        },
+        {
+          "actualBulkHours" : null,
+          "adjustmentNote" : null,
+          "canCheckIn" : true,
+          "hasCalibrationSample" : false,
+          "isChilled" : false,
+          "shapeDetail" : "Shape once the dough is up about 37%. Check in first if it looks early or slow.",
+          "shapeHasLikelyWindow" : true,
+          "steps" : [
+            {
+              "attended" : true,
+              "end" : "2026-10-05T08:25:00Z",
+              "id" : "feed",
+              "start" : "2026-10-05T08:20:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-05T18:15:00Z",
+              "id" : "starter-rise",
+              "start" : "2026-10-05T08:25:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T18:35:00Z",
+              "id" : "mix",
+              "start" : "2026-10-05T18:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T18:50:00Z",
+              "id" : "fold-1",
+              "start" : "2026-10-05T18:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T19:20:00Z",
+              "id" : "fold-2",
+              "start" : "2026-10-05T19:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T19:50:00Z",
+              "id" : "fold-3",
+              "start" : "2026-10-05T19:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T20:20:00Z",
+              "id" : "fold-4",
+              "start" : "2026-10-05T20:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-05T22:30:00Z",
+              "id" : "bulk",
+              "start" : "2026-10-05T20:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T22:50:00Z",
+              "id" : "shape",
+              "start" : "2026-10-05T22:30:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-06T18:15:00Z",
+              "id" : "cold-proof",
+              "start" : "2026-10-05T22:50:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-06T18:15:00Z",
+              "id" : "preheat",
+              "start" : "2026-10-06T17:30:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-06T19:00:00Z",
+              "id" : "bake",
+              "start" : "2026-10-06T18:15:00Z"
+            }
+          ]
+        },
+        {
+          "actualBulkHours" : null,
+          "adjustmentNote" : null,
+          "applied" : "shapeWhenReady",
+          "canCheckIn" : true,
+          "hasCalibrationSample" : false,
+          "isChilled" : false,
+          "now" : "2026-10-05T19:00:00Z",
+          "optionKinds" : [
+            "shapeWhenReady"
+          ],
+          "problems" : [
+
+          ],
+          "reminders" : [
+            {
+              "fireAt" : "2026-10-05T19:03:13Z",
+              "step" : "shape"
+            },
+            {
+              "fireAt" : "2026-10-06T17:30:00Z",
+              "step" : "preheat"
+            },
+            {
+              "fireAt" : "2026-10-06T18:15:00Z",
+              "step" : "bake"
+            }
+          ],
+          "shapeDetail" : "Shape once the dough is up about 30%. Check in first if it looks early or slow.",
+          "shapeHasLikelyWindow" : true,
+          "steps" : [
+            {
+              "attended" : true,
+              "end" : "2026-10-05T08:25:00Z",
+              "id" : "feed",
+              "start" : "2026-10-05T08:20:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-05T18:15:00Z",
+              "id" : "starter-rise",
+              "start" : "2026-10-05T08:25:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T18:35:00Z",
+              "id" : "mix",
+              "start" : "2026-10-05T18:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T18:50:00Z",
+              "id" : "fold-1",
+              "start" : "2026-10-05T18:45:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-05T19:03:13Z",
+              "id" : "bulk",
+              "start" : "2026-10-05T18:50:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-05T19:23:13Z",
+              "id" : "shape",
+              "start" : "2026-10-05T19:03:13Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-06T18:15:00Z",
+              "id" : "cold-proof",
+              "start" : "2026-10-05T19:23:13Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-06T18:15:00Z",
+              "id" : "preheat",
+              "start" : "2026-10-06T17:30:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-06T19:00:00Z",
+              "id" : "bake",
+              "start" : "2026-10-06T18:15:00Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "actions" : [
+        {
+          "apply" : null,
+          "hoursAfterMix" : 1,
+          "op" : "checkIn",
+          "rise" : 20,
+          "tempC" : 21
+        }
+      ],
+      "name" : "Check-in before mixing is refused",
+      "planScenario" : "Friday morning → Saturday 10:00",
+      "snapshots" : [
+        {
+          "actualBulkHours" : null,
+          "adjustmentNote" : null,
+          "canCheckIn" : false,
+          "hasCalibrationSample" : false,
+          "isChilled" : false,
+          "now" : "2026-10-09T21:15:00Z",
+          "optionKinds" : [
+
+          ],
+          "problems" : [
+            "notInBulk"
+          ],
+          "reminders" : [
+            {
+              "fireAt" : "2026-10-09T21:45:00Z",
+              "step" : "fold-3"
+            },
+            {
+              "fireAt" : "2026-10-09T22:15:00Z",
+              "step" : "fold-4"
+            },
+            {
+              "fireAt" : "2026-10-10T07:00:00Z",
+              "step" : "shape"
+            },
+            {
+              "fireAt" : "2026-10-10T08:30:00Z",
+              "step" : "preheat"
+            },
+            {
+              "fireAt" : "2026-10-10T09:15:00Z",
+              "step" : "bake"
+            }
+          ],
+          "shapeDetail" : "Shape once the dough is up about 75%. Check in first if it looks early or slow.",
+          "shapeHasLikelyWindow" : true,
+          "steps" : [
+            {
+              "attended" : true,
+              "end" : "2026-10-09T08:20:00Z",
+              "id" : "feed",
+              "start" : "2026-10-09T08:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-09T20:15:00Z",
+              "id" : "starter-rise",
+              "start" : "2026-10-09T08:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T20:35:00Z",
+              "id" : "mix",
+              "start" : "2026-10-09T20:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T20:50:00Z",
+              "id" : "fold-1",
+              "start" : "2026-10-09T20:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T21:20:00Z",
+              "id" : "fold-2",
+              "start" : "2026-10-09T21:15:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T21:50:00Z",
+              "id" : "fold-3",
+              "start" : "2026-10-09T21:45:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-09T22:20:00Z",
+              "id" : "fold-4",
+              "start" : "2026-10-09T22:15:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-10T07:00:00Z",
+              "id" : "bulk",
+              "start" : "2026-10-09T22:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T07:20:00Z",
+              "id" : "shape",
+              "start" : "2026-10-10T07:00:00Z"
+            },
+            {
+              "attended" : false,
+              "end" : "2026-10-10T09:15:00Z",
+              "id" : "room-proof",
+              "start" : "2026-10-10T07:20:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T09:15:00Z",
+              "id" : "preheat",
+              "start" : "2026-10-10T08:30:00Z"
+            },
+            {
+              "attended" : true,
+              "end" : "2026-10-10T10:00:00Z",
+              "id" : "bake",
+              "start" : "2026-10-10T09:15:00Z"
+            }
+          ]
+        }
+      ]
     }
   ],
   "timeZone" : "UTC"

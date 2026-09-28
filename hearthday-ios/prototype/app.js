@@ -32,7 +32,7 @@
     return {
       settings: s, formulas: formulas.length ? formulas : d.formulas, session,
       history: Array.isArray(raw.history) ? raw.history.filter((r) => r && typeof r.finishedAt === "number") : [],
-      samples: Array.isArray(raw.samples) ? raw.samples.filter((x) => typeof x === "number" && Number.isFinite(x)) : [],
+      samples: Array.isArray(raw.samples) ? raw.samples.filter((x) => x && typeof x === "object" && Number.isFinite(x.modelHours) && Number.isFinite(x.actualHours)) : [],
       simOffset: num(raw.simOffset, [0, 60 * DAY], 0),
     };
   }
@@ -73,7 +73,7 @@
     return days.slice().sort().map((d) => WD[d - 1]).join(", ");
   }
   const busyColor = (k) => (k === "sleep" ? "var(--night)" : k === "work" ? "var(--sage)" : "var(--plum)");
-  const ICON = { feedStarter: "💧", starterRise: "⏳", mix: "✋", fold: "↻", bulk: "◷", shape: "◌", coldRetard: "❄", coldBulk: "❄", roomProof: "⌛", preheat: "♨", bake: "🔥" };
+  const ICON = { feedStarter: "💧", starterRise: "⏳", mix: "✋", fold: "↻", bulk: "◷", shape: "◌", coldRetard: "❄", fridgeDough: "🧊", coldBulk: "❄", roomProof: "⌛", preheat: "♨", bake: "🔥" };
 
   // ---------- Domain helpers ----------
   const speedFactor = () => H.calibration.speedFactor(state.samples);
@@ -245,12 +245,16 @@
     const next = H.session.nextAttendedStep(s);
     const passive = H.session.passiveStep(s, n);
     const inBulk = H.session.isInBulk(s);
+    const canCheckIn = H.session.canCheckIn(s);
     let out = `<div class="row between"><h2>${esc(s.plan.formula.name)}</h2><button class="btn-link" data-action="endMenu" aria-label="More options">•••</button></div>`;
     if (conflicts.length) {
       out += `<div class="card banner-warn"><h3 style="color:var(--warning)">⚠︎ Heads up</h3>${conflicts.map((c) => `<p>${esc(c.step.title)} at ${lower(dayTime(c.step.start))} now overlaps “${esc(c.busyLabel)}”.</p>`).join("")}
-        ${inBulk ? `<button class="btn-secondary" data-action="checkin">Check the dough and re-plan</button>` : ""}</div>`;
+        ${canCheckIn ? `<button class="btn-secondary" data-action="checkin">Check the dough and re-plan</button>` : ""}</div>`;
     }
     const status = H.session.status(s, n);
+    if (s.adjustmentNote && status.kind !== "baked") {
+      out += `<div class="card row" data-testid="live-adjustment"><span style="font-size:20px" aria-hidden="true">↻</span><p class="small">${esc(s.adjustmentNote)}</p></div>`;
+    }
     if (status.kind === "baked") {
       out += `<div class="card">${stateMessage("🍞", "Bread’s out", "Let it cool at least an hour before slicing. Then tell Hearthday how it went.")}<button class="btn" data-action="finish">Log this bake</button></div>`;
     } else if (status.kind === "stale") {
@@ -262,7 +266,7 @@
       const label = late ? `Was due ${lower(dayTime(next.start))} · ${H.compact(status.minutesLate)} ago` : due ? "Now" : `Next, in ${H.compact(Math.max(0, Math.round((next.start - n) / MIN)))}`;
       out += `<div class="card stack" style="gap:8px" ${late ? 'data-testid="live-overdue"' : ""}><span class="small" style="font-weight:600;color:${late ? "var(--warning)" : due ? "var(--ember)" : "var(--ash)"}">${label}</span>
         <h2>${esc(next.title)}</h2><p class="muted">${esc(next.detail)}</p>
-        ${late && next.kind === "shape" && inBulk ? `<p class="small">The dough may have gone past its best while you were away. Check it before shaping; if it’s very slack, shape gently and fridge it.</p>` : ""}        ${next.likelyStart ? `<p class="small muted">👁 Likely ready ${time(next.likelyStart)}–${time(next.likelyEnd)}. Go by the dough, not the clock.</p>` : ""}
+        ${late && next.kind === "shape" && canCheckIn ? `<p class="small">The dough may have gone past its best while you were away. Check it before shaping; if it’s very slack, shape gently and fridge it.</p>` : ""}        ${next.likelyStart && !H.session.isChilled(s) ? `<p class="small muted">👁 Likely ready ${time(next.likelyStart)}–${time(next.likelyEnd)}. Go by the dough, not the clock.</p>` : ""}
         <p class="clock" style="color:var(--crust)">${dayTime(next.start)} · ${H.compact(Math.round((next.end - next.start) / MIN))}</p>
         <button class="btn" data-action="done" data-id="${next.id}" aria-label="Mark ${esc(next.title)} done">${due ? "Done" : "Done early"}</button></div>`;
     }
@@ -273,7 +277,7 @@
     if (passive) {
       out += `<div class="card row"><span style="font-size:24px;color:var(--night)" aria-hidden="true">${passive.kind === "coldRetard" || passive.kind === "coldBulk" ? "❄" : "⏳"}</span><div><h3>${esc(passive.title)}</h3><p class="small muted">Until about ${dayTime(passive.end)} · ${H.compact(Math.max(0, Math.round((passive.end - n) / MIN)))} left</p></div></div>`;
     }
-    if (inBulk) out += `<button class="btn-secondary" data-action="checkin">📏 Check the dough</button>`;
+    if (canCheckIn) out += `<button class="btn-secondary" data-action="checkin">📏 Check the dough</button>`;
     out += dayRibbon(s.plan, n) + stepList(s.plan, s);
     if (s.replanCount) out += `<p class="small muted">Re-planned ${s.replanCount}× · originally ${lower(dayTime(s.originalReadyAt))}</p>`;
     return `<div class="stack">${out}</div>`;
@@ -461,7 +465,7 @@
         update(() => { state.session = H.newSession(p, now()); ui.showResult = false; });
         break;
       }
-      case "done": update(() => H.session.complete(state.session, el.dataset.id, now())); break;
+      case "done": update(() => H.session.complete(state.session, el.dataset.id, now(), state.settings.blocks, cal)); break;
       case "ready": update(() => { state.session.shapeReadiness = el.dataset.v; }); break;
       case "checkin":
         ui.sheet = "checkin"; ui.ci = null;

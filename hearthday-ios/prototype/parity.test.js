@@ -92,6 +92,55 @@ for (const c of fixtures.checkInScenarios) {
   });
 }
 
+console.log("Session scripts (late/early completions, fridge transfer, repeated check-ins)");
+const roundedIso = (ms) => iso(Math.round(ms / 1000) * 1000);
+const roundedSteps = (steps) => steps.map((x) => ({ id: x.id, start: roundedIso(x.start), end: roundedIso(x.end), attended: x.attended }));
+for (const sc of fixtures.sessionScenarios) {
+  check(sc.name, () => {
+    const ps = planByName[sc.planScenario];
+    const req = requestFrom(ps.input);
+    const blocks = ps.input.blocks;
+    const plan = H.plan(req, cal).primary;
+    const s = H.newSession(plan, plan.firstStepAt);
+    sc.actions.forEach((a, i) => {
+      const want = sc.snapshots[i];
+      const got = {};
+      if (a.op === "complete") {
+        const st = H.planStep(s.plan, a.step);
+        if (!st) got.missing = a.step;
+        else H.session.complete(s, a.step, st.end + a.lateMinutes * H.MIN, blocks, cal);
+      } else if (a.op === "checkIn") {
+        const now = H.session.bulkClockStart(s) + a.hoursAfterMix * H.HOUR;
+        for (const st of s.plan.steps.slice()) {
+          if (H.session.isInBulk(s) && st.kind === "fold" && st.end <= now && s.completed[st.id] == null) H.session.complete(s, st.id, st.end);
+        }
+        const r = H.checkIn(s, now, a.rise, a.tempC, blocks, cal, req.model);
+        got.now = roundedIso(now);
+        got.problems = r.problems;
+        got.optionKinds = r.options.map((o) => o.kind);
+        const option = a.apply && r.options.find((o) => o.kind === a.apply);
+        if (option) { H.session.apply(s, option); got.applied = a.apply; }
+        got.reminders = H.session.reminders(s, now, blocks, cal).map((x) => ({ step: x.id.slice(s.id.length + 1), fireAt: roundedIso(x.fireAt) }));
+      } else if (a.op === "readiness") {
+        s.shapeReadiness = a.value;
+      }
+      got.steps = roundedSteps(s.plan.steps);
+      const shape = H.planStep(s.plan, "shape");
+      got.shapeDetail = shape ? shape.detail : null;
+      got.shapeHasLikelyWindow = !!(shape && shape.likelyStart != null);
+      got.adjustmentNote = s.adjustmentNote || null;
+      got.isChilled = H.session.isChilled(s);
+      got.canCheckIn = H.session.canCheckIn(s);
+      const bulkHours = H.session.actualBulkHours(s);
+      got.hasCalibrationSample = H.session.calibrationSample(s) != null;
+      const { actualBulkHours: wantHours, ...wantRest } = want;
+      assert.deepStrictEqual(got, wantRest, `after action ${i + 1} (${a.op} ${a.step || a.apply || a.value || ""})`);
+      if (wantHours == null) assert.strictEqual(bulkHours, null, "actualBulkHours");
+      else assert.ok(Math.abs(bulkHours - wantHours) < 1e-6, `actualBulkHours ${bulkHours} vs ${wantHours}`);
+    });
+  });
+}
+
 console.log("Calibration");
 check("prior keeps one odd bake from swinging the model", () => {
   const one = H.calibration.record([], { modelHours: 6, actualHours: 3 });
