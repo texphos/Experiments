@@ -25,6 +25,7 @@ struct OnboardingView: View {
                     if page < 2 { page += 1 } else { finish() }
                 }
                 .buttonStyle(PrimaryButtonStyle())
+                .accessibilityIdentifier("onboarding.next")
 
                 if page > 0 {
                     Button("Back") { page -= 1 }
@@ -182,14 +183,15 @@ struct LoafMark: View {
 struct TemperatureStepper: View {
     @Binding var celsius: Double
     var fahrenheit: Bool
+    var label = "Kitchen temperature"
 
     var body: some View {
-        Stepper(value: $celsius, in: 14...32, step: fahrenheit ? 5.0 / 9.0 : 0.5) {
+        Stepper(value: $celsius, in: Limits.tempC, step: fahrenheit ? 5.0 / 9.0 : 0.5) {
             Text(Fmt.temperature(celsius, fahrenheit: fahrenheit))
                 .font(Typo.clock(.title2))
                 .foregroundStyle(Palette.rye)
         }
-        .accessibilityLabel("Kitchen temperature")
+        .accessibilityLabel(label)
         .accessibilityValue(Fmt.temperature(celsius, fahrenheit: fahrenheit))
     }
 }

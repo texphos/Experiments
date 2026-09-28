@@ -39,6 +39,7 @@ struct HomeView: View {
                     )
                 }
                 .buttonStyle(PrimaryButtonStyle())
+                .accessibilityIdentifier("home.plan")
 
                 if let insight = model.state.calibrationInsight {
                     InsightCard(text: insight, applied: model.state.isPro)

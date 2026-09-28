@@ -14,6 +14,15 @@ struct PlanResultView: View {
                 case nil:
                     ProgressView("Finding a plan that fits…")
                         .frame(maxWidth: .infinity, minHeight: 300)
+                case .invalid(let problems)?:
+                    StateMessage(
+                        systemImage: "exclamationmark.circle",
+                        title: "Something needs fixing first",
+                        message: problems.map(\.message).joined(separator: "\n"),
+                        tint: Palette.warning
+                    )
+                    .card(padding: 20)
+                    .accessibilityIdentifier("plan.invalid")
                 case .infeasible(let why)?:
                     InfeasibleView(infeasibility: why) { earliest in
                         input.readyBy = earliest
@@ -37,6 +46,7 @@ struct PlanResultView: View {
                         EstimateNote(plan: plan)
                         Button("Start this bake") { model.start(plan) }
                             .buttonStyle(PrimaryButtonStyle())
+                            .accessibilityIdentifier("plan.start")
                             .padding(.bottom)
                     }
                 }
@@ -174,11 +184,12 @@ private struct InfeasibleView: View {
             if let earliest = infeasibility.earliestFeasibleReadyAt {
                 Button("Earliest that fits: \(Fmt.dayTime(earliest))") { tryEarliest(earliest) }
                     .buttonStyle(PrimaryButtonStyle())
+                    .accessibilityIdentifier("plan.earliest")
             } else {
                 Text("No workable plan in the next three days. Try freeing up a busy time in Settings.")
                     .font(.callout).foregroundStyle(Palette.ash).multilineTextAlignment(.center)
             }
-            Text("Hearthday never schedules hands-on steps during your busy times. It will say no rather than hand you an alarm at 3 AM.")
+            Text("Hearthday never schedules hands-on steps during your busy times. It says no rather than hand you an alarm at 3 AM.")
                 .font(.footnote).foregroundStyle(Palette.ash).multilineTextAlignment(.center)
         }
         .card(padding: 20)

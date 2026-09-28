@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import HearthdayCore
 
 /// The bake in progress: what's next, what the dough is doing, and a way to re-plan when it drifts.
@@ -26,6 +27,7 @@ struct LiveBakeView: View {
                     Image(systemName: "ellipsis.circle").frame(minWidth: 44, minHeight: 44)
                 }
                 .accessibilityLabel("More")
+                .accessibilityIdentifier("live.more")
             }
         }
         .confirmationDialog("Abandon this bake?", isPresented: $confirmingEnd, titleVisibility: .visible) {
@@ -40,18 +42,30 @@ struct LiveBakeView: View {
 
     @ViewBuilder
     private func content(session: BakeSession, now: Date) -> some View {
-        let conflicts = session.upcomingConflicts(now: now, availability: model.state.settings.availability, calendar: .current)
+        let conflicts = session.upcomingConflicts(now: now, availability: model.state.settings.availability, calendar: model.calendar)
+        let status = session.status(now: now)
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                if !conflicts.isEmpty {
+                if model.reminderPermission == .denied && status != .baked {
+                    RemindersOffBanner()
+                }
+
+                if !conflicts.isEmpty && status != .stale {
                     ConflictBanner(conflicts: conflicts, canCheckIn: session.isInBulk) { showingCheckIn = true }
                 }
 
-                if session.isBaked {
+                switch status {
+                case .baked:
                     StateMessage(systemImage: "birthday.cake", title: "Bread’s out", message: "Let it cool at least an hour before slicing. Then tell Hearthday how it went.")
-                    Button("Log this bake") { showingFinish = true }.buttonStyle(PrimaryButtonStyle())
-                } else if let next = session.nextAttendedStep {
-                    NextStepCard(step: next, now: now) { model.complete(next) }
+                    Button("Log this bake") { showingFinish = true }
+                        .buttonStyle(PrimaryButtonStyle())
+                        .accessibilityIdentifier("live.logBake")
+                case .stale:
+                    StaleBakeCard(readyAt: session.plan.readyAt, onLog: { showingFinish = true }, onAbandon: { confirmingEnd = true })
+                case .overdue(let step, let minutesLate):
+                    NextStepCard(step: step, now: now, minutesLate: minutesLate, inBulk: session.isInBulk) { model.complete(step) }
+                case .due(let step), .upcoming(let step):
+                    NextStepCard(step: step, now: now, minutesLate: nil, inBulk: session.isInBulk) { model.complete(step) }
                 }
 
                 if session.completed["shape"] != nil && session.shapeReadiness == nil {
@@ -70,6 +84,7 @@ struct LiveBakeView: View {
                     }
                     .buttonStyle(SecondaryButtonStyle())
                     .accessibilityHint("Enter how much it has risen to re-plan the rest of the bake")
+                    .accessibilityIdentifier("live.checkin")
                 }
 
                 DayRibbonView(plan: session.plan, availability: model.state.settings.availability, now: now)
@@ -90,15 +105,28 @@ struct LiveBakeView: View {
 private struct NextStepCard: View {
     var step: BakeStep
     var now: Date
+    var minutesLate: Int?
+    var inBulk: Bool
     var onDone: () -> Void
 
     private var isDue: Bool { step.start <= now.addingTimeInterval(5 * 60) }
 
+    private var heading: String {
+        if let minutesLate {
+            return "Was due \(Fmt.dayTime(step.start).lowercasedFirst) · \(DurationText.compact(minutes: minutesLate)) ago"
+        }
+        return isDue ? "Now" : "Next, in \(Fmt.countdown(to: step.start, from: now))"
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(isDue ? "Now" : "Next, in \(Fmt.countdown(to: step.start, from: now))")
+            Text(heading)
                 .font(.subheadline.weight(.semibold))
-                .foregroundStyle(isDue ? Palette.ember : Palette.ash)
+                .foregroundStyle(minutesLate != nil ? Palette.warning : isDue ? Palette.ember : Palette.ash)
+            if minutesLate != nil && step.kind == .shape && inBulk {
+                Text("The dough may have gone past its best while you were away. Check it before shaping; if it’s very slack, shape gently and fridge it.")
+                    .font(.footnote).foregroundStyle(Palette.rye)
+            }
             Text(step.title).font(Typo.display(.title2)).foregroundStyle(Palette.rye)
             Text(step.detail).foregroundStyle(Palette.ash)
             if let lo = step.likelyStart, let hi = step.likelyEnd {
@@ -110,6 +138,7 @@ private struct NextStepCard: View {
             Button(isDue ? "Done" : "Done early", action: onDone)
                 .buttonStyle(PrimaryButtonStyle())
                 .accessibilityLabel("Mark \(step.title) done")
+                .accessibilityIdentifier("step.done")
         }
         .card(padding: 20)
     }
@@ -130,6 +159,49 @@ private struct PassiveCard: View {
         }
         .card()
         .accessibilityElement(children: .combine)
+    }
+}
+
+/// Reopened long after the loaf should have come out: ask, don't guess.
+private struct StaleBakeCard: View {
+    var readyAt: Date
+    var onLog: () -> Void
+    var onAbandon: () -> Void
+
+    var body: some View {
+        VStack(spacing: 12) {
+            StateMessage(
+                systemImage: "clock.badge.questionmark",
+                title: "Did this bake finish?",
+                message: "It was planned to come out \(Fmt.dayTime(readyAt).lowercasedFirst). Log how it went, or abandon it to plan a new one."
+            )
+            Button("Log this bake", action: onLog)
+                .buttonStyle(PrimaryButtonStyle())
+                .accessibilityIdentifier("live.logBake")
+            Button("Abandon it", role: .destructive, action: onAbandon)
+                .buttonStyle(SecondaryButtonStyle())
+        }
+        .card(padding: 20)
+    }
+}
+
+/// Shown when iOS notification permission is off, so a bake never silently goes without reminders.
+private struct RemindersOffBanner: View {
+    @Environment(\.openURL) private var openURL
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label("Reminders are off", systemImage: "bell.slash.fill")
+                .font(.headline).foregroundStyle(Palette.warning)
+            Text("Hearthday can’t alert you for the next step. Keep this screen handy, or turn notifications on.")
+                .font(.subheadline).foregroundStyle(Palette.rye)
+            Button("Open Settings") {
+                if let url = URL(string: UIApplication.openNotificationSettingsURLString) { openURL(url) }
+            }
+            .buttonStyle(SecondaryButtonStyle())
+        }
+        .card()
+        .accessibilityIdentifier("live.remindersOff")
     }
 }
 
@@ -164,6 +236,7 @@ private struct ShapeReadinessPrompt: View {
             HStack(spacing: 8) {
                 answer("Under", "tortoise", .under)
                 answer("Just right", "checkmark", .justRight)
+                    .accessibilityIdentifier("readiness.justRight")
                 answer("Over", "hare", .over)
             }
             Text("Only “just right” bakes without a fridge pause teach Hearthday your kitchen’s speed; the others are noted in your journal.")
@@ -237,6 +310,7 @@ struct FinishBakeView: View {
                         model.finish(rating: rating, notes: notes)
                         dismiss()
                     }
+                    .accessibilityIdentifier("finish.save")
                 }
             }
         }

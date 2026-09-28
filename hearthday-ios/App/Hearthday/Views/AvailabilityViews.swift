@@ -198,6 +198,9 @@ struct BusyBlockEditor: View {
     var onDelete: () -> Void
     @Environment(\.dismiss) private var dismiss
 
+    /// A blank label is filled in on save, so it isn't a blocking problem here.
+    private var problems: [InputProblem] { block.problems.filter { $0 != .busyLabelEmpty } }
+
     private var startBinding: Binding<Date> { minuteBinding(\.startMinute) }
     private var endBinding: Binding<Date> { minuteBinding(\.endMinute) }
 
@@ -215,14 +218,18 @@ struct BusyBlockEditor: View {
                 Section {
                     DatePicker("Starts", selection: startBinding, displayedComponents: .hourAndMinute)
                     DatePicker("Ends", selection: endBinding, displayedComponents: .hourAndMinute)
-                    if block.endMinute <= block.startMinute {
-                        Text("Ends the next morning.").font(.footnote).foregroundStyle(Palette.ash)
+                    if block.startMinute == block.endMinute {
+                        Label(InputProblem.busyZeroLength.message, systemImage: "exclamationmark.circle")
+                            .foregroundStyle(Palette.warning)
+                    } else if block.endMinute < block.startMinute {
+                        Text("Ends the next day. Times follow your iPhone’s clock, including daylight-saving changes.")
+                            .font(.footnote).foregroundStyle(Palette.ash)
                     }
                 }
                 Section("Starts on") {
                     WeekdayPicker(selection: $block.weekdays)
                     if block.weekdays.isEmpty {
-                        Label("Pick at least one day.", systemImage: "exclamationmark.circle")
+                        Label(InputProblem.busyNoDays.message, systemImage: "exclamationmark.circle")
                             .foregroundStyle(Palette.warning)
                     }
                 }
@@ -248,7 +255,7 @@ struct BusyBlockEditor: View {
                         onSave(saved)
                         dismiss()
                     }
-                    .disabled(block.weekdays.isEmpty || block.startMinute == block.endMinute)
+                    .disabled(!problems.isEmpty)
                 }
             }
         }

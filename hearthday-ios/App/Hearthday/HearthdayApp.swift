@@ -14,10 +14,11 @@ struct HearthdayApp: App {
                 .tint(Palette.crust)
                 .task {
                     store.onEntitlementChange = { isPro in model.setPro(isPro) }
+                    await model.resume()
                     await store.start()
                 }
                 .onChange(of: scenePhase) { _, phase in
-                    if phase == .active { model.refreshClock() }
+                    if phase == .active { Task { await model.resume() } }
                 }
         }
     }

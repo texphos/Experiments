@@ -81,6 +81,7 @@ struct SettingsView: View {
                             Image(systemName: "chevron.right").foregroundStyle(Palette.ash).accessibilityHidden(true)
                         }
                     }
+                    .accessibilityIdentifier("settings.pro")
                 }
 
                 Section {
@@ -113,14 +114,20 @@ private struct FormulaEditor: View {
     @State var formula: Formula
     var isNew: Bool
 
+    /// A blank name becomes "My loaf" on save.
+    private var blockingProblems: [InputProblem] { formula.problems.filter { $0 != .formulaNameEmpty } }
+
     var body: some View {
         NavigationStack {
             Form {
                 TextField("Name", text: $formula.name)
-                Stepper("Flour \(Int(formula.flourGrams)) g", value: $formula.flourGrams, in: 200...2000, step: 50)
-                Stepper("Water \(Int(formula.hydrationPercent))%", value: $formula.hydrationPercent, in: 55...95, step: 1)
-                Stepper("Starter \(Int(formula.starterPercent))%", value: $formula.starterPercent, in: 5...40, step: 1)
-                Stepper("Salt \(String(format: "%.1f", formula.saltPercent))%", value: $formula.saltPercent, in: 0...3, step: 0.1)
+                Stepper("Flour \(Int(formula.flourGrams)) g", value: $formula.flourGrams, in: Limits.flourGrams, step: 50)
+                Stepper("Water \(Int(formula.hydrationPercent))%", value: $formula.hydrationPercent, in: Limits.hydrationPercent, step: 1)
+                Stepper("Starter \(Int(formula.starterPercent))%", value: $formula.starterPercent, in: Limits.starterPercent, step: 1)
+                Stepper("Salt \(String(format: "%.1f", formula.saltPercent))%", value: $formula.saltPercent, in: Limits.saltPercent, step: 0.1)
+                ForEach(blockingProblems, id: \.code) { problem in
+                    Label(problem.message, systemImage: "exclamationmark.circle").foregroundStyle(Palette.warning)
+                }
                 if !isNew && model.state.formulas.count > 1 {
                     Button("Delete formula", role: .destructive) {
                         model.update { $0.formulas.removeAll { $0.id == formula.id } }
@@ -141,6 +148,7 @@ private struct FormulaEditor: View {
                         }
                         dismiss()
                     }
+                    .disabled(!blockingProblems.isEmpty)
                 }
             }
         }

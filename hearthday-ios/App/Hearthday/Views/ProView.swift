@@ -32,10 +32,17 @@ struct ProView: View {
 
                     if let message = store.purchaseMessage {
                         Text(message).font(.callout).foregroundStyle(Palette.rye)
+                            .accessibilityIdentifier("pro.message")
                     }
 
-                    Button("Restore purchase") { Task { await store.restore() } }
-                        .frame(maxWidth: .infinity, minHeight: 44)
+                    Button {
+                        Task { await store.restore() }
+                    } label: {
+                        if store.isRestoring { ProgressView() } else { Text("Restore purchase") }
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 44)
+                    .disabled(store.isRestoring || store.isPurchasing)
+                    .accessibilityIdentifier("pro.restore")
                     Text("One-time purchase. No subscription, no trial that turns into a charge. Family Sharing supported.")
                         .font(.footnote).foregroundStyle(Palette.ash)
                 }
@@ -51,6 +58,7 @@ struct ProView: View {
         if model.state.isPro || store.isPro {
             Label("Pro is unlocked", systemImage: "checkmark.seal.fill")
                 .font(.headline).foregroundStyle(Palette.sage)
+                .accessibilityIdentifier("pro.unlocked")
         } else {
             switch store.loadState {
             case .loading:
@@ -58,6 +66,7 @@ struct ProView: View {
             case .unavailable(let reason):
                 VStack(spacing: 10) {
                     Text(reason).font(.callout).foregroundStyle(Palette.ash)
+                        .accessibilityIdentifier("pro.unavailable")
                     Button("Try again") { Task { await store.loadProduct() } }.buttonStyle(SecondaryButtonStyle())
                 }
             case .ready:
@@ -68,7 +77,8 @@ struct ProView: View {
                         if store.isPurchasing { ProgressView().tint(.white) } else { Text("Unlock for \(product.displayPrice)") }
                     }
                     .buttonStyle(PrimaryButtonStyle())
-                    .disabled(store.isPurchasing)
+                    .disabled(store.isPurchasing || store.isRestoring)
+                    .accessibilityIdentifier("pro.buy")
                 }
             }
         }

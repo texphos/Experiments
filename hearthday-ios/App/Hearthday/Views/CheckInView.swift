@@ -29,10 +29,11 @@ struct CheckInView: View {
                     }
                     Slider(value: $rise, in: 0...150, step: 5) { Text("Rise") }
                         .accessibilityValue("\(Int(rise)) percent")
+                        .accessibilityIdentifier("checkin.rise")
                     Text("Easiest in a straight-sided container: mark the level after mixing and compare. Rise targets are a guide from home-baker tables, not a rule; trust bubbles, jiggle and domed edges too.")
                         .font(.footnote).foregroundStyle(Palette.ash)
 
-                    TemperatureStepper(celsius: $tempC, fahrenheit: model.state.settings.usesFahrenheit)
+                    TemperatureStepper(celsius: $tempC, fahrenheit: model.state.settings.usesFahrenheit, label: "Dough temperature")
                         .card()
 
                     Button(result == nil ? "Re-plan from here" : "Update options") {
@@ -40,6 +41,7 @@ struct CheckInView: View {
                         result = model.checkIn(risePercent: rise, tempC: tempC)
                     }
                     .buttonStyle(PrimaryButtonStyle())
+                    .accessibilityIdentifier("checkin.replan")
 
                     if let result { options(result) }
                 }
@@ -61,8 +63,18 @@ struct CheckInView: View {
     private func options(_ result: CheckInResult) -> some View {
         let checkIn = CheckIn(at: checkedAt, risePercent: rise, tempC: tempC)
         VStack(alignment: .leading, spacing: 12) {
-            Text(result.summary).font(.headline).foregroundStyle(Palette.rye)
-            if result.options.isEmpty {
+            if !result.problems.isEmpty {
+                StateMessage(
+                    systemImage: "exclamationmark.circle",
+                    title: "Check that reading",
+                    message: result.summary,
+                    tint: Palette.warning
+                )
+            } else {
+                Text(result.summary).font(.headline).foregroundStyle(Palette.rye)
+                    .accessibilityIdentifier("checkin.summary")
+            }
+            if result.options.isEmpty && result.problems.isEmpty {
                 StateMessage(
                     systemImage: "questionmark.circle",
                     title: "No clean way to re-plan",
@@ -120,6 +132,7 @@ private struct OptionCard: View {
         }
         .buttonStyle(.plain)
         .accessibilityHint("Replaces the rest of the plan")
+        .accessibilityIdentifier("option.\(option.kind.rawValue)")
     }
 }
 
