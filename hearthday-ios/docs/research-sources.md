@@ -30,6 +30,10 @@ All sources accessed **2026-09-28** unless noted. App Store prices are US storef
 | Inoculation effect | rate ∝ (inoc/20%)^0.5 | **Assumption**; Sourjoe uses the same exponent |
 | Starter peak by feed ratio at 24 °C | 1:1:1 4.5 h, 1:2:2 6.5 h, 1:5:5 9 h, 1:10:10 12 h | **Assumption** (community rule of thumb; stated as such in the app) |
 | Uncertainty window | ±20% by default; calibrated range 10–30% | **Assumption**; this is why the live check-in exists |
+| Time to ready from a mid-bulk reading | Straight line through (mix, 0%) and (now, reading) extended to the target rise | **Assumption** (a numerical heuristic, not a validated fermentation predictor). Rise usually accelerates, so it tends to overestimate the time left; an imprecise reading can move it either way. Readings under 45 min after mixing are labelled "very rough" |
+| Cold proof after shaping | 8–36 h workable, 12–16 h preferred | **Assumption** (common home-baking practice, not a measured limit). The app moves the bake to stay inside 8–36 h when a late or early mix/shape would push it out |
+| Fridge rescue mid-bulk | Offered from 35% of estimated bulk, recommended from 50%; the transfer is a 5 min hands-on step, 10 min before the busy block | **Assumption**. Thresholds are product choices, not measured. How much further chilled dough ferments is not modelled |
+| Calibration from chilled bulks | Excluded | Design choice: the model has no fridge term, so counting fridge hours as room hours would teach it the dough is slow |
 
 ## Economics and platform
 

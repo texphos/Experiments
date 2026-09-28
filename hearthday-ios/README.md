@@ -70,7 +70,10 @@ CI is in [`.github/workflows/hearthday.yml`](../.github/workflows/hearthday.yml)
 | JS parity with Swift (plans, invalid input, check-in options and wording, reminders after re-plan, DST windows) | **21/21 pass** | Prototype job, and locally |
 | Prototype end-to-end in headless Chrome over `file://` | **39/39 pass**, no script errors | Prototype job, and locally |
 
-The latest run and its artifacts are listed on the pull request's Checks tab. Sensitivity checks: the DST tests fail under the old fixed-duration logic (15 failures in Swift, and the JS DST checks fail too), and mutating a fermentation constant fails the parity test.
+The latest run and its artifacts are listed on the pull request's Checks tab. Sensitivity checks:
+- The DST tests fail under the old fixed-duration logic: 15 failures in Swift, and the JS DST checks fail too.
+- Mutating a fermentation constant fails the parity test.
+- Each re-planning integrity fix fails its tests when reverted: the attended fridge transfer, excluding chilled bakes from calibration, the cold-proof bounds after late or early steps, fold pruning, bulk ending before shaping, and refusing check-ins once chilled. This holds in Swift (`ReplanIntegrityTests`) and in the JS parity scripts.
 
 **Not verified** (it needs hardware or an account, not more code):
 - Real notification delivery on a locked device.

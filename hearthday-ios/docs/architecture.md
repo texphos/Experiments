@@ -65,17 +65,38 @@ CI (`.github/workflows/hearthday.yml`) runs three jobs on every pull-request upd
 - Default uncertainty is ±20%. Calibration narrows it to between ±10% and ±30%.
 - **The constants disagree with at least one public model.** Sourjoe publishes 3.75 h at 20 °C with Q10 = 2. The two models reflect different assumptions about flour, inoculation and the end point. Neither is authoritative. Calibration exists because no fixed model fits every kitchen.
 
+### What comes from research and what is Hearthday's own heuristic
+
+Only two things above are backed by a cited source ([research-sources.md](research-sources.md), labelled **Fact**): the 21 °C → 75% and 27 °C → 30% rise targets, and the fact that published bulk-time models disagree. Everything else is a **numerical heuristic** chosen for planning, labelled **Assumption** there. That covers the Q10, the reference bulk time, the inoculation exponent, starter peak times, the ±20% window, the linear rise extrapolation, the 8–36 h cold-proof bounds, and the fridge-rescue thresholds and transfer timing. None of them has been validated against measured bakes. The app says "likely" and "about", and tells the baker to go by the dough.
+
 ## Live re-planning
 
-1. Estimate the time until the rise target by **linear extrapolation** of rise versus time since mixing.
+1. Estimate the time until the rise target by **linear extrapolation** of rise versus time since mixing. This is an estimate, not a validated fermentation predictor. Rise usually accelerates, so it tends to overestimate the time left, and a single imprecise reading can move it either way. Readings under 45 minutes after mixing are labelled "very rough", and every summary suggests checking again.
 2. Tolerance is the larger of 30 minutes and 15% of bulk.
 3. If the user has a free shaping slot within tolerance of the likely-ready time, the single recommended option is `shapeNow` or `shapeWhenReady`, and reminders move to match.
-4. Otherwise the options are built in a fixed order: `fridgeNow` (offered once bulk is at least 35% done by the time it would go in the fridge, recommended at 50% or more), then `stayUp` (shape during the busy block; recommended only if nothing else is), then `waitLonger` (shape at the next free slot, up to 3× tolerance late). Each option's remaining steps are re-planned against busy time. If a room-proof tail doesn't fit, a fridge proof is tried.
+4. Otherwise the options are built in a fixed order:
+   - `fridgeNow`: offered once bulk is at least 35% done by the time the dough would go in, recommended at 50% or more.
+   - `stayUp`: shape during the busy block. Recommended only if nothing else is.
+   - `waitLonger`: shape at the next free slot, up to 3× tolerance late.
+
+   Each option's remaining steps are re-planned against busy time. If a room-proof tail doesn't fit, a fridge proof is tried.
 5. Options are not scored or sorted beyond that order and the single "recommended" flag.
+
+**Putting the dough in the fridge is a real step.** `fridgeNow` starts with an attended 5-minute `fridgeDough` step, so it gets its own reminder and counts as hands-on time. It is scheduled 10 minutes before the busy block when that slot is free, otherwise immediately (the baker is holding the phone). The passive `coldBulk` follows. The shape step after it has cold-shaping text and no room-temperature "likely ready" window.
+
+**Applying an option keeps the plan in order.** Completed steps and the mix are kept. Pending folds that would end after the new end of bulk are dropped. Bulk is trimmed so it ends exactly where the option's shaping (or fridge transfer) begins. An earlier fridge option that was never carried out is replaced.
+
+**Once the dough is chilled, check-ins stop** (`BakeSession.isChilled`: the transfer has been marked done, or a bake saved before the transfer step existed has a `coldBulk`). Rise targets assume room temperature, so a reading from chilled dough would feed the room-temperature model a number it can't interpret. Check-ins return `doughIsChilled` (or `notInBulk` before mixing and after shaping), and the app hides the check-in button.
+
+**Late or early mixing and shaping never leave an impossible cold proof.** Marking mix or shape done slides the dough steps. In a fridge-proof plan, `keepColdProofWorkable` then checks the cold proof. If the bake is now under 8 h or over 36 h after shaping, including a "negative" proof when shaping happened after the planned bake, the bake moves to the nearest 15-minute slot inside the range. It prefers a slot where preheat and bake are free, and `adjustmentNote` tells the baker why. Room-proof plans already slide the bake with shaping.
+
+`ReplanIntegrityTests` checks chronology after every option, and after completing each remaining step 90 minutes late, across a day of check-ins. The prototype replays the same scripted bakes from `fixtures.json`.
 
 ## Calibration
 
-- Only bakes rated "just right" at shaping count. Bakes whose bulk was paused in the fridge (`coldBulk`) are excluded, because chilling makes fast dough look slow.
+- Only bakes rated "just right" at shaping count.
+- Any bake whose dough went into the fridge mid-bulk is excluded. The model has no term for time in the fridge, so counting those hours as room-temperature bulk would teach Hearthday that the baker's dough is slow. The exclusion holds even if a later re-plan removes the fridge steps, because it keys off the completed transfer.
+- The journal's bulk time for a chilled bake counts room-temperature time only.
 - The speed factor is the log-mean of the observed/model ratio with a prior weight of 2, so one odd bake can't swing it.
 - With 3 or more samples, uncertainty is `clamp(1.3 × rms + 0.05, 0.10, 0.30)`.
 - **Pro** applies the factor to plans. Everyone can see what it has learned.
@@ -120,7 +141,8 @@ On launch and on every foreground, `AppModel.resume()` refreshes the clock and c
 ## Known limitations
 
 - **Daylight-saving edge cases are policy, not physics.** A step that lands inside a skipped hour is shown at the shifted time. An overnight dough spanning fall-back gets an extra hour of wall-clock time but not of fermentation.
-- **Linear extrapolation** of rise underestimates late-bulk acceleration and overestimates early lag. It is good enough for decisions, not for precision.
+- **Linear extrapolation** of rise is an unvalidated estimate. Rise usually speeds up through bulk, so a straight line tends to overestimate the time left (the safer error overnight). A mis-marked container, an uneven dough temperature or a very early reading can push it wrong in either direction. It is meant to support a decision, not to predict a time.
+- **Chilled bulk isn't modelled.** Hearthday doesn't estimate how far dough ferments in the fridge. It schedules shaping at the next free time and tells the baker to judge the dough.
 - **Temperature is entered by hand.** No sensor or weather integration.
 - **Single oven, single dough.** Batches and multiple doughs are roadmap items.
 - **No iCloud sync or backup** beyond the standard device backup.
