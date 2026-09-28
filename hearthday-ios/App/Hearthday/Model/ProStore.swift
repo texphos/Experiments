@@ -79,8 +79,8 @@ final class ProStore {
     // An error or an unverified result doesn't tell the app whether the App Store charged the baker, so these
     // messages never say either way. They point to Restore and to Apple's purchase history and support instead.
     static let unlockedMessage = "Thank you. Pro is unlocked on this Apple Account."
-    static let errorMessage = "The App Store reported a problem, so Pro isn’t unlocked on this iPhone yet. Tap Restore purchase in a moment. If the purchase appears in your Apple Account purchase history and Pro still isn’t unlocked, use Report a Problem there or contact Apple Support."
-    static let unverifiedMessage = "The App Store couldn’t verify this purchase, so Pro isn’t unlocked yet. Tap Restore purchase in a moment. If the purchase appears in your Apple Account purchase history and Pro still isn’t unlocked, use Report a Problem there or contact Apple Support."
+    static let errorMessage = "The App Store reported a problem, so Pro isn’t active on this iPhone yet. Tap Restore purchase in a moment. If the purchase appears in your Apple Account purchase history and Pro still isn’t active, use Report a Problem there or contact Apple Support."
+    static let unverifiedMessage = "The App Store couldn’t verify this purchase, so Pro isn’t active yet. Tap Restore purchase in a moment. If the purchase appears in your Apple Account purchase history and Pro still isn’t active, use Report a Problem there or contact Apple Support."
     static let notActiveYetMessage = "The App Store accepted the purchase but Pro isn’t active on this iPhone yet. Tap Restore purchase in a moment."
     static let pendingMessage = "Your purchase is waiting for approval. Pro unlocks as soon as it goes through."
 

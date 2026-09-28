@@ -59,7 +59,7 @@ final class ProStoreTests: XCTestCase {
     /// An error or unverified result doesn't prove whether the baker was charged, so the copy never says.
     func testFailureCopyMakesNoClaimAboutCharges() {
         let failures = [ProStore.errorMessage, ProStore.unverifiedMessage, ProStore.notActiveYetMessage]
-        let banned = ["nothing was charged", "not charged", "haven’t been charged", "wasn’t charged", "charged twice", "didn’t go through", "no charge", "refund"]
+        let banned = ["unlocked on", "thank you", "nothing was charged", "not charged", "haven’t been charged", "wasn’t charged", "charged twice", "didn’t go through", "no charge", "refund"]
         for message in failures {
             for phrase in banned {
                 XCTAssertFalse(message.localizedCaseInsensitiveContains(phrase), "“\(phrase)” in: \(message)")
