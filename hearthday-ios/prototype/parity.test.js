@@ -81,6 +81,13 @@ for (const c of fixtures.checkInScenarios) {
       r.options.map((o) => ({ kind: o.kind, recommended: o.recommended, bulkEndsAt: iso(Math.round(o.bulkEndsAt / 1000) * 1000), conflictLabel: o.conflictLabel, steps: stepsView(o.steps.map((x) => Object.assign({}, x, { start: Math.round(x.start / 1000) * 1000, end: Math.round(x.end / 1000) * 1000 }))) })),
       c.expected.options
     );
+    if (r.options.length) H.session.apply(s, r.options[0]);
+    const rounded = (ms) => iso(Math.round(ms / 1000) * 1000);
+    assert.deepStrictEqual(
+      H.session.reminders(s, now, ps.input.blocks, cal).map((x) => ({ step: x.id.slice(s.id.length + 1), fireAt: rounded(x.fireAt) })),
+      c.expected.remindersAfterFirstOption,
+      "reminders after re-planning"
+    );
   });
 }
 

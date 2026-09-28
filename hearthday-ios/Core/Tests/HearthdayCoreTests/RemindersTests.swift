@@ -66,6 +66,29 @@ final class RemindersTests: XCTestCase {
         XCTAssertNil(state.activeSession, "No session means the app schedules nothing")
     }
 
+    func testEarlyCheckNudgeNeverFiresDuringABusyBlock() {
+        let s = started()
+        let nudgeAt = s.plan.step("shape")!.likelyStart!
+        let minute = cal.component(.hour, from: nudgeAt) * 60 + cal.component(.minute, from: nudgeAt)
+        let nap = Availability(blocks: [BusyBlock(label: "Nap", kind: .other, weekdays: BusyBlock.everyDay,
+                                                  startMinute: minute - 30, endMinute: minute + 30)])
+        let now = TestClock.date(10, 10, 20)
+        XCTAssertTrue(Reminders.specs(for: s, now: now, availability: .init(blocks: []), calendar: cal).contains { $0.id.hasSuffix("-check") })
+        let specs = Reminders.specs(for: s, now: now, availability: nap, calendar: cal)
+        XCTAssertFalse(specs.contains { $0.id.hasSuffix("-check") })
+        XCTAssertTrue(specs.contains { $0.id.hasSuffix("-shape") }, "Required steps are still reminded")
+    }
+
+    func testNoEarlyCheckNudgeWhileTheDoughIsInTheFridge() throws {
+        var s = started()
+        for i in 1...4 { s.complete("fold-\(i)", at: s.plan.step("fold-\(i)")!.end) }
+        let now = TestClock.date(10, 16)
+        let result = LiveReplanner.checkIn(session: s, now: now, risePercent: 30, tempC: 21,
+                                           availability: .typicalWeekdayWorker, calendar: cal, model: FermentationModel())
+        s.apply(try XCTUnwrap(result.options.first { $0.kind == .fridgeNow }))
+        XCTAssertFalse(Reminders.specs(for: s, now: now).contains { $0.id.hasSuffix("-check") })
+    }
+
     func testEarlyCheckNudgeOnlyWhenTheLikelyWindowOpensWellBeforeShaping() {
         let s = started()
         let specs = Reminders.specs(for: s, now: TestClock.date(10, 10, 20))

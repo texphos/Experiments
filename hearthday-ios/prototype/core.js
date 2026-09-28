@@ -482,10 +482,12 @@
 
   // ---------- Live session ----------
   function newSession(plan, startedAt) {
-    return { plan: clonePlan(plan), originalReadyAt: plan.readyAt, startedAt, completed: {}, checkIns: [], shapeReadiness: null, finishedAt: null, replanCount: 0 };
+    return { id: `bake-${startedAt}`, plan: clonePlan(plan), originalReadyAt: plan.readyAt, startedAt, completed: {}, checkIns: [], shapeReadiness: null, finishedAt: null, replanCount: 0 };
   }
   function clonePlan(p) { return makePlan(Object.assign({}, p, { steps: p.steps.map((s) => Object.assign({}, s)) })); }
 
+  const GRACE_MINUTES = 15;
+  const STALE_AFTER_HOURS = 12;
   const session = {
     nextAttendedStep: (s) => s.plan.steps.find((x) => x.attended && s.completed[x.id] == null) || null,
     passiveStep: (s, now) => s.plan.steps.find((x) => !x.attended && x.start <= now && now < x.end && s.completed[x.id] == null) || null,
@@ -495,6 +497,30 @@
       return s.completed.mix != null ? s.completed.mix - (mix.end - mix.start) : mix.start;
     },
     isInBulk: (s) => s.completed.mix != null && s.completed.shape == null,
+    /** Mirrors BakeSession.status(now:): upcoming, due, overdue (with minutesLate), baked or stale. */
+    status(s, now) {
+      if (s.completed.bake != null) return { kind: "baked" };
+      if (now - s.plan.readyAt > STALE_AFTER_HOURS * HOUR) return { kind: "stale" };
+      const next = session.nextAttendedStep(s);
+      if (!next) return { kind: "baked" };
+      const late = now - next.start;
+      if (late > GRACE_MINUTES * MIN) return { kind: "overdue", step: next, minutesLate: Math.floor(late / MIN) };
+      return { kind: late >= -5 * MIN ? "due" : "upcoming", step: next };
+    },
+    /** Mirrors Reminders.specs(for:now:): what the native app hands to iOS after every change. */
+    reminders(s, now, blocks, cal) {
+      const out = [];
+      const chilling = s.plan.steps.some((x) => x.kind === "coldBulk");
+      for (const st of s.plan.steps) {
+        if (!st.attended || s.completed[st.id] != null || !(st.start > now)) continue;
+        out.push({ id: `${s.id}-${st.id}`, fireAt: st.start, title: st.title, body: st.detail });
+        if (st.kind === "shape" && !chilling && st.likelyStart != null && st.likelyStart > now && st.start - st.likelyStart >= 20 * MIN) {
+          if (blocks && !timeline(blocks, st.likelyStart - HOUR, st.likelyStart + HOUR, cal).isFree(st.likelyStart, MIN)) continue;
+          out.push({ id: `${s.id}-check`, fireAt: st.likelyStart, title: "Check your dough", body: "It could be ready early. Compare the rise with your mark and do a quick check-in." });
+        }
+      }
+      return out.sort((a, b) => a.fireAt - b.fireAt);
+    },
     complete(s, id, now) {
       const st = planStep(s.plan, id);
       if (!st || s.completed[id] != null) return;

@@ -149,6 +149,12 @@ for c in checkInScenarios {
         calendar: calendar,
         model: c.plan.request.model
     )
+    var replanned = session
+    if let first = result.options.first { replanned.apply(first) }
+    let prefix = session.id.uuidString + "-"
+    let remindersAfterFirstOption = Reminders.specs(for: replanned, now: now, availability: c.plan.availability, calendar: calendar).map {
+        ["step": String($0.id.dropFirst(prefix.count)), "fireAt": iso.string(from: $0.fireAt)]
+    }
     checkInOut.append([
         "name": c.name,
         "planScenario": c.plan.name,
@@ -160,6 +166,7 @@ for c in checkInScenarios {
             "now": iso.string(from: now),
             "estimatedReadyAt": iso.string(from: result.estimatedReadyAt),
             "targetRisePercent": result.targetRisePercent,
+            "remindersAfterFirstOption": remindersAfterFirstOption,
             "options": result.options.map {
                 [
                     "kind": $0.kind.rawValue,

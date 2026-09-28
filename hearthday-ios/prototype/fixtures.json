@@ -38,6 +38,24 @@
             ]
           }
         ],
+        "remindersAfterFirstOption" : [
+          {
+            "fireAt" : "2026-10-05T21:57:37Z",
+            "step" : "check"
+          },
+          {
+            "fireAt" : "2026-10-05T22:36:54Z",
+            "step" : "shape"
+          },
+          {
+            "fireAt" : "2026-10-06T17:30:00Z",
+            "step" : "preheat"
+          },
+          {
+            "fireAt" : "2026-10-06T18:15:00Z",
+            "step" : "bake"
+          }
+        ],
         "targetRisePercent" : 36.666666666666664
       },
       "hoursAfterMix" : 2.5,
@@ -123,6 +141,20 @@
             ]
           }
         ],
+        "remindersAfterFirstOption" : [
+          {
+            "fireAt" : "2026-10-10T07:00:00Z",
+            "step" : "shape"
+          },
+          {
+            "fireAt" : "2026-10-10T08:30:00Z",
+            "step" : "preheat"
+          },
+          {
+            "fireAt" : "2026-10-10T09:15:00Z",
+            "step" : "bake"
+          }
+        ],
         "targetRisePercent" : 65
       },
       "hoursAfterMix" : 2,
@@ -168,6 +200,24 @@
                 "start" : "2026-10-10T17:45:00Z"
               }
             ]
+          }
+        ],
+        "remindersAfterFirstOption" : [
+          {
+            "fireAt" : "2026-10-10T12:28:20Z",
+            "step" : "check"
+          },
+          {
+            "fireAt" : "2026-10-10T15:18:20Z",
+            "step" : "shape"
+          },
+          {
+            "fireAt" : "2026-10-10T17:00:00Z",
+            "step" : "preheat"
+          },
+          {
+            "fireAt" : "2026-10-10T17:45:00Z",
+            "step" : "bake"
           }
         ],
         "targetRisePercent" : 85
@@ -217,6 +267,16 @@
             ]
           }
         ],
+        "remindersAfterFirstOption" : [
+          {
+            "fireAt" : "2026-10-06T17:30:00Z",
+            "step" : "preheat"
+          },
+          {
+            "fireAt" : "2026-10-06T18:15:00Z",
+            "step" : "bake"
+          }
+        ],
         "targetRisePercent" : 30
       },
       "hoursAfterMix" : 2,
@@ -262,6 +322,16 @@
                 "start" : "2026-10-11T12:15:00Z"
               }
             ]
+          }
+        ],
+        "remindersAfterFirstOption" : [
+          {
+            "fireAt" : "2026-10-11T11:30:00Z",
+            "step" : "preheat"
+          },
+          {
+            "fireAt" : "2026-10-11T12:15:00Z",
+            "step" : "bake"
           }
         ],
         "targetRisePercent" : 75
